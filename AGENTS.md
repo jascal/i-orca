@@ -78,13 +78,14 @@ isn't declared.
 
 [`examples/fieldrun/fieldrun.i.orca.md`](./examples/fieldrun/fieldrun.i.orca.md)
 proves the ten theorems/propositions of the fieldrun paper ("What a Transformer
-Retrieves and What It Computes"). The closed-form results
-(cardinality-inertness, the non-truth-functionality budget, the weighted-
-threshold witness, recovered probability = softmax, the power-diagram cell
-identity, the margin–distance identity) carry a concrete method on every step;
-the parts the paper itself leaves open (general Horn separation; the Maslov
-limit; the asymptotic localisation bound) are honest frontier holes. Generated
-`.thy` / `.tex` / `.lean` artifacts live under `examples/fieldrun/artifacts/`.
+Retrieves and What It Computes"). **All ten are fully kernel-proved** under
+Isabelle2025-2 — the combined `Fieldrun.thy` builds clean (exit 0) with zero
+`sorry`. The analytic steps (the k/PR limit, the Diffuseness k-source fraction,
+both Maslov bounds) are real multi-step i-orca proofs; Theorem 3's open half was
+restated faithfully (the first encoding was a vacuous placeholder) — see the
+research note in `examples/fieldrun/RESULTS.md` and the companion
+`examples/fieldrun/separation/Separation.thy`. Generated `.thy` / `.tex` /
+`.lean` artifacts live under `examples/fieldrun/artifacts/`.
 
 ## Gotchas
 

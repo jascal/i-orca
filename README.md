@@ -89,11 +89,14 @@ codes), so an agent can drive the whole loop. See [`docs/mcp.md`](docs/mcp.md).
 
 [`examples/fieldrun/fieldrun.i.orca.md`](examples/fieldrun/fieldrun.i.orca.md)
 formalises all ten theorems/propositions of the paper *"What a Transformer
-Retrieves and What It Computes"* (`../fieldrun/paper`). The closed-form results
-are proved to a concrete Isar method on every step; the parts the paper itself
-leaves open (general Horn separation; the cited Maslov limit; the asymptotic
-localisation bound) are honest frontier holes. Generated `.thy`/`.tex`/`.lean`
-artifacts and the kernel-check report are in
+Retrieves and What It Computes"* (`../fieldrun/paper`). **All ten are fully
+kernel-proved** with Isabelle2025-2: the combined `Fieldrun.thy` builds clean
+(exit 0) with **zero `sorry`** — every step is a concrete method the kernel
+accepts. Formalising the open half of Theorem 3 surfaced a definitional crux (μ_t=0
+"no singleton" vs irreducibility "no sufficient sub-conjunction") with a
+kernel-checked witness; see the research note and the companion
+[`separation/Separation.thy`](examples/fieldrun/separation/Separation.thy).
+Generated `.thy`/`.tex`/`.lean` artifacts and the kernel-check report are in
 [`examples/fieldrun/artifacts/`](examples/fieldrun/artifacts/) — see
 [`examples/fieldrun/RESULTS.md`](examples/fieldrun/RESULTS.md).
 

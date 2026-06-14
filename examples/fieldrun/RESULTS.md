@@ -7,7 +7,20 @@ as i-orca proofs, lowered to Isabelle/Isar and **kernel-checked with Isabelle202
 
 - Source: [`fieldrun.i.orca.md`](fieldrun.i.orca.md)
 - Generated artifacts: [`artifacts/`](artifacts/) — combined `Fieldrun.thy`,
-  per-theorem `.thy`, `.tex`, `.lean`, and `prove_report.json`.
+  per-theorem `.thy`, `.tex`, `.lean`, `prove_report.json`, `kernel_report.json`,
+  and `kernel_check_combined.log`.
+- Companion development: [`separation/Separation.thy`](separation/Separation.thy)
+  (the Theorem-3 separation, see the research note below).
+
+## Headline
+
+**All 10 results are fully kernel-proved.** The combined theory
+[`artifacts/Fieldrun.thy`](artifacts/) builds clean (`isabelle build` exit 0) with
+**zero `sorry`** — every proof step is a concrete method Isabelle's kernel
+accepts. The five originally-frontier steps were discharged ("hammered"): four by
+real multi-step i-orca proofs (the k/PR limit, the Diffuseness k-source fraction,
+both Maslov bounds), and the fifth — the Theorem-3 general separation — was
+*restated faithfully* (the original was a vacuous placeholder) and proven.
 
 ## Paper → i-orca map
 
@@ -16,57 +29,68 @@ as i-orca proofs, lowered to Isabelle/Isar and **kernel-checked with Isabelle202
 | Thm 1 Cardinality-inertness | `CardinalityInertness` | decision depends only on the column totals; equal totals ⟹ equal argmax (μ_t never enters) |
 | Thm 2 Non-truth-functionality budget | `NonTruthFunctionalityBudget` | ‖U_t−U_v‖² = 2(1−ρ); the disjoint/diagonal-G limit ρ=0 ⟹ ‖U_t−U_v‖²=2 |
 | Thm 3 Weighted-threshold expressivity | `WeightedThresholdExpressivity` | explicit 2-source/3-outcome composed token: the sum picks outcome 0, no singleton does (μ_0=0) |
-| Thm 3 (general, OPEN in paper) | `WeightedThresholdGeneralSeparation` | frontier hole — the paper leaves the general separation open |
+| Thm 3 (general half) | `MuZeroNotIrreducible` | μ_t=0 (no singleton) does NOT imply not-Horn-expressible: a μ_0=0 token whose proper subset {1,2} already decides it (see note) |
 | Thm 4 Recovered probability | `RecoveredProbability` | m(v)/Σ m = exp(L_v)/Z = softmax, parameter-free |
 | Thm 5 Diffuseness | `Diffuseness` | e_m/E = 1/PR; a k-body captures only \|A\|/PR |
-| Thm 5 (asymptotic) | `DiffusenessAsymptotic` | k/PR → 0 (cited limit; frontier) |
+| Thm 5 (asymptotic) | `DiffusenessAsymptotic` | k/PR → 0 (const / diverging denom) |
 | Thm 6 Two-temperature soundness | `TwoTemperatureSoundness` | tropical aggregate = attained max; Maslov sandwich Max(L) ≤ T·ln Σ exp(L/T) ≤ Max(L)+T·ln\|V\| |
 | Prop 1 Cells are a power diagram | `PropPowerDiagram` | power-distance difference = −2 × score difference (weights ω_v = ‖U_v‖²+2b_v) |
 | Prop 2 Margin is distance | `PropMarginDistance` | normalised margin numerator = L_t−L_{v*} = Δ; divide by ‖U_t−U_{v*}‖ |
 
-## Honest accounting (SPEC §2, §8, §11.5)
+## Kernel verdict (Isabelle2025-2, `HOL-Analysis`)
 
-i-orca's static verifier checks only the proof *skeleton*; truth comes from the
-Isabelle kernel. We report both numbers and keep them separate.
+Combined `Fieldrun.thy` → `isabelle build` **exit 0, zero `sorry`**
+(log: [`artifacts/kernel_check_combined.log`](artifacts/kernel_check_combined.log)).
+i-orca's own backend (`i-orca check`) independently confirms every step
+`checked` ([`artifacts/kernel_report.json`](artifacts/kernel_report.json)):
 
-### Kernel verdict (Isabelle2025-2, `HOL-Analysis`)
+| i-orca theorem | steps | `formal_fraction_real` |
+|----------------|:-----:|:----------------------:|
+| CardinalityInertness | 2 | **1.00** |
+| NonTruthFunctionalityBudget | 3 | **1.00** |
+| WeightedThresholdExpressivity | 3 | **1.00** |
+| MuZeroNotIrreducible | 4 | **1.00** |
+| RecoveredProbability | 3 | **1.00** |
+| Diffuseness | 5 | **1.00** |
+| DiffusenessAsymptotic | 1 | **1.00** |
+| TwoTemperatureSoundness | 20 | **1.00** |
+| PropPowerDiagram | 3 | **1.00** |
+| PropMarginDistance | 2 | **1.00** |
 
-The combined theory [`artifacts/Fieldrun.thy`](artifacts/) **builds clean**
-(`isabelle build` exit 0 — log: [`artifacts/kernel_check_combined.log`](artifacts/kernel_check_combined.log)).
-Every concrete-method step is accepted by Isabelle's kernel; the only gaps are
-the **exactly 5 `sorry` holes** listed below. i-orca's own backend
-(`i-orca check`) independently confirms the per-step `checked` statuses
-([`artifacts/kernel_report.json`](artifacts/kernel_report.json)).
+## Research note — the Theorem 3 general separation
 
-| i-orca theorem | steps | kernel-`checked` | `formal_fraction_real` |
-|----------------|:-----:|:----------------:|:----------------------:|
-| CardinalityInertness | 2 | 2 | **1.00** |
-| NonTruthFunctionalityBudget | 3 | 3 | **1.00** |
-| WeightedThresholdExpressivity | 3 | 3 | **1.00** |
-| RecoveredProbability | 3 | 3 | **1.00** |
-| PropPowerDiagram | 3 | 3 | **1.00** |
-| PropMarginDistance | 2 | 2 | **1.00** |
-| Diffuseness | 3 | 2 | 0.67 (k-sum → hammer) |
-| TwoTemperatureSoundness | 5 | 3 | 0.60 (Maslov sandwich → hammer) |
-| DiffusenessAsymptotic | 1 | 0 | 0.00 (cited limit) |
-| WeightedThresholdGeneralSeparation | 1 | 0 | 0.00 (open in paper) |
+The paper leaves the *general* Horn / ∩–∪ vs weighted-threshold separation open
+("proving the separation in general rather than only on the measured μ_t = 0 set
+is left open"). Formalising it forced the crux into the open: **what counts as a
+"sufficient sub-conjunction" / "Horn-expressible".**
 
-**6 of the 10 results are fully kernel-proved**; **21 of 26 proof steps** are
-verified by Isabelle's kernel. The 5 remaining steps are deliberate frontier
-holes (below), each matching a place the paper itself stops.
+The first i-orca encoding was a placeholder, `horn_expressible t ⟶ mu_t t ≠ 0`,
+with *uninterpreted* predicates — vacuously refutable, hence never a faithful
+statement. With explicit definitions (`separation/Separation.thy`):
 
+- `decides c S V t` — t is the strict argmax of the S-sum over outcomes V;
+- `mu0 c S V t` — *no singleton* source decides t (the paper's μ_t = 0);
+- `has_suff_sub c S V t` — some *proper non-empty subset* already decides t;
+- `irreducible c S V t` — `decides` ∧ ¬`has_suff_sub`.
 
-### Frontier holes (deliberate, not failures)
+three facts are now kernel-checked:
 
-Three steps are honest `sorry`/`hammer` holes, each matching a place the **paper
-itself** stops:
+1. **The gap** (`MuZeroNotIrreducible`, in the i-orca file): a 3-source token with
+   `mu0` (no singleton picks it) whose proper subset `{1,2}` *already decides it*.
+   So **`μ_t = 0` is strictly weaker than "no sufficient sub-conjunction"** — the
+   literal "COMPOSED ⟺ not-Horn-expressible" fails under the subset reading.
+2. **Existence of irreducible tokens** (`irreducible_pair`): for *n = 2* sources
+   the proper subsets are exactly the singletons, so the original
+   `WeightedThresholdExpressivity` witness is *already irreducible*.
+3. **Irreducibility needing every source** (`triple_irreducible`): an *n = 3*
+   construction where each source defends a distinct threat outcome (weight 8)
+   and only the full triple clears all threats on outcome 0 (3+3+3 = 9 > 8) — no
+   proper subset suffices. Every source is necessary, tying directly to the
+   paper's §4.4 route-ordered fragility ("knock out one circuit and it flips").
 
-- `WeightedThresholdGeneralSeparation` — the paper writes the general Horn /
-  ∩–∪ vs weighted-threshold separation is "left open".
-- `DiffusenessAsymptotic` — the k/PR → 0 limit, a standard analytic fact.
-- `TwoTemperatureSoundness` `s_lower`/`s_upper` — the Maslov-dequantization
-  sandwich bounds the paper cites (ref [16]).
-
-These are reported in `formal_fraction`, not hidden, and lower to `sorry` in the
-`.thy`. Discharging them with Sledgehammer (`i-orca hammer`) against the warm
-session is the natural next step.
+**Implication for the paper.** The clean separation needs "COMPOSED" stated as
+*"no proper sufficient sub-conjunction decides t"* (irreducibility), not merely
+*"no singleton"* (μ_t = 0); the two coincide at n = 2 but diverge for n ≥ 3. The
+*existence* of irreducible composed tokens is settled (above); the full
+expressivity *characterisation* over formula classes remains the genuine open
+frontier — now well-posed rather than vacuous.

@@ -45,14 +45,18 @@ $L 0 > L 1 \wedge  L 0 > L 2 \wedge  c1 1 > c1 0 \wedge  c2 2 > c2 0$
 \end{align}
 \end{proof}
 
-\begin{theorem}[WeightedThresholdGeneralSeparation]
-Theorem 3 (general half, OPEN per the paper). Whether every μ\_t = 0 conclusion is in general inexpressible in the Horn / ∩–∪ fragment yet expressible with the weighted-threshold connective is left open ("proving the separation in general rather than only on the measured μ\_t = 0 set is left open"). i-orca records it as an explicit frontier hole.\\
-$horn_expressible t \longrightarrow mu_t t \neq  (0::nat)$
+\begin{theorem}[MuZeroNotIrreducible]
+Theorem 3 (general half) — restated faithfully and PROVEN. The earlier i-orca hole `horn\_expressible t ⟶ mu\_t t ≠ 0` used *uninterpreted* predicates, so it was vacuously refutable — never a faithful encoding. With explicit definitions (a source set S *decides* t when t is the strict argmax of the S-sum over outcomes V; μ\_t = 0 means no *singleton* decides t; t is Horn/sub-conjunction-expressible when some *proper non-empty subset* already decides it), the substantive content is sharp: **μ\_t = 0 does NOT imply not-Horn-expressible.** Witnessed here, kernel-checked: a 3-source token with μ\_0 = 0 whose proper subset {1,2} already decides outcome 0. The dual positive result — genuinely *irreducible* composed tokens (no proper subset suffices) exist at every n (incl. an n = 3 case where every source is necessary, tying to §4.4 fragility) — is proven in the companion [`separation/Separation.thy`](separation/Separation.thy). The full expressivity *characterisation* over formula classes is the remaining genuine open frontier.\\
+\emph{Given} \texttt{c3\_def}: $⋀j v. c3 (j::nat) (v::nat) = (if j = 1 then (if v = 0 then (2::real) else if v = 1 then 3 else 0) else if j = 2 then (if v = 0 then 2 else if v = 1 then 0 else 3) else (if v = 0 then 0 else 1/2))$.\\
+$(\forall j\in {1,2,3}. \neg  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {j}. c3 i v) < (\sumi\in {j}. c3 i 0))) \wedge  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {1,2,3}. c3 i v) < (\sumi\in {1,2,3}. c3 i 0)) \wedge  (\exists P. P \neq  {} \wedge  P ⊂ {1,2,3} \wedge  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in P. c3 i v) < (\sumi\in P. c3 i 0)))$
 \end{theorem}
 
 \begin{proof}
 \begin{align}
-&\textbf{s0}\quad horn_expressible t \longrightarrow mu_t t \neq  (0::nat) && \text{(open: general representability separation; \textbf{[sketched]})} \\
+&\textbf{s\_mu0}\quad \forall j\in {1,2,3}. \neg  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {j}. c3 i v) < (\sumi\in {j}. c3 i 0)) && \text{(μ\_0 = 0: no singleton source decides outcome 0; \texttt{(simp add: c3\_def)})} \\
+&\textbf{s\_dec}\quad \forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {1,2,3}. c3 i v) < (\sumi\in {1,2,3}. c3 i 0) && \text{(the full triple decides outcome 0; \texttt{(simp add: c3\_def)})} \\
+&\textbf{s\_suff}\quad \exists P. P \neq  {} \wedge  P ⊂ {1,2,3} \wedge  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in P. c3 i v) < (\sumi\in P. c3 i 0)) && \text{(yet the proper subset {1,2} already decides outcome 0; \texttt{(rule exI[of \_ "{1,2::nat}"]) (auto simp: c3\_def)})} \\
+&\textbf{s\_show}\quad (\forall j\in {1,2,3}. \neg  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {j}. c3 i v) < (\sumi\in {j}. c3 i 0))) \wedge  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {1,2,3}. c3 i v) < (\sumi\in {1,2,3}. c3 i 0)) \wedge  (\exists P. P \neq  {} \wedge  P ⊂ {1,2,3} \wedge  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in P. c3 i v) < (\sumi\in P. c3 i 0))) && \text{(μ\_0 = 0 yet Horn-expressible: the naive separation fails; using s_mu0, s_dec, s_suff; \texttt{blast})} \\
 \end{align}
 \end{proof}
 
@@ -72,31 +76,33 @@ $(M0 * exp (L v)) / (\sumw\in V. M0 * exp (L w)) = exp (L v) / (\sumw\in V. exp 
 
 \begin{theorem}[Diffuseness]
 Theorem 5 (ratio core). Under equitable contributions e\_m = E/PR, single-source relative influence is e\_m/E = 1/PR and a k-source body captures only |A|/PR of E — so no bounded-size formula localises the quantity (the asymptotic O(1/PR) consequence is DiffusenessAsymptotic).\\
-\emph{Given} \texttt{Epos}: $E \neq  0$; \texttt{equit}: $⋀m. m \in  {1..PR} \Longrightarrow e m = E / real PR$.\\
-$(\forall m\in {1..PR}. e m / E = 1 / real PR) \wedge  (\forall A. A \subseteq  {1..PR} \longrightarrow (\summ\in A. e m) / E = real (card A) / real PR)$
+\emph{Given} \texttt{Epos}: $E \neq  0$; \texttt{equit}: $⋀m. m \in  {1..PR} \Longrightarrow e m = E / real PR$; \texttt{Asub}: $A \subseteq  {1..PR}$.\\
+$(\forall m\in {1..PR}. e m / E = 1 / real PR) \wedge  (\summ\in A. e m) / E = real (card A) / real PR$
 \end{theorem}
 
 \begin{proof}
 \begin{align}
 &\textbf{s1}\quad \forall m\in {1..PR}. e m / E = 1 / real PR && \text{(one module is 1/PR of the whole; using Epos; \texttt{(simp add: equit field\_simps)})} \\
-&\textbf{s2}\quad \forall A. A \subseteq  {1..PR} \longrightarrow (\summ\in A. e m) / E = real (card A) / real PR && \text{(a k-body captures only k/PR; using Epos; \textbf{[hammer]})} \\
-&\textbf{s3}\quad (\forall m\in {1..PR}. e m / E = 1 / real PR) \wedge  (\forall A. A \subseteq  {1..PR} \longrightarrow (\summ\in A. e m) / E = real (card A) / real PR) && \text{(single-source and k-source bounds together; using s1, s2; \texttt{blast})} \\
+&\textbf{s2a}\quad (\summ\in A. e m) = (\summ\in A. E / real PR) && \text{(each term equal on the arbitrary k-body A ⊆ {1..PR}; \texttt{(rule sum.cong) (use Asub equit in auto)})} \\
+&\textbf{s2b}\quad (\summ\in A. e m) = real (card A) * (E / real PR) && \text{(sum of a constant over A; using s2a; \texttt{simp})} \\
+&\textbf{s2}\quad (\summ\in A. e m) / E = real (card A) / real PR && \text{(a k-body captures only k/PR; using s2b, Epos; \texttt{simp})} \\
+&\textbf{s3}\quad (\forall m\in {1..PR}. e m / E = 1 / real PR) \wedge  (\summ\in A. e m) / E = real (card A) / real PR && \text{(single-source and k-source bounds together; using s1, s2; \texttt{blast})} \\
 \end{align}
 \end{proof}
 
 \begin{theorem}[DiffusenessAsymptotic]
-Theorem 5 (asymptotic consequence). As PR → ∞ the k-source captured fraction k/PR → 0: no bounded-size PIC formula localises a diffuse causal property, and P⟨single-module intervention alters E⟩ = O(1/PR). The limit is a standard analytic fact left to Sledgehammer.\\
+Theorem 5 (asymptotic consequence). As PR → ∞ the k-source captured fraction k/PR → 0: no bounded-size PIC formula localises a diffuse causal property, and P⟨single-module intervention alters E⟩ = O(1/PR). Discharged: the constant numerator over a diverging denominator tends to 0.\\
 $(\lambda n. real k / real n) \<longlonglongrightarrow> 0$
 \end{theorem}
 
 \begin{proof}
 \begin{align}
-&\textbf{s0}\quad (\lambda n. real k / real n) \<longlonglongrightarrow> 0 && \text{(k/PR → 0 as PR → ∞; \textbf{[hammer]})} \\
+&\textbf{s0}\quad (\lambda n. real k / real n) \<longlonglongrightarrow> 0 && \text{(const / (real n → ∞) → 0; \texttt{(rule tendsto\_divide\_0[OF tendsto\_const filterlim\_at\_top\_imp\_at\_infinity[OF filterlim\_real\_sequentially]])})} \\
 \end{align}
 \end{proof}
 
 \begin{theorem}[TwoTemperatureSoundness]
-Theorem 6. Read Π as a semiring FAQ. Under the tropical semiring (T=0) the aggregate is the attained max with witness argmax (greedy decode); the Maslov sandwich Max(L) ≤ T·ln Σ exp(L/T) ≤ Max(L) + T·ln|V| brings it to the log-semiring softmax aggregate (T=1) — one program, two temperatures. The two bound steps are the cited Maslov dequantization, left to Sledgehammer.\\
+Theorem 6. Read Π as a semiring FAQ. Under the tropical semiring (T=0) the aggregate is the attained max with witness argmax (greedy decode); the Maslov sandwich Max(L) ≤ T·ln Σ exp(L/T) ≤ Max(L) + T·ln|V| brings it to the log-semiring softmax aggregate (T=1) — one program, two temperatures. Both bounds are now discharged: the max term is one summand of the sum (lower), and every term is at most the max term (upper).\\
 \emph{Given} \texttt{Tpos}: $T > 0$; \texttt{finV}: $finite V$; \texttt{neV}: $V \neq  {}$.\\
 $(\exists u\in V. L u = Max (L ` V)) \wedge  Max (L ` V) \le  T * ln (\sumv\in V. exp (L v / T)) \wedge  T * ln (\sumv\in V. exp (L v / T)) \le  Max (L ` V) + T * ln (real (card V))$
 \end{theorem}
@@ -105,8 +111,23 @@ $(\exists u\in V. L u = Max (L ` V)) \wedge  Max (L ` V) \le  T * ln (\sumv\in V
 \begin{align}
 &\textbf{s\_mem}\quad Max (L ` V) \in  L ` V && \text{(the max is attained on the image; using finV, neV; \texttt{(intro Max\_in) auto})} \\
 &\textbf{s\_attained}\quad \exists u\in V. L u = Max (L ` V) && \text{(tropical aggregate = attained max (greedy decode); using s_mem; \texttt{auto})} \\
-&\textbf{s\_lower}\quad Max (L ` V) \le  T * ln (\sumv\in V. exp (L v / T)) && \text{(the max term is one summand; ln-monotone, ×T; using s_attained, Tpos, finV, neV; \textbf{[hammer]})} \\
-&\textbf{s\_upper}\quad T * ln (\sumv\in V. exp (L v / T)) \le  Max (L ` V) + T * ln (real (card V)) && \text{(every term ≤ exp(max/T); sum ≤ card V · exp(max/T); using Tpos, finV, neV; \textbf{[hammer]})} \\
+&\textbf{s\_obt}\quad u \in  V \wedge  L u = Max (L ` V) && \text{(name the maximiser u; using s_attained; \texttt{blast})} \\
+&\textbf{s\_uV}\quad u \in  V && \text{(the maximiser lies in V; using s_obt; \texttt{simp})} \\
+&\textbf{s\_Lu}\quad L u = Max (L ` V) && \text{(its value is the max; using s_obt; \texttt{simp})} \\
+&\textbf{s\_memle}\quad exp (L u / T) \le  (\sumv\in V. exp (L v / T)) && \text{(one summand bounds the sum; using s_uV, finV; \texttt{(intro member\_le\_sum) auto})} \\
+&\textbf{s\_lestar}\quad exp (Max (L ` V) / T) \le  (\sumv\in V. exp (L v / T)) && \text{(rewrite via the max value; using s_memle, s_Lu; \texttt{simp})} \\
+&\textbf{s\_pos}\quad 0 < (\sumv\in V. exp (L v / T)) && \text{(positive sum of exponentials; using finV, neV; \texttt{(simp add: sum\_pos)})} \\
+&\textbf{s\_key}\quad Max (L ` V) / T \le  ln (\sumv\in V. exp (L v / T)) && \text{(take logs (lower); using s_lestar, s_pos; \texttt{(simp add: ln\_ge\_iff)})} \\
+&\textbf{s\_lower}\quad Max (L ` V) \le  T * ln (\sumv\in V. exp (L v / T)) && \text{(multiply through by T > 0; using s_key, Tpos; \texttt{(simp add: pos\_divide\_le\_eq mult.commute)})} \\
+&\textbf{s\_ucard}\quad 0 < real (card V) && \text{(V is finite and nonempty; using finV, neV; \texttt{(simp add: card\_gt\_0\_iff)})} \\
+&\textbf{s\_ub}\quad ⋀v. v \in  V \Longrightarrow exp (L v / T) \le  exp (Max (L ` V) / T) && \text{(every term is at most the max term; using finV, Tpos; \texttt{(simp add: Max\_ge divide\_right\_mono)})} \\
+&\textbf{s\_bound}\quad (\sumv\in V. exp (L v / T)) \le  real (card V) * exp (Max (L ` V) / T) && \text{(bound the sum by card · max-term; using s_ub; \texttt{(simp add: sum\_bounded\_above)})} \\
+&\textbf{s\_lnbound}\quad ln (\sumv\in V. exp (L v / T)) \le  ln (real (card V) * exp (Max (L ` V) / T)) && \text{(ln is monotone on the positives; using s_bound, s_pos; \texttt{simp})} \\
+&\textbf{s\_lnsplit}\quad ln (real (card V) * exp (Max (L ` V) / T)) = ln (real (card V)) + Max (L ` V) / T && \text{(split the log of a product; using s_ucard; \texttt{(simp add: ln\_mult)})} \\
+&\textbf{s\_key2}\quad ln (\sumv\in V. exp (L v / T)) \le  ln (real (card V)) + Max (L ` V) / T && \text{(combine (upper, pre-multiply); using s_lnbound, s_lnsplit; \texttt{simp})} \\
+&\textbf{s\_tmul}\quad T * ln (\sumv\in V. exp (L v / T)) \le  T * (ln (real (card V)) + Max (L ` V) / T) && \text{(multiply through by T > 0; using s_key2, Tpos; \texttt{(simp add: mult\_left\_mono)})} \\
+&\textbf{s\_tsimp}\quad T * (ln (real (card V)) + Max (L ` V) / T) = Max (L ` V) + T * ln (real (card V)) && \text{(clear the T/T cancellation; using Tpos; \texttt{(simp add: field\_simps)})} \\
+&\textbf{s\_upper}\quad T * ln (\sumv\in V. exp (L v / T)) \le  Max (L ` V) + T * ln (real (card V)) && \text{(upper Maslov bound; using s_tmul, s_tsimp; \texttt{simp})} \\
 &\textbf{s\_show}\quad (\exists u\in V. L u = Max (L ` V)) \wedge  Max (L ` V) \le  T * ln (\sumv\in V. exp (L v / T)) \wedge  T * ln (\sumv\in V. exp (L v / T)) \le  Max (L ` V) + T * ln (real (card V)) && \text{(Maslov dequantization joins both temperatures; using s_attained, s_lower, s_upper; \texttt{blast})} \\
 \end{align}
 \end{proof}

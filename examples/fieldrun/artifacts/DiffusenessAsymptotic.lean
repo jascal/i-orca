@@ -8,7 +8,7 @@
 
 -- goal: (λn. real k / real n) \<longlonglongrightarrow> 0
 -- proof DAG (id  [status]  using → claim):
---   s0  [hammer]  · → (λn. real k / real n) \<longlonglongrightarrow> 0
+--   s0  [method]  · → (λn. real k / real n) \<longlonglongrightarrow> 0
 
 theorem diffusenessAsymptotic : True := by
   trivial

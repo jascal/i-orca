@@ -31,32 +31,14 @@
       "open_obligations": []
     },
     {
-      "theorem": "WeightedThresholdGeneralSeparation",
+      "theorem": "MuZeroNotIrreducible",
       "structurally_valid": true,
       "errors": [],
-      "formal_fraction_static": 0.0,
-      "frontier": [
-        {
-          "step": "s0",
-          "claim": "horn_expressible t ⟶ mu_t t ≠ (0::nat)",
-          "kind": "sketched",
-          "by": "open: general representability separation",
-          "using": []
-        }
-      ],
+      "formal_fraction_static": 1.0,
+      "frontier": [],
       "isabelle_available": false,
       "formal_fraction_real": null,
-      "open_obligations": [
-        {
-          "step": "s0",
-          "goal": "horn_expressible t ⟶ mu_t t ≠ (0::nat)",
-          "fixed": [],
-          "assume": [],
-          "using": [],
-          "by": "open: general representability separation",
-          "suggestion": "hammer_step(s0) with using=[]"
-        }
-      ]
+      "open_obligations": []
     },
     {
       "theorem": "RecoveredProbability",
@@ -72,134 +54,31 @@
       "theorem": "Diffuseness",
       "structurally_valid": true,
       "errors": [],
-      "formal_fraction_static": 0.6666666666666666,
-      "frontier": [
-        {
-          "step": "s2",
-          "claim": "∀A. A ⊆ {1..PR} ⟶ (∑m∈A. e m) / E = real (card A) / real PR",
-          "kind": "hammer",
-          "by": "a k-body captures only k/PR",
-          "using": [
-            "Epos"
-          ]
-        }
-      ],
+      "formal_fraction_static": 1.0,
+      "frontier": [],
       "isabelle_available": false,
       "formal_fraction_real": null,
-      "open_obligations": [
-        {
-          "step": "s2",
-          "goal": "∀A. A ⊆ {1..PR} ⟶ (∑m∈A. e m) / E = real (card A) / real PR",
-          "fixed": [],
-          "assume": [
-            "E ≠ 0",
-            "⋀m. m ∈ {1..PR} ⟹ e m = E / real PR"
-          ],
-          "using": [
-            "Epos"
-          ],
-          "by": "a k-body captures only k/PR",
-          "suggestion": "hammer_step(s2) with using=[Epos]"
-        }
-      ]
+      "open_obligations": []
     },
     {
       "theorem": "DiffusenessAsymptotic",
       "structurally_valid": true,
       "errors": [],
-      "formal_fraction_static": 0.0,
-      "frontier": [
-        {
-          "step": "s0",
-          "claim": "(λn. real k / real n) \\<longlonglongrightarrow> 0",
-          "kind": "hammer",
-          "by": "k/PR → 0 as PR → ∞",
-          "using": []
-        }
-      ],
+      "formal_fraction_static": 1.0,
+      "frontier": [],
       "isabelle_available": false,
       "formal_fraction_real": null,
-      "open_obligations": [
-        {
-          "step": "s0",
-          "goal": "(λn. real k / real n) \\<longlonglongrightarrow> 0",
-          "fixed": [],
-          "assume": [],
-          "using": [],
-          "by": "k/PR → 0 as PR → ∞",
-          "suggestion": "hammer_step(s0) with using=[]"
-        }
-      ]
+      "open_obligations": []
     },
     {
       "theorem": "TwoTemperatureSoundness",
       "structurally_valid": true,
       "errors": [],
-      "formal_fraction_static": 0.6,
-      "frontier": [
-        {
-          "step": "s_lower",
-          "claim": "Max (L ` V) ≤ T * ln (∑v∈V. exp (L v / T))",
-          "kind": "hammer",
-          "by": "the max term is one summand; ln-monotone, ×T",
-          "using": [
-            "s_attained",
-            "Tpos",
-            "finV",
-            "neV"
-          ]
-        },
-        {
-          "step": "s_upper",
-          "claim": "T * ln (∑v∈V. exp (L v / T)) ≤ Max (L ` V) + T * ln (real (card V))",
-          "kind": "hammer",
-          "by": "every term ≤ exp(max/T); sum ≤ card V · exp(max/T)",
-          "using": [
-            "Tpos",
-            "finV",
-            "neV"
-          ]
-        }
-      ],
+      "formal_fraction_static": 1.0,
+      "frontier": [],
       "isabelle_available": false,
       "formal_fraction_real": null,
-      "open_obligations": [
-        {
-          "step": "s_lower",
-          "goal": "Max (L ` V) ≤ T * ln (∑v∈V. exp (L v / T))",
-          "fixed": [],
-          "assume": [
-            "T > 0",
-            "finite V",
-            "V ≠ {}"
-          ],
-          "using": [
-            "s_attained",
-            "Tpos",
-            "finV",
-            "neV"
-          ],
-          "by": "the max term is one summand; ln-monotone, ×T",
-          "suggestion": "hammer_step(s_lower) with using=[s_attained, Tpos, finV, neV]"
-        },
-        {
-          "step": "s_upper",
-          "goal": "T * ln (∑v∈V. exp (L v / T)) ≤ Max (L ` V) + T * ln (real (card V))",
-          "fixed": [],
-          "assume": [
-            "T > 0",
-            "finite V",
-            "V ≠ {}"
-          ],
-          "using": [
-            "Tpos",
-            "finV",
-            "neV"
-          ],
-          "by": "every term ≤ exp(max/T); sum ≤ card V · exp(max/T)",
-          "suggestion": "hammer_step(s_upper) with using=[Tpos, finV, neV]"
-        }
-      ]
+      "open_obligations": []
     },
     {
       "theorem": "PropPowerDiagram",
