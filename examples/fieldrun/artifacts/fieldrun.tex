@@ -1,0 +1,139 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb,amsthm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\begin{document}
+
+\begin{theorem}[CardinalityInertness]
+Theorem 1. Under the projective pairing the decision depends only on the totals (hence on {Δ, D\_j}) and is invariant to the readout multiplicity μ\_t: two source tensors c, c′ with equal column sums induce the same argmax even when their per-source argmax counts μ\_t differ.\\
+\emph{Given} \texttt{eqtot}: $⋀v. (\sumj\in J. c j v) = (\sumj\in J. c' j v)$.\\
+$(\forall w\in V. (\sumj\in J. c j w) \le  (\sumj\in J. c j t)) = (\forall w\in V. (\sumj\in J. c' j w) \le  (\sumj\in J. c' j t))$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s\_tot}\quad ⋀w. (\sumj\in J. c j w) = (\sumj\in J. c' j w) && \text{(totals coincide; μ\_t never enters L; using eqtot; \texttt{(simp add: eqtot)})} \\
+&\textbf{s\_dec}\quad (\forall w\in V. (\sumj\in J. c j w) \le  (\sumj\in J. c j t)) = (\forall w\in V. (\sumj\in J. c' j w) \le  (\sumj\in J. c' j t)) && \text{(decision is a function of totals only; using s_tot; \texttt{(simp add: s\_tot)})} \\
+\end{align}
+\end{proof}
+
+\begin{theorem}[NonTruthFunctionalityBudget]
+Theorem 2. Competition hardness is carried by the frame Gram: for unit directions ‖U\_t − U\_v‖² = 2(1 − ρ\_tv), so the differential incidence becomes common-mode and collapses as ρ\_tv → 1; and when G is diagonal (ρ\_tv = 0, mutually exclusive outcomes) it reduces to the classical disjoint-outcome distance ‖U\_t − U\_v‖² = 2.\\
+\emph{Given} \texttt{ut}: $norm (U t) = 1$; \texttt{uv}: $norm (U v) = 1$.\\
+$(norm (U t - U v)) ^ 2 = 2 * (1 - inner (U t) (U v)) \wedge  (inner (U t) (U v) = 0 \longrightarrow (norm (U t - U v)) ^ 2 = 2)$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s1}\quad (norm (U t - U v)) ^ 2 = (norm (U t)) ^ 2 - 2 * inner (U t) (U v) + (norm (U v)) ^ 2 && \text{(polarisation of the norm; \texttt{(simp add: power2\_norm\_eq\_inner inner\_diff\_left inner\_diff\_right inner\_commute)})} \\
+&\textbf{s2}\quad (norm (U t - U v)) ^ 2 = 2 * (1 - inner (U t) (U v)) && \text{(substitute the unit norms; using s1; \texttt{(simp add: ut uv algebra\_simps)})} \\
+&\textbf{s3}\quad (norm (U t - U v)) ^ 2 = 2 * (1 - inner (U t) (U v)) \wedge  (inner (U t) (U v) = 0 \longrightarrow (norm (U t - U v)) ^ 2 = 2) && \text{(diagonal G is the ρ = 0 limit; using s2; \texttt{(simp add: s2)})} \\
+\end{align}
+\end{proof}
+
+\begin{theorem}[WeightedThresholdExpressivity]
+Theorem 3 (realisability half). A COMPOSED token (μ\_t = 0) is the argmax of the weighted sum Σ\_j c\_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction.\\
+\emph{Given} \texttt{c1\_def}: $c1 = (\lambda x::nat. if x = 0 then (2::real) else if x = 1 then 3 else 0)$; \texttt{c2\_def}: $c2 = (\lambda x::nat. if x = 0 then (2::real) else if x = 1 then 0 else 3)$; \texttt{L\_def}: $L = (\lambda x. c1 x + c2 x)$.\\
+$L 0 > L 1 \wedge  L 0 > L 2 \wedge  c1 1 > c1 0 \wedge  c2 2 > c2 0$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s1}\quad L 0 = 4 \wedge  L 1 = 3 \wedge  L 2 = 3 && \text{(the summed vote prefers outcome 0; \texttt{(simp add: L\_def c1\_def c2\_def)})} \\
+&\textbf{s2}\quad c1 1 > c1 0 \wedge  c2 2 > c2 0 && \text{(each source's own argmax avoids outcome 0 (μ\_0 = 0); \texttt{(simp add: c1\_def c2\_def)})} \\
+&\textbf{s3}\quad L 0 > L 1 \wedge  L 0 > L 2 \wedge  c1 1 > c1 0 \wedge  c2 2 > c2 0 && \text{(composed token: realised by the sum, by no singleton; using s1, s2; \texttt{simp})} \\
+\end{align}
+\end{proof}
+
+\begin{theorem}[WeightedThresholdGeneralSeparation]
+Theorem 3 (general half, OPEN per the paper). Whether every μ\_t = 0 conclusion is in general inexpressible in the Horn / ∩–∪ fragment yet expressible with the weighted-threshold connective is left open ("proving the separation in general rather than only on the measured μ\_t = 0 set is left open"). i-orca records it as an explicit frontier hole.\\
+$horn_expressible t \longrightarrow mu_t t \neq  (0::nat)$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s0}\quad horn_expressible t \longrightarrow mu_t t \neq  (0::nat) && \text{(open: general representability separation; \textbf{[sketched]})} \\
+\end{align}
+\end{proof}
+
+\begin{theorem}[RecoveredProbability]
+Theorem 4. With a uniform base measure M\_0 reweighted by exp(c\_j^v) per source, the normalised mass m(v)/Σ\_w m(w) = exp(L\_v)/Z is exactly the softmax — the Gibbs measure recovered as a PIC incidence frequency, parameter-free.\\
+\emph{Given} \texttt{M0pos}: $(M0::real) > 0$.\\
+$(M0 * exp (L v)) / (\sumw\in V. M0 * exp (L w)) = exp (L v) / (\sumw\in V. exp (L w))$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s1}\quad (\sumw\in V. M0 * exp (L w)) = M0 * (\sumw\in V. exp (L w)) && \text{(pull the common base out; \texttt{(simp add: sum\_distrib\_left)})} \\
+&\textbf{s2}\quad M0 \neq  0 && \text{(the base is positive; using M0pos; \texttt{(metis less\_irrefl)})} \\
+&\textbf{s3}\quad (M0 * exp (L v)) / (\sumw\in V. M0 * exp (L w)) = exp (L v) / (\sumw\in V. exp (L w)) && \text{(cancel the base → softmax; using s1, s2; \texttt{(simp add: mult\_divide\_mult\_cancel\_left)})} \\
+\end{align}
+\end{proof}
+
+\begin{theorem}[Diffuseness]
+Theorem 5 (ratio core). Under equitable contributions e\_m = E/PR, single-source relative influence is e\_m/E = 1/PR and a k-source body captures only |A|/PR of E — so no bounded-size formula localises the quantity (the asymptotic O(1/PR) consequence is DiffusenessAsymptotic).\\
+\emph{Given} \texttt{Epos}: $E \neq  0$; \texttt{equit}: $⋀m. m \in  {1..PR} \Longrightarrow e m = E / real PR$.\\
+$(\forall m\in {1..PR}. e m / E = 1 / real PR) \wedge  (\forall A. A \subseteq  {1..PR} \longrightarrow (\summ\in A. e m) / E = real (card A) / real PR)$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s1}\quad \forall m\in {1..PR}. e m / E = 1 / real PR && \text{(one module is 1/PR of the whole; using Epos; \texttt{(simp add: equit field\_simps)})} \\
+&\textbf{s2}\quad \forall A. A \subseteq  {1..PR} \longrightarrow (\summ\in A. e m) / E = real (card A) / real PR && \text{(a k-body captures only k/PR; using Epos; \textbf{[hammer]})} \\
+&\textbf{s3}\quad (\forall m\in {1..PR}. e m / E = 1 / real PR) \wedge  (\forall A. A \subseteq  {1..PR} \longrightarrow (\summ\in A. e m) / E = real (card A) / real PR) && \text{(single-source and k-source bounds together; using s1, s2; \texttt{blast})} \\
+\end{align}
+\end{proof}
+
+\begin{theorem}[DiffusenessAsymptotic]
+Theorem 5 (asymptotic consequence). As PR → ∞ the k-source captured fraction k/PR → 0: no bounded-size PIC formula localises a diffuse causal property, and P⟨single-module intervention alters E⟩ = O(1/PR). The limit is a standard analytic fact left to Sledgehammer.\\
+$(\lambda n. real k / real n) \<longlonglongrightarrow> 0$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s0}\quad (\lambda n. real k / real n) \<longlonglongrightarrow> 0 && \text{(k/PR → 0 as PR → ∞; \textbf{[hammer]})} \\
+\end{align}
+\end{proof}
+
+\begin{theorem}[TwoTemperatureSoundness]
+Theorem 6. Read Π as a semiring FAQ. Under the tropical semiring (T=0) the aggregate is the attained max with witness argmax (greedy decode); the Maslov sandwich Max(L) ≤ T·ln Σ exp(L/T) ≤ Max(L) + T·ln|V| brings it to the log-semiring softmax aggregate (T=1) — one program, two temperatures. The two bound steps are the cited Maslov dequantization, left to Sledgehammer.\\
+\emph{Given} \texttt{Tpos}: $T > 0$; \texttt{finV}: $finite V$; \texttt{neV}: $V \neq  {}$.\\
+$(\exists u\in V. L u = Max (L ` V)) \wedge  Max (L ` V) \le  T * ln (\sumv\in V. exp (L v / T)) \wedge  T * ln (\sumv\in V. exp (L v / T)) \le  Max (L ` V) + T * ln (real (card V))$
+\end{theorem}
+
+\begin{proof}
+\begin{align}
+&\textbf{s\_mem}\quad Max (L ` V) \in  L ` V && \text{(the max is attained on the image; using finV, neV; \texttt{(intro Max\_in) auto})} \\
+&\textbf{s\_attained}\quad \exists u\in V. L u = Max (L ` V) && \text{(tropical aggregate = attained max (greedy decode); using s_mem; \texttt{auto})} \\
+&\textbf{s\_lower}\quad Max (L ` V) \le  T * ln (\sumv\in V. exp (L v / T)) && \text{(the max term is one summand; ln-monotone, ×T; using s_attained, Tpos, finV, neV; \textbf{[hammer]})} \\
+&\textbf{s\_upper}\quad T * ln (\sumv\in V. exp (L v / T)) \le  Max (L ` V) + T * ln (real (card V)) && \text{(every term ≤ exp(max/T); sum ≤ card V · exp(max/T); using Tpos, finV, neV; \textbf{[hammer]})} \\
+&\textbf{s\_show}\quad (\exists u\in V. L u = Max (L ` V)) \wedge  Max (L ` V) \le  T * ln (\sumv\in V. exp (L v / T)) \wedge  T * ln (\sumv\in V. exp (L v / T)) \le  Max (L ` V) + T * ln (real (card V)) && \text{(Maslov dequantization joins both temperatures; using s_attained, s_lower, s_upper; \texttt{blast})} \\
+\end{align}
+\end{proof}
+
+\begin{proposition}[PropPowerDiagram]
+Proposition 1. The linear regions of the max-logit M(r) are the Laguerre power diagram of {U\_v} with weights (b\_v, ‖U\_v‖²): the power-distance difference between two sites equals −2× the score difference ⟨r,U\_v⟩+b\_v, so the cell of minimum power distance is exactly the argmax (predicted) token.\\
+$((norm (r - U v)) ^ 2 - ((norm (U v)) ^ 2 + 2 * b v)) - ((norm (r - U w)) ^ 2 - ((norm (U w)) ^ 2 + 2 * b w)) = - 2 * ((inner r (U v) + b v) - (inner r (U w) + b w))$
+\end{proposition}
+
+\begin{proof}
+\begin{align}
+&\textbf{s1v}\quad (norm (r - U v)) ^ 2 = (norm r) ^ 2 - 2 * inner r (U v) + (norm (U v)) ^ 2 && \text{(polarisation at site v; \texttt{(simp add: power2\_norm\_eq\_inner inner\_diff\_left inner\_diff\_right inner\_commute)})} \\
+&\textbf{s1w}\quad (norm (r - U w)) ^ 2 = (norm r) ^ 2 - 2 * inner r (U w) + (norm (U w)) ^ 2 && \text{(polarisation at site w; \texttt{(simp add: power2\_norm\_eq\_inner inner\_diff\_left inner\_diff\_right inner\_commute)})} \\
+&\textbf{s2}\quad ((norm (r - U v)) ^ 2 - ((norm (U v)) ^ 2 + 2 * b v)) - ((norm (r - U w)) ^ 2 - ((norm (U w)) ^ 2 + 2 * b w)) = - 2 * ((inner r (U v) + b v) - (inner r (U w) + b w)) && \text{(weight ω\_v = ‖U\_v‖² + 2 b\_v makes argmin-power = argmax-score; using s1v, s1w; \texttt{(simp add: algebra\_simps)})} \\
+\end{align}
+\end{proof}
+
+\begin{proposition}[PropMarginDistance]
+Proposition 2. The normalised margin (L\_t − L\_{v*})/‖U\_t − U\_{v*}‖ is the exact signed Euclidean distance from r to the t–v* facet of the tropical hypersurface: the numerator ⟨r, U\_t − U\_{v*}⟩ + (b\_t − b\_{v*}) equals L\_t − L\_{v*} = Δ, and dividing by ‖U\_t − U\_{v*}‖ gives the point-to-bisector distance.\\
+$(inner r (U t - U vstar) + (b t - b vstar)) / norm (U t - U vstar) = ((inner r (U t) + b t) - (inner r (U vstar) + b vstar)) / norm (U t - U vstar)$
+\end{proposition}
+
+\begin{proof}
+\begin{align}
+&\textbf{s1}\quad inner r (U t - U vstar) = inner r (U t) - inner r (U vstar) && \text{(linearity of the inner product; \texttt{(simp add: inner\_diff\_right)})} \\
+&\textbf{s2}\quad (inner r (U t - U vstar) + (b t - b vstar)) / norm (U t - U vstar) = ((inner r (U t) + b t) - (inner r (U vstar) + b vstar)) / norm (U t - U vstar) && \text{(the facet numerator is Δ; divide by ‖U\_t − U\_{v*}‖; using s1; \texttt{(simp add: algebra\_simps)})} \\
+\end{align}
+\end{proof}
+
+\end{document}

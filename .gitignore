@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+build/
+dist/
+.eggs/
+
+# Virtualenv
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Claude Code transient state (skills are tracked; local state is not)
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+
+# Editor / OS
+.DS_Store
+*.swp
+*~
+
+# Isabelle session/heap scratch (the checked-in .thy artifacts are kept)
+*.thy~
+.isabelle/

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "i-orca"
+dynamic = ["version"]
+description = "i-orca — a Markdown-table DSL for LLM-register mathematical proofs, with Isabelle/Isar as the canonical backend"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [
+    { name = "Allan" }
+]
+keywords = ["isabelle", "isar", "proof", "theorem-proving", "lean", "llm", "mcp", "orca"]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Code Generators",
+]
+
+[project.urls]
+Homepage = "https://github.com/jascal/i-orca"
+Source = "https://github.com/jascal/i-orca"
+"Bug Tracker" = "https://github.com/jascal/i-orca/issues"
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+# The MCP server uses the official `mcp` SDK (FastMCP). Optional: parse/verify/
+# compile work with zero extra dependencies; only `i-orca-mcp` needs this.
+mcp = ["mcp"]
+
+[project.scripts]
+i-orca = "i_orca.cli:main"
+i-orca-mcp = "i_orca.mcp_server:main"
+
+[tool.hatch.version]
+path = "i_orca/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["i_orca"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "i-orca": {
+      "command": ".venv/bin/python",
+      "args": ["-m", "i_orca.mcp_server"],
+      "env": {}
+    }
+  }
+}
