@@ -60,28 +60,65 @@ is causally necessary*; ablating any one flips the decision. The measured per-he
 un-rescue / flip behaviour is the empirical shadow of tokens sitting in (or near)
 the irreducible regime.
 
+## Characterising irreducibility — what we can pin down
+
+(All in [`Characterization.thy`](Characterization.thy), kernel-checked.)
+
+- **Reformulation (exact).** `irreducible_iff_unique_decider`: t is irreducible
+  iff the full set S is the **unique deciding set** — the only `P ⊆ S` with
+  `decides c P V t` is `P = S`. Equivalently, writing the per-competitor *margin*
+  `m_j^v = c j t − c j v`, the all-ones vector is the unique nonzero 0/1 solution
+  of the system `(∀v≠t) Σ_{j} m_j^v x_j > 0`.
+- **Necessary conditions (any |S| ≥ 2).** Irreducible ⟹ `mu0` (no singleton
+  decides) **and** `all_necessary` (every `S − {j}` fails) — `necessary_mu0`,
+  `necessary_all_sources`. So both the bottom layer (singletons) and the top
+  layer (co-singletons) of the subset lattice must fail.
+- **Exact at n ≤ 3.** `n3_characterization`: for `card S = 3`,
+  `irreducible ⟺ mu0 ∧ all_necessary`. (At n = 3 the proper non-empty subsets are
+  exactly the singletons and the co-singletons, so the two necessary conditions
+  already cover the whole lattice.)
+- **Sharp — it breaks at n = 4.** `n3_characterization_is_sharp`: an explicit
+  4-source token with `mu0` **and** `all_necessary` **and** decided by the full
+  set, yet **reducible** — the proper *pair* `{1,2}` already decides it. The
+  middle lattice layers (sizes 2…n−2) are exactly what the bottom/top necessary
+  conditions miss, and they are where irreducibility actually lives for n ≥ 4.
+
 ## What remains open
 
-The **full expressivity characterisation** — *exactly which* composed tokens are
-irreducible, and the separation between the weighted-threshold connective and the
-Horn / ∩–∪ fragment over *all* formula classes (not just the vote-subset reading
-above). The existence of irreducible tokens is settled; their characterisation is
-the genuine open frontier — now well-posed rather than vacuous.
+The middle layers are genuinely hard, not just unwritten. Deciding *reducibility*
+is the existence of a non-empty proper `P` with `Σ_{j∈P} m_j^v > 0` for every
+competitor v — a **0/1 feasibility of strict linear inequalities** (does the open
+cone `⋂_v {m^v · x > 0}` contain a hypercube vertex other than 0 and the all-ones
+point?). That decision problem is NP-hard in general, so one should **not** expect
+a simple closed-form characterisation of irreducibility for arbitrary n; the exact
+statement is the lattice one (unique deciding set), with the dimension ≤ 3 case
+fully pinned down and existence settled at every n. (The NP-hardness is a
+complexity meta-claim, not formalised here.)
+
+The remaining *mathematical* frontier is then narrow and precise: a structural
+description of the middle-layer deciding sets (e.g. for bounded #competitors |V|,
+or bounded subset size), and the corresponding weighted-threshold vs Horn / ∩–∪
+formula-class separation. Existence is settled; low dimension is exact; the
+general case is provably lattice-combinatorial rather than a missing formula.
 
 ## Suggested paper text
 
 > A composed token (μ_t = 0) can be realised by the weighted-threshold connective
 > though no singleton sub-conjunction selects it (Theorem 3a). But μ_t = 0 — *no
-> singleton suffices* — is strictly weaker than irreducibility — *no proper
-> sub-conjunction suffices*: there are μ_t = 0 tokens already decided by a proper
-> subset of sources (a two-source coalition can select a token that neither source
-> selects alone). The two conditions coincide at n = 2 and diverge for n ≥ 3.
-> Genuinely irreducible composed tokens — decided by the full source set but by no
-> proper sub-conjunction — do exist, including cases where every source is
-> necessary (the formal counterpart of the route-ordered fragility of §4.4). A
-> complete characterisation of when irreducibility occurs, and the corresponding
-> formula-class separation, remains open. (All claims here are machine-checked in
-> Isabelle/HOL; see the i-orca formalisation.)
+> singleton suffices* — is strictly weaker than *irreducibility* — *no proper
+> sub-conjunction suffices*. Call t irreducible when the full source set is the
+> unique deciding coalition. Irreducibility implies both μ_t = 0 and that every
+> source is necessary (each single-source ablation flips the decision — the
+> formal counterpart of the route-ordered fragility of §4.4); for n ≤ 3 these two
+> conditions are also sufficient, but at n ≥ 4 they are not — a two-source
+> coalition can select a token that neither it, any singleton, nor any
+> (n−1)-subset selects. Genuinely irreducible composed tokens exist at every n,
+> including cases where every source is necessary. A complete characterisation of
+> *which* composed tokens are irreducible is, in general, a 0/1 linear-feasibility
+> question (NP-hard), so the clean content is the unique-deciding-coalition
+> criterion plus the exact low-dimension result; the corresponding formula-class
+> separation remains the open frontier. (All non-complexity claims here are
+> machine-checked in Isabelle/HOL; see the i-orca formalisation.)
 
 ## Naming note
 

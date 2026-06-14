@@ -2,3 +2,4 @@ session "Separation" = "HOL" +
   options [quick_and_dirty]
   theories
     Separation
+    Characterization

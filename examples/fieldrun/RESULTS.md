@@ -91,7 +91,23 @@ three facts are now kernel-checked:
 
 **Implication for the paper.** The clean separation needs "COMPOSED" stated as
 *"no proper sufficient sub-conjunction decides t"* (irreducibility), not merely
-*"no singleton"* (μ_t = 0); the two coincide at n = 2 but diverge for n ≥ 3. The
-*existence* of irreducible composed tokens is settled (above); the full
-expressivity *characterisation* over formula classes remains the genuine open
-frontier — now well-posed rather than vacuous.
+*"no singleton"* (μ_t = 0); the two coincide at n = 2 but diverge for n ≥ 3.
+
+**Characterising irreducibility** (kernel-checked in
+[`separation/Characterization.thy`](separation/Characterization.thy); narrative in
+[`separation/THEOREM3_NOTE.md`](separation/THEOREM3_NOTE.md)):
+
+- *Reformulation:* t is irreducible ⟺ the full set S is the **unique deciding
+  coalition** (`irreducible_iff_unique_decider`).
+- *Necessary (any n):* irreducible ⟹ μ_t = 0 **and** every source necessary
+  (`necessary_mu0`, `necessary_all_sources`).
+- *Exact at n ≤ 3:* irreducible ⟺ μ_t = 0 ∧ every-source-necessary
+  (`n3_characterization`).
+- *Sharp:* at n = 4 those conditions no longer suffice — explicit token, μ_t = 0,
+  every-source-necessary, full set decides, yet reducible via a pair
+  (`n3_characterization_is_sharp`).
+
+The general characterisation is a 0/1 linear-feasibility (NP-hard) question, so
+the durable content is the unique-coalition criterion + the exact low-dimension
+result; the formula-class separation remains the open frontier — now narrow and
+well-posed rather than vacuous.
