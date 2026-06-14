@@ -12,7 +12,7 @@ EXPECTED = {
     "CardinalityInertness",
     "NonTruthFunctionalityBudget",
     "WeightedThresholdExpressivity",
-    "MuZeroNotIrreducible",
+    "MuZeroDoesNotImplyIrreducible",
     "RecoveredProbability",
     "Diffuseness",
     "DiffusenessAsymptotic",

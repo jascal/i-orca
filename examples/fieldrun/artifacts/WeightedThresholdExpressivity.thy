@@ -2,7 +2,7 @@ theory WeightedThresholdExpressivity
   imports Complex_Main
 begin
 
-text \<open>Theorem 3 (realisability half). A COMPOSED token (μ_t = 0) is the argmax of the weighted sum Σ_j c_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction.\<close>
+text \<open>Theorem 3 (realisability half). A COMPOSED token (μ_t = 0) is the argmax of the weighted sum Σ_j c_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction. (Since at n = 2 the only proper non-empty subsets are the singletons, this witness is in fact *irreducible* — no proper sub-conjunction decides it; see `separation/Separation.thy::irreducible_pair`. Cf. MuZeroDoesNotImplyIrreducible for why this needs care at n ≥ 3.)\<close>
 theorem weightedthresholdexpressivity:
   assumes
     c1_def: "c1 = (\<lambda>x::nat. if x = 0 then (2::real) else if x = 1 then 3 else 0)"

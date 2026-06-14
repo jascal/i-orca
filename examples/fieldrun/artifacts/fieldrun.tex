@@ -32,7 +32,7 @@ $(norm (U t - U v)) ^ 2 = 2 * (1 - inner (U t) (U v)) \wedge  (inner (U t) (U v)
 \end{proof}
 
 \begin{theorem}[WeightedThresholdExpressivity]
-Theorem 3 (realisability half). A COMPOSED token (μ\_t = 0) is the argmax of the weighted sum Σ\_j c\_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction.\\
+Theorem 3 (realisability half). A COMPOSED token (μ\_t = 0) is the argmax of the weighted sum Σ\_j c\_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction. (Since at n = 2 the only proper non-empty subsets are the singletons, this witness is in fact *irreducible* — no proper sub-conjunction decides it; see `separation/Separation.thy::irreducible\_pair`. Cf. MuZeroDoesNotImplyIrreducible for why this needs care at n ≥ 3.)\\
 \emph{Given} \texttt{c1\_def}: $c1 = (\lambda x::nat. if x = 0 then (2::real) else if x = 1 then 3 else 0)$; \texttt{c2\_def}: $c2 = (\lambda x::nat. if x = 0 then (2::real) else if x = 1 then 0 else 3)$; \texttt{L\_def}: $L = (\lambda x. c1 x + c2 x)$.\\
 $L 0 > L 1 \wedge  L 0 > L 2 \wedge  c1 1 > c1 0 \wedge  c2 2 > c2 0$
 \end{theorem}
@@ -45,7 +45,7 @@ $L 0 > L 1 \wedge  L 0 > L 2 \wedge  c1 1 > c1 0 \wedge  c2 2 > c2 0$
 \end{align}
 \end{proof}
 
-\begin{theorem}[MuZeroNotIrreducible]
+\begin{theorem}[MuZeroDoesNotImplyIrreducible]
 Theorem 3 (general half) — restated faithfully and PROVEN. The earlier i-orca hole `horn\_expressible t ⟶ mu\_t t ≠ 0` used *uninterpreted* predicates, so it was vacuously refutable — never a faithful encoding. With explicit definitions (a source set S *decides* t when t is the strict argmax of the S-sum over outcomes V; μ\_t = 0 means no *singleton* decides t; t is Horn/sub-conjunction-expressible when some *proper non-empty subset* already decides it), the substantive content is sharp: **μ\_t = 0 does NOT imply not-Horn-expressible.** Witnessed here, kernel-checked: a 3-source token with μ\_0 = 0 whose proper subset {1,2} already decides outcome 0. The dual positive result — genuinely *irreducible* composed tokens (no proper subset suffices) exist at every n (incl. an n = 3 case where every source is necessary, tying to §4.4 fragility) — is proven in the companion [`separation/Separation.thy`](separation/Separation.thy). The full expressivity *characterisation* over formula classes is the remaining genuine open frontier.\\
 \emph{Given} \texttt{c3\_def}: $⋀j v. c3 (j::nat) (v::nat) = (if j = 1 then (if v = 0 then (2::real) else if v = 1 then 3 else 0) else if j = 2 then (if v = 0 then 2 else if v = 1 then 0 else 3) else (if v = 0 then 0 else 1/2))$.\\
 $(\forall j\in {1,2,3}. \neg  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {j}. c3 i v) < (\sumi\in {j}. c3 i 0))) \wedge  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in {1,2,3}. c3 i v) < (\sumi\in {1,2,3}. c3 i 0)) \wedge  (\exists P. P \neq  {} \wedge  P ⊂ {1,2,3} \wedge  (\forall v\in {0,1,2}. v \neq  0 \longrightarrow (\sumi\in P. c3 i v) < (\sumi\in P. c3 i 0)))$

@@ -6,8 +6,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -16,8 +16,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -26,18 +26,18 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
-      "theorem": "MuZeroNotIrreducible",
+      "theorem": "MuZeroDoesNotImplyIrreducible",
       "structurally_valid": true,
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -46,8 +46,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -56,8 +56,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -66,8 +66,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -76,8 +76,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -86,8 +86,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     },
     {
@@ -96,8 +96,8 @@
       "errors": [],
       "formal_fraction_static": 1.0,
       "frontier": [],
-      "isabelle_available": false,
-      "formal_fraction_real": null,
+      "isabelle_available": true,
+      "formal_fraction_real": 1.0,
       "open_obligations": []
     }
   ]

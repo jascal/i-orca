@@ -1,6 +1,8 @@
 """Backend graceful-degradation and metrics tests."""
 from __future__ import annotations
 
+import pytest
+
 from i_orca.backend import IsabelleBackend, locate_isabelle
 from i_orca.metrics import compute_metrics
 from i_orca.parser import parse
@@ -39,9 +41,24 @@ def test_metrics_counts():
     assert m.formal_fraction_real is None  # no backend run
 
 
-def test_backend_degrades_when_absent(monkeypatch):
-    # Force "no Isabelle" regardless of host.
-    backend = IsabelleBackend(isabelle_bin=None)
+@pytest.fixture
+def absent_backend(monkeypatch):
+    """A backend that truly cannot find Isabelle, regardless of host.
+
+    On a machine with Isabelle installed (and ISABELLE_HOME set) the
+    ``isabelle_bin=None`` fallback would otherwise *locate* it, so we stub the
+    locator and clear the env vars to exercise the graceful-degradation path.
+    """
+    import i_orca.backend.isabelle as iz
+
+    for var in ("ISABELLE", "ISABELLE_BIN", "ISABELLE_HOME"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setattr(iz, "locate_isabelle", lambda: None)
+    return IsabelleBackend(isabelle_bin=None)
+
+
+def test_backend_degrades_when_absent(absent_backend):
+    backend = absent_backend
     assert backend.available is False
     res = backend.check_proof(_thm())
     assert res.available is False
@@ -55,16 +72,15 @@ def test_backend_degrades_when_absent(monkeypatch):
     assert ob["s0"].using == ["ax"]
 
 
-def test_hammer_degrades_when_absent():
-    backend = IsabelleBackend(isabelle_bin=None)
-    res = backend.hammer_step(_thm(), "s0")
+def test_hammer_degrades_when_absent(absent_backend):
+    res = absent_backend.hammer_step(_thm(), "s0")
     assert res.available is False
     assert res.success is False
     assert res.step == "s0"
 
 
-def test_hammer_unknown_step():
-    backend = IsabelleBackend(isabelle_bin=None)
+def test_hammer_unknown_step(absent_backend):
+    backend = absent_backend
     res = backend.hammer_step(_thm(), "does_not_exist")
     assert res.success is False
 

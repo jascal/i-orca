@@ -40,7 +40,7 @@
     },
     {
       "available": true,
-      "theorem": "MuZeroNotIrreducible",
+      "theorem": "MuZeroDoesNotImplyIrreducible",
       "steps": {
         "s_mu0": "checked",
         "s_dec": "checked",

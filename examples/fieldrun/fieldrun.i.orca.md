@@ -6,15 +6,18 @@
   lowers to Isabelle/Isar (the canonical backend). Honest reckonings (SPEC §2,
   §11.5): the static verifier checks the proof *skeleton*; a green `verify` is
   NOT a kernel proof. `formal_fraction_static` reports method coverage; the real
-  status needs an Isabelle distribution (`i-orca check`). Steps the paper itself
-  leaves open (general Horn separation; the cited Maslov limit; the asymptotic
-  localisation bound) are marked as frontier holes — incompleteness is first-class.
+  status needs an Isabelle distribution (`i-orca check`). All ten theorems below
+  are now fully kernel-proved (Isabelle2025-2, combined Fieldrun.thy builds exit
+  0 with zero sorry). Theorem 3's general half was a vacuous placeholder; it is
+  restated faithfully here (MuZeroDoesNotImplyIrreducible) with the existence /
+  irreducibility results in separation/Separation.thy. The full expressivity
+  characterisation over formula classes is the remaining genuine open frontier.
 
   Paper map:  Thm 1 → CardinalityInertness          Thm 4 → RecoveredProbability
               Thm 2 → NonTruthFunctionalityBudget    Thm 5 → Diffuseness (+Asymptotic)
               Thm 3 → WeightedThresholdExpressivity   Thm 6 → TwoTemperatureSoundness
-                      (+GeneralSeparation, open)      Prop 1 → PropPowerDiagram
-                                                      Prop 2 → PropMarginDistance
+                      (+MuZeroDoesNotImplyIrreducible) Prop 1 → PropPowerDiagram
+                       & separation/Separation.thy     Prop 2 → PropMarginDistance
 -->
 
 # theorem CardinalityInertness
@@ -68,7 +71,7 @@
 | s3   | (norm (U t - U v)) ^ 2 = 2 * (1 - inner (U t) (U v)) ∧ (inner (U t) (U v) = 0 ⟶ (norm (U t - U v)) ^ 2 = 2) | diagonal G is the ρ = 0 limit | s2 | (simp add: s2) | method |
 
 # theorem WeightedThresholdExpressivity
-> Theorem 3 (realisability half). A COMPOSED token (μ_t = 0) is the argmax of the weighted sum Σ_j c_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction.
+> Theorem 3 (realisability half). A COMPOSED token (μ_t = 0) is the argmax of the weighted sum Σ_j c_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction. (Since at n = 2 the only proper non-empty subsets are the singletons, this witness is in fact *irreducible* — no proper sub-conjunction decides it; see `separation/Separation.thy::irreducible_pair`. Cf. MuZeroDoesNotImplyIrreducible for why this needs care at n ≥ 3.)
 
 ## imports
 | Theory       |
@@ -94,7 +97,7 @@
 | s2  | c1 1 > c1 0 ∧ c2 2 > c2 0                       | each source's own argmax avoids outcome 0 (μ_0 = 0) | — | (simp add: c1_def c2_def)    | method |
 | s3  | L 0 > L 1 ∧ L 0 > L 2 ∧ c1 1 > c1 0 ∧ c2 2 > c2 0 | composed token: realised by the sum, by no singleton | s1, s2 | simp | method |
 
-# theorem MuZeroNotIrreducible
+# theorem MuZeroDoesNotImplyIrreducible
 > Theorem 3 (general half) — restated faithfully and PROVEN. The earlier i-orca hole `horn_expressible t ⟶ mu_t t ≠ 0` used *uninterpreted* predicates, so it was vacuously refutable — never a faithful encoding. With explicit definitions (a source set S *decides* t when t is the strict argmax of the S-sum over outcomes V; μ_t = 0 means no *singleton* decides t; t is Horn/sub-conjunction-expressible when some *proper non-empty subset* already decides it), the substantive content is sharp: **μ_t = 0 does NOT imply not-Horn-expressible.** Witnessed here, kernel-checked: a 3-source token with μ_0 = 0 whose proper subset {1,2} already decides outcome 0. The dual positive result — genuinely *irreducible* composed tokens (no proper subset suffices) exist at every n (incl. an n = 3 case where every source is necessary, tying to §4.4 fragility) — is proven in the companion [`separation/Separation.thy`](separation/Separation.thy). The full expressivity *characterisation* over formula classes is the remaining genuine open frontier.
 
 ## imports

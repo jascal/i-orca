@@ -10,7 +10,8 @@ as i-orca proofs, lowered to Isabelle/Isar and **kernel-checked with Isabelle202
   per-theorem `.thy`, `.tex`, `.lean`, `prove_report.json`, `kernel_report.json`,
   and `kernel_check_combined.log`.
 - Companion development: [`separation/Separation.thy`](separation/Separation.thy)
-  (the Theorem-3 separation, see the research note below).
+  (the Theorem-3 separation, see the research note below) and a paper-ready
+  writeup in [`separation/THEOREM3_NOTE.md`](separation/THEOREM3_NOTE.md).
 
 ## Headline
 
@@ -29,7 +30,7 @@ both Maslov bounds), and the fifth — the Theorem-3 general separation — was
 | Thm 1 Cardinality-inertness | `CardinalityInertness` | decision depends only on the column totals; equal totals ⟹ equal argmax (μ_t never enters) |
 | Thm 2 Non-truth-functionality budget | `NonTruthFunctionalityBudget` | ‖U_t−U_v‖² = 2(1−ρ); the disjoint/diagonal-G limit ρ=0 ⟹ ‖U_t−U_v‖²=2 |
 | Thm 3 Weighted-threshold expressivity | `WeightedThresholdExpressivity` | explicit 2-source/3-outcome composed token: the sum picks outcome 0, no singleton does (μ_0=0) |
-| Thm 3 (general half) | `MuZeroNotIrreducible` | μ_t=0 (no singleton) does NOT imply not-Horn-expressible: a μ_0=0 token whose proper subset {1,2} already decides it (see note) |
+| Thm 3 (general half) | `MuZeroDoesNotImplyIrreducible` | μ_t=0 (no singleton) does NOT imply not-Horn-expressible: a μ_0=0 token whose proper subset {1,2} already decides it (see note) |
 | Thm 4 Recovered probability | `RecoveredProbability` | m(v)/Σ m = exp(L_v)/Z = softmax, parameter-free |
 | Thm 5 Diffuseness | `Diffuseness` | e_m/E = 1/PR; a k-body captures only \|A\|/PR |
 | Thm 5 (asymptotic) | `DiffusenessAsymptotic` | k/PR → 0 (const / diverging denom) |
@@ -49,7 +50,7 @@ i-orca's own backend (`i-orca check`) independently confirms every step
 | CardinalityInertness | 2 | **1.00** |
 | NonTruthFunctionalityBudget | 3 | **1.00** |
 | WeightedThresholdExpressivity | 3 | **1.00** |
-| MuZeroNotIrreducible | 4 | **1.00** |
+| MuZeroDoesNotImplyIrreducible | 4 | **1.00** |
 | RecoveredProbability | 3 | **1.00** |
 | Diffuseness | 5 | **1.00** |
 | DiffusenessAsymptotic | 1 | **1.00** |
@@ -75,7 +76,7 @@ statement. With explicit definitions (`separation/Separation.thy`):
 
 three facts are now kernel-checked:
 
-1. **The gap** (`MuZeroNotIrreducible`, in the i-orca file): a 3-source token with
+1. **The gap** (`MuZeroDoesNotImplyIrreducible`, in the i-orca file): a 3-source token with
    `mu0` (no singleton picks it) whose proper subset `{1,2}` *already decides it*.
    So **`μ_t = 0` is strictly weaker than "no sufficient sub-conjunction"** — the
    literal "COMPOSED ⟺ not-Horn-expressible" fails under the subset reading.

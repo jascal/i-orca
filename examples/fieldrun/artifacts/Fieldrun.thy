@@ -25,7 +25,7 @@ proof -
   show "(norm (U t - U v)) ^ 2 = 2 * (1 - inner (U t) (U v)) \<and> (inner (U t) (U v) = 0 \<longrightarrow> (norm (U t - U v)) ^ 2 = 2)" using s2 by (simp add: s2)
 qed
 
-text \<open>Theorem 3 (realisability half). A COMPOSED token (μ_t = 0) is the argmax of the weighted sum Σ_j c_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction.\<close>
+text \<open>Theorem 3 (realisability half). A COMPOSED token (μ_t = 0) is the argmax of the weighted sum Σ_j c_j though no single source's argmax selects it: an explicit two-source, three-outcome witness where the sum prefers outcome 0 while source 1 prefers 1 and source 2 prefers 2 — realised by a weighted-threshold connective but by no singleton sufficient sub-conjunction. (Since at n = 2 the only proper non-empty subsets are the singletons, this witness is in fact *irreducible* — no proper sub-conjunction decides it; see `separation/Separation.thy::irreducible_pair`. Cf. MuZeroDoesNotImplyIrreducible for why this needs care at n ≥ 3.)\<close>
 theorem weightedthresholdexpressivity:
   assumes
     c1_def: "c1 = (\<lambda>x::nat. if x = 0 then (2::real) else if x = 1 then 3 else 0)"
@@ -41,7 +41,7 @@ proof -
 qed
 
 text \<open>Theorem 3 (general half) — restated faithfully and PROVEN. The earlier i-orca hole `horn_expressible t ⟶ mu_t t ≠ 0` used *uninterpreted* predicates, so it was vacuously refutable — never a faithful encoding. With explicit definitions (a source set S *decides* t when t is the strict argmax of the S-sum over outcomes V; μ_t = 0 means no *singleton* decides t; t is Horn/sub-conjunction-expressible when some *proper non-empty subset* already decides it), the substantive content is sharp: **μ_t = 0 does NOT imply not-Horn-expressible.** Witnessed here, kernel-checked: a 3-source token with μ_0 = 0 whose proper subset {1,2} already decides outcome 0. The dual positive result — genuinely *irreducible* composed tokens (no proper subset suffices) exist at every n (incl. an n = 3 case where every source is necessary, tying to §4.4 fragility) — is proven in the companion [`separation/Separation.thy`](separation/Separation.thy). The full expressivity *characterisation* over formula classes is the remaining genuine open frontier.\<close>
-theorem muzeronotirreducible:
+theorem muzerodoesnotimplyirreducible:
   assumes
     c3_def: "\<And>j v. c3 (j::nat) (v::nat) = (if j = 1 then (if v = 0 then (2::real) else if v = 1 then 3 else 0) else if j = 2 then (if v = 0 then 2 else if v = 1 then 0 else 3) else (if v = 0 then 0 else 1/2))"
   shows "(\<forall>j\<in>{1,2,3}. \<not> (\<forall>v\<in>{0,1,2}. v \<noteq> 0 \<longrightarrow> (\<Sum>i\<in>{j}. c3 i v) < (\<Sum>i\<in>{j}. c3 i 0))) \<and> (\<forall>v\<in>{0,1,2}. v \<noteq> 0 \<longrightarrow> (\<Sum>i\<in>{1,2,3}. c3 i v) < (\<Sum>i\<in>{1,2,3}. c3 i 0)) \<and> (\<exists>P. P \<noteq> {} \<and> P \<subset> {1,2,3} \<and> (\<forall>v\<in>{0,1,2}. v \<noteq> 0 \<longrightarrow> (\<Sum>i\<in>P. c3 i v) < (\<Sum>i\<in>P. c3 i 0)))"

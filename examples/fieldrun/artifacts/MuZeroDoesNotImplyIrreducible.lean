@@ -15,6 +15,6 @@
 --   s_suff  [method]  · → ∃P. P ≠ {} ∧ P ⊂ {1,2,3} ∧ (∀v∈{0,1,2}. v ≠ 0 ⟶ (∑i∈P. c3 i v) < (∑i∈P. c3 i 0))
 --   s_show  [method]  using s_mu0,s_dec,s_suff → (∀j∈{1,2,3}. ¬ (∀v∈{0,1,2}. v ≠ 0 ⟶ (∑i∈{j}. c3 i v) < (∑i∈{j}. c3 i 0))) ∧ (∀v∈{0,1,2}. v ≠ 0 ⟶ (∑i∈{1,2,3}. c3 i v) < (∑i∈{1,2,3}. c3 i 0)) ∧ (∃P. P ≠ {} ∧ P ⊂ {1,2,3} ∧ (∀v∈{0,1,2}. v ≠ 0 ⟶ (∑i∈P. c3 i v) < (∑i∈P. c3 i 0)))
 
-theorem muZeroNotIrreducible : True := by
+theorem muZeroDoesNotImplyIrreducible : True := by
   trivial
 
