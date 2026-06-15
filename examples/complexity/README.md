@@ -32,6 +32,23 @@ touch the fully-proven fieldrun corpus.
   needed); `disjoint_private` + `disjoint_private_card_Union` are where the hub
   disjointness actually pays (total distinct private neurons = sum, i.e. the bit
   budget / clean partition), which is NOT the per-token density.
+- [`MinimalDecider.thy`](MinimalDecider.thy) — **the algorithm as a theorem**, two
+  objects and the honest gap between them. (A) `minimal_decider`: an EXECUTABLE
+  greedy (`function` + termination on `card S`) that drops one removable source at a
+  time; proved to return a deciding SUBSET that is locally minimal
+  (`minimal_decider_decides` / `minimal_decider_subset` /
+  `minimal_decider_all_necessary`) and never fires more neurons
+  (`minimal_decider_firing_bound`). (B) `irreducible_core_exists` /
+  `decomposes_exists`: every deciding finite coalition contains a GENUINELY
+  irreducible atom. The single-token end-to-end theorem
+  `every_deciding_token_has_firing_minimal_irreducible_atom` and the multi-token
+  **pipeline theorem** `pipeline_composition` (with `pipeline_density_max_bound`
+  giving the literal `≤ |H| + max_e|M_e − H|` shared-core bound) tie
+  MinimalDecider + Hub + Density together. `all_necessary_not_irreducible` makes the
+  kernel-filtered correction explicit: the greedy's local minimality is NOT global
+  irreducibility (the `c4` witness on `main` is `all_necessary` yet reducible), so
+  `minimal_decider` is a sound poly UNDER-approximation and the global core is the
+  hard part.
 - [`hardness.i.orca.md`](hardness.i.orca.md) — a concrete i-orca witness of the
   single-competitor base case (verifies + kernel-checks).
 
