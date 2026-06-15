@@ -117,9 +117,14 @@ class HammerResult:
 class IsabelleBackend:
     """Wraps an Isabelle distribution; safe to construct with none present."""
 
-    def __init__(self, isabelle_bin: str | None = None, *, parent_session: str | None = None):
+    def __init__(self, isabelle_bin: str | None = None, *, parent_session: str | None = None,
+                 extra_dirs: list[str] | None = None):
         self.isabelle_bin = isabelle_bin or locate_isabelle()
         self._parent_session = parent_session
+        # Directories holding project-local theories that ``## imports`` may name
+        # (e.g. a sibling ``MinimalDecider``). Emitted as ROOT ``directories`` so the
+        # import resolves from source instead of being looked up as a bare file.
+        self._extra_dirs = [str(Path(d).resolve()) for d in (extra_dirs or [])]
 
     @property
     def available(self) -> bool:
@@ -182,15 +187,28 @@ class IsabelleBackend:
             (root / f"{thy_name}.thy").write_text(thy_src, encoding="utf-8")
             session = f"IOrca_{thy_name}"
             (root / "ROOT").write_text(
-                f'session "{session}" = "{parent}" +\n'
-                f"  theories\n    {thy_name}\n",
-                encoding="utf-8",
+                self._root_text(session, parent, thy_name), encoding="utf-8"
             )
             proc = subprocess.run(
                 [self.isabelle_bin, "build", "-D", str(root), "-o", "quick_and_dirty"],
                 capture_output=True, text=True, timeout=timeout_s,
             )
             return proc.returncode == 0, (proc.stdout + "\n" + proc.stderr)
+
+    def _root_text(self, session: str, parent: str, thy_name: str) -> str:
+        """ROOT for the one-theory build session. Project-local theory directories
+        (``self._extra_dirs``) are registered as ``directories`` so ``## imports`` may
+        name a sibling theory (e.g. ``MinimalDecider``) and have it resolve from source
+        rather than be looked up as a bare file under the temp dir."""
+        dirs_block = ""
+        if self._extra_dirs:
+            body = "".join(f'    "{ed}"\n' for ed in self._extra_dirs)
+            dirs_block = f"  directories\n{body}"
+        return (
+            f'session "{session}" = "{parent}" +\n'
+            f"{dirs_block}"
+            f"  theories\n    {thy_name}\n"
+        )
 
     def _parent_for(self, theorem: Theorem) -> str:
         if self._parent_session:

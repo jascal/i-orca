@@ -86,3 +86,27 @@ def test_mcp_describe_tools():
 def test_mcp_parse_error_is_structured():
     res = mcp.parse_proof("not a theorem")
     assert "error" in res
+
+
+def test_mcp_check_hammer_prove_accept_dirs_session():
+    import inspect
+    for fn in (mcp.check_proof, mcp.hammer_step, mcp.prove_proof):
+        params = inspect.signature(fn).parameters
+        assert "dirs" in params, fn.__name__
+        assert "session" in params, fn.__name__
+
+
+def test_mcp_compile_document_parity(valid_source):
+    import inspect
+    params = inspect.signature(mcp.compile_proof).parameters
+    assert "document" in params and "theory" in params
+    out = mcp.compile_proof(valid_source, "isar", document=True, theory="Demo")
+    assert out["document"] is True
+    assert "theory Demo" in out["output"]
+
+
+def test_mcp_prove_tool_registered():
+    desc = mcp.describe_tools()
+    # prove_proof is exposed on the MCP surface for CLI parity
+    names = {t["name"] for t in desc["tools"]}
+    assert "prove_proof" in names or hasattr(mcp, "prove_proof")

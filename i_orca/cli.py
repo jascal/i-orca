@@ -97,7 +97,10 @@ def cmd_metrics(args) -> int:
 
 def cmd_check(args) -> int:
     theorems = _load(args)
-    backend = IsabelleBackend()
+    backend = IsabelleBackend(
+        extra_dirs=getattr(args, "dir", None),
+        parent_session=getattr(args, "session", None),
+    )
     results = [backend.check_proof(t, timeout_s=args.timeout) for t in theorems]
     if args.json:
         _emit({"results": [r.to_dict() for r in results]}, True)
@@ -129,7 +132,10 @@ def cmd_hammer(args) -> int:
 def cmd_prove(args) -> int:
     """Autonomous loop (SPEC §7): verify → compile isar → check → report."""
     theorems = _load(args)
-    backend = IsabelleBackend()
+    backend = IsabelleBackend(
+        extra_dirs=getattr(args, "dir", None),
+        parent_session=getattr(args, "session", None),
+    )
     overall = {"theorems": []}
     exit_code = 0
     for t in theorems:
@@ -267,6 +273,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("check", help="kernel-check via Isabelle (warm session)")
     add_input(sp)
     sp.add_argument("--timeout", type=int, default=300)
+    sp.add_argument("-d", "--dir", action="append", metavar="DIR",
+                    help="directory holding project-local theories named in ## imports "
+                         "(repeatable; resolves a sibling like MinimalDecider)")
+    sp.add_argument("--session", help="parent Isabelle session for the check "
+                                      "(default: inferred from imports)")
     sp.set_defaults(func=cmd_check)
 
     sp = sub.add_parser("hammer", help="Sledgehammer one hole")
@@ -279,6 +290,10 @@ def build_parser() -> argparse.ArgumentParser:
     add_input(sp)
     sp.add_argument("--timeout", type=int, default=300)
     sp.add_argument("--out", help="dir to write .thy artifacts")
+    sp.add_argument("-d", "--dir", action="append", metavar="DIR",
+                    help="directory holding project-local theories named in ## imports "
+                         "(repeatable)")
+    sp.add_argument("--session", help="parent Isabelle session (default: inferred)")
     sp.set_defaults(func=cmd_prove)
 
     sp = sub.add_parser("tools", help="print the tool surface as JSON")

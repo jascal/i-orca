@@ -88,3 +88,29 @@ def test_hammer_unknown_step(absent_backend):
 def test_locate_isabelle_returns_str_or_none():
     loc = locate_isabelle()
     assert loc is None or isinstance(loc, str)
+
+
+# --- local-import resolution (check -d / --session parity) ------------------- #
+
+
+def test_root_text_default_has_no_directories():
+    b = IsabelleBackend(isabelle_bin="/fake/isabelle")
+    txt = b._root_text("IOrca_T", "HOL", "T")
+    assert 'session "IOrca_T" = "HOL" +' in txt
+    assert "directories" not in txt
+    assert "theories\n    T" in txt
+
+
+def test_root_text_registers_extra_dirs(tmp_path):
+    d1, d2 = tmp_path / "complexity", tmp_path / "separation"
+    d1.mkdir()
+    d2.mkdir()
+    b = IsabelleBackend(isabelle_bin="/fake/isabelle", extra_dirs=[str(d1), str(d2)])
+    # stored as resolved absolute paths
+    assert b._extra_dirs == [str(d1.resolve()), str(d2.resolve())]
+    txt = b._root_text("IOrca_T", "Complex_Main", "T")
+    assert "  directories\n" in txt
+    assert f'    "{d1.resolve()}"' in txt
+    assert f'    "{d2.resolve()}"' in txt
+    # directories precede the theories clause
+    assert txt.index("directories") < txt.index("theories")

@@ -37,6 +37,7 @@ _TERM_SYMBOLS = {
     "∑": r"\<Sum>", "∏": r"\<Prod>", "∫": r"\<integral>",
     "∈": r"\<in>", "∉": r"\<notin>", "⊆": r"\<subseteq>", "⊂": r"\<subset>",
     "∩": r"\<inter>", "∪": r"\<union>", "∅": r"\<emptyset>",
+    "⋃": r"\<Union>", "⋂": r"\<Inter>", "⨆": r"\<Squnion>", "⨅": r"\<Sqinter>",
     "≤": r"\<le>", "≥": r"\<ge>", "≠": r"\<noteq>", "≡": r"\<equiv>",
     "≈": r"\<approx>", "∝": r"\<propto>",
     "∧": r"\<and>", "∨": r"\<or>", "¬": r"\<not>",

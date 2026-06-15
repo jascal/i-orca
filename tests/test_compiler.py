@@ -28,6 +28,32 @@ HOLE_SRC = """\
 """
 
 
+SYMBOL_SRC = """\
+# theorem Sym
+## imports
+| Theory       |
+|--------------|
+| Complex_Main |
+## goal
+| Statement |
+|-----------|
+| (∑e∈Es. card (M e - H)) ≤ d * card (⋃e∈Es. (M e - H)) |
+## proof
+| Id | Claim | By | Using | Method | Status |
+|----|-------|----|-------|--------|--------|
+| s0 | (∑e∈Es. card (M e - H)) ≤ d * card (⋃e∈Es. (M e - H)) | cite | — | (rule foo) | method |
+"""
+
+
+def test_isar_translates_big_union_and_friends():
+    # ⋃ / ⋂ are the indexed (big) operators — distinct from binary ∪ / ∩ — and must
+    # lower to \<Union> / \<Inter>, else the batch lexer chokes on raw Unicode.
+    out = compile_isar(_thm(SYMBOL_SRC))
+    assert r"\<Union>" in out
+    assert "⋃" not in out
+    assert r"\<Sum>" in out and r"\<le>" in out
+
+
 def test_isar_structure():
     out = compile_isar(_thm(HOLE_SRC))
     assert out.startswith("theory H")
