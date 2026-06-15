@@ -12,6 +12,10 @@ touch the fully-proven fieldrun corpus.
   (the margin reformulation) and `single_competitor_reducible` /
   `irreducible_needs_two_competitors` (Route B base case: **irreducibility needs
   ≥ 2 competitors**). Route A/B gadgets are documented targets.
+- [`Hardness_RouteB.thy`](Hardness_RouteB.thy) — Route B, K = 2, kernel-checked:
+  `pp_nonempty_reducible` / `mm_nonempty_reducible` settle the both-positive and
+  both-negative sign classes (a one-pass test); the residual pm/mp-only case is
+  the genuine pseudo-poly core (where the irreducible witnesses live).
 - [`hardness.i.orca.md`](hardness.i.orca.md) — a concrete i-orca witness of the
   single-competitor base case (verifies + kernel-checks).
 
