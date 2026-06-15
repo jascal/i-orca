@@ -26,6 +26,12 @@ touch the fully-proven fieldrun corpus.
   (`decomposes_atom`); the result still decides (`decomposes_decides`) and its
   firing count is non-increasing (`decomposes_firing_non_increasing`). You never
   split an irreducible coalition.
+- [`Hub.thy`](Hub.thy) — the shared-core / "which neurons can't be disentangled"
+  layer, corrected: `per_token_active_bound` is the honest per-token density bound
+  (subadditivity, routing each token to its own minimal decider — no hub condition
+  needed); `disjoint_private` + `disjoint_private_card_Union` are where the hub
+  disjointness actually pays (total distinct private neurons = sum, i.e. the bit
+  budget / clean partition), which is NOT the per-token density.
 - [`hardness.i.orca.md`](hardness.i.orca.md) — a concrete i-orca witness of the
   single-competitor base case (verifies + kernel-checks).
 
