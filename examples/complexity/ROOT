@@ -5,3 +5,5 @@ session "Hardness" = "HOL" +
     Separation
     Hardness
     Hardness_RouteB
+    Density
+    Density_Minimization

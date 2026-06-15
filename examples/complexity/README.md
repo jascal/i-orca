@@ -16,6 +16,16 @@ touch the fully-proven fieldrun corpus.
   `pp_nonempty_reducible` / `mm_nonempty_reducible` settle the both-positive and
   both-negative sign classes (a one-pass test); the residual pm/mp-only case is
   the genuine pseudo-poly core (where the irreducible witnesses live).
+- [`Density.thy`](Density.thy) — the activation→density bridge (the layer the
+  static margin model lacks): `fires` / `active_on` / `avg_density`, with
+  `active_count_mono` / `total_firing_mono` proving the firing COUNT is monotone
+  under shrinking a coalition. (The ratio `density_on` is *not* monotone — flagged.)
+- [`Density_Minimization.thy`](Density_Minimization.thy) — top-down decomposition:
+  `decomposes` repeatedly replaces a reducible deciding coalition by a strictly
+  smaller deciding sub-coalition, bottoming out at irreducible atoms
+  (`decomposes_atom`); the result still decides (`decomposes_decides`) and its
+  firing count is non-increasing (`decomposes_firing_non_increasing`). You never
+  split an irreducible coalition.
 - [`hardness.i.orca.md`](hardness.i.orca.md) — a concrete i-orca witness of the
   single-competitor base case (verifies + kernel-checks).
 
