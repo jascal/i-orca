@@ -1,9 +1,11 @@
-# The decision-complexity of irreducibility (WIP)
+# The decision-complexity of irreducibility
 
-> Branch `complexity/irreducibility-hardness`. Exploratory — does **not** affect
-> the fully-proven `main` corpus. Goal: settle how hard it is to decide whether a
-> composed token is irreducible, and formalise the parts that are
-> i-orca/Isabelle-shaped.
+> Merged to `main` (was branch `complexity/irreducibility-hardness`). Goal: settle
+> how hard it is to decide whether a composed token is irreducible, and formalise
+> the parts that are i-orca/Isabelle-shaped. The **decomposition / decider / hub /
+> end-to-end** layers are now kernel-checked (see "What is proven" below); the
+> genuinely open items are the Route A NP-hardness gadget, the `K`-dichotomy, and
+> the per-input model bridge to fieldrun measurements.
 
 ## Background
 
@@ -23,6 +25,35 @@ inequalities?
 the **exact** characterisation at n ≤ 3, and a **sharp** n = 4 counterexample.
 What remains is the middle lattice layers — and the conjecture that there is no
 simple closed form because the decision problem is hard.
+
+## What is proven (kernel-checked on `main`)
+
+Beyond the margin reformulation and the Route B base case, the following layers are
+now fully discharged (zero `sorry`; `isabelle build` of session `Hardness`):
+
+- **Density bridge** (`Density.thy`): the activation→firing model `fires`/`active_on`,
+  with the firing **count** monotone under shrinking a coalition
+  (`active_count_mono`, `total_firing_mono`) — the right objective, since the
+  **ratio** `density_on` is *not* monotone.
+- **Top-down decomposition** (`Density_Minimization.thy`): the `decomposes` relation
+  replaces a reducible deciding coalition by a strictly smaller deciding one, bottoming
+  out at irreducible atoms (`decomposes_atom`), still deciding (`decomposes_decides`),
+  firing-count non-increasing (`decomposes_firing_non_increasing`).
+- **Executable minimal decider** (`MinimalDecider.thy`): `minimal_decider` (a real
+  `function` + termination on `card S`) returns a deciding subset that is locally
+  minimal (`minimal_decider_all_necessary`) and fires no more neurons
+  (`minimal_decider_firing_bound`); `irreducible_core_exists`/`decomposes_exists` give
+  genuine irreducible atoms. **Honest gap:** local minimality is a sound poly
+  *under-approximation*, **not** global irreducibility — `all_necessary_not_irreducible`
+  (the `c4` witness is `all_necessary` yet reducible).
+- **End-to-end pipeline** (`MinimalDecider.thy`): single-token
+  `every_deciding_token_has_firing_minimal_irreducible_atom`, and multi-token
+  `pipeline_composition` / `pipeline_density_max_bound` — every token in a sample gets
+  an irreducible atom that still decides and whose per-token active count is
+  `≤ |H| + max_e |M_e − H|`.
+- **Realistic hub** (`Hub.thy`): `is_d_bounded_disentangling_hub` (bounded overlap)
+  with `d_bounded_private_budget` (sum overcounts the distinct union by ≤ factor `d`);
+  `d = 1` recovers the clean partition (`d1_bounded_budget_is_partition`).
 
 ## The two layers (only one is formalisable)
 
@@ -70,10 +101,21 @@ probably the more interesting answer for interpretability**: real tokens have fe
 ## Milestones
 
 - [x] Margin reformulation (`decides_via_margin`).
-- [ ] `single_competitor_reducible` (Route B base case; ⟹ ≥2 competitors needed).
-- [ ] Route A: define `c_red`, prove the partition ⟷ reducibility gadget.
-- [ ] Route B: poly procedure for bounded `K` (or locate the hardness threshold).
-- [ ] Write up: hardness/poly dichotomy in `K` + the interpretability reading.
+- [x] `single_competitor_reducible` (Route B base case; ⟹ ≥2 competitors needed).
+- [x] Density bridge + monotone firing count (`Density.thy`).
+- [x] Top-down decomposition to irreducible atoms (`Density_Minimization.thy`).
+- [x] Executable `minimal_decider` + correctness; irreducible-core existence
+      (`MinimalDecider.thy`).
+- [x] End-to-end pipeline theorem (`pipeline_composition` /
+      `pipeline_density_max_bound`).
+- [x] Realistic bounded-overlap hub (`is_d_bounded_disentangling_hub`,
+      `d_bounded_private_budget`).
+- [ ] **Route A:** define `c_red`, prove the partition ⟷ reducibility gadget (the
+      load-bearing NP-hardness construction; still a target).
+- [ ] **Route B:** poly procedure for bounded `K` (or locate the hardness threshold);
+      the `K`-dichotomy write-up.
+- [ ] **Model bridge:** per-input `c_x` with `¬fires ⟹ margin = 0`, connecting the
+      static margin model to fieldrun firing measurements (do when wiring into fieldrun).
 
 ## Build
 

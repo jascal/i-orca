@@ -2,10 +2,16 @@ theory Hardness
   imports Separation
 begin
 
-text \<open>WIP (branch complexity/irreducibility-hardness): the decision-complexity of
-  IRREDUCIBILITY. Reduction/gadget correctness is Isabelle-shaped (below); the
-  poly-time + completeness wrapper is a paper-level meta-claim, not formalised.
-  See PROPOSAL.md.\<close>
+text \<open>The decision-complexity of IRREDUCIBILITY (merged to main). Reduction/gadget
+  correctness is Isabelle-shaped (below); the poly-time + completeness wrapper is a
+  paper-level meta-claim, not formalised. See PROPOSAL.md.
+
+  This theory is the base layer (margin reformulation + Route B single-competitor base
+  case). The downstream theories build on it: Density (activation->firing bridge),
+  Density_Minimization (top-down decomposition to irreducible atoms), MinimalDecider
+  (executable greedy decider + irreducible-core existence + the single/multi-token
+  end-to-end pipeline theorem), and Hub (the bounded-overlap disentangling hub). Still
+  open here: the Route A NP-hardness gadget and the Route B K-dichotomy below.\<close>
 
 text \<open>--- Margin reformulation: deciding = positivity of per-competitor margin sums. ---\<close>
 
