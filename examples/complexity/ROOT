@@ -1,0 +1,11 @@
+session "Hardness" = "HOL" +
+  options [quick_and_dirty]
+  directories "../fieldrun/separation"
+  theories
+    Separation
+    Hardness
+    Hardness_RouteB
+    Density
+    Density_Minimization
+    Hub
+    MinimalDecider
