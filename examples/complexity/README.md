@@ -31,7 +31,13 @@ touch the fully-proven fieldrun corpus.
   (subadditivity, routing each token to its own minimal decider — no hub condition
   needed); `disjoint_private` + `disjoint_private_card_Union` are where the hub
   disjointness actually pays (total distinct private neurons = sum, i.e. the bit
-  budget / clean partition), which is NOT the per-token density.
+  budget / clean partition), which is NOT the per-token density. **GAP #3, the
+  realistic hub:** `is_d_bounded_disentangling_hub` relaxes perfect disjointness to
+  BOUNDED overlap (each neuron in the private part of ≤ d tokens);
+  `d_bounded_private_budget` proves the naive sum of private sizes overcounts the
+  distinct union by at most a factor d (so the distinct neuron budget is ≥ sum/d);
+  `disjoint_private_is_1_bounded` / `d1_bounded_budget_is_partition` show the d = 1
+  case recovers the clean partition.
 - [`MinimalDecider.thy`](MinimalDecider.thy) — **the algorithm as a theorem**, two
   objects and the honest gap between them. (A) `minimal_decider`: an EXECUTABLE
   greedy (`function` + termination on `card S`) that drops one removable source at a
