@@ -54,6 +54,12 @@ now fully discharged (zero `sorry`; `isabelle build` of session `Hardness`):
 - **Realistic hub** (`Hub.thy`): `is_d_bounded_disentangling_hub` (bounded overlap)
   with `d_bounded_private_budget` (sum overcounts the distinct union by ≤ factor `d`);
   `d = 1` recovers the clean partition (`d1_bounded_budget_is_partition`).
+- **Per-input model bridge** (`MarginBridge.thy`): gated per-input contributions
+  (`gated`: `¬fires ⟹ c_x = 0`); `decides_iff_active` (the decision is carried by the
+  FIRING sources, the measured `active_on`); `effective_irreducible_atom_on_input` /
+  `bridge_pipeline` lift `irreducible_core_exists` / `pipeline_composition` onto
+  measured firing — the decision-relevant irreducible atom sits inside the measured
+  active set, whose count upper-bounds it.
 
 ## The two layers (only one is formalisable)
 
@@ -110,12 +116,13 @@ probably the more interesting answer for interpretability**: real tokens have fe
       `pipeline_density_max_bound`).
 - [x] Realistic bounded-overlap hub (`is_d_bounded_disentangling_hub`,
       `d_bounded_private_budget`).
+- [x] Model bridge: per-input `c_x` with `¬fires ⟹ margin = 0`; decision carried by
+      the firing sources; static results lifted onto measured firing
+      (`MarginBridge.thy`).
 - [ ] **Route A:** define `c_red`, prove the partition ⟷ reducibility gadget (the
       load-bearing NP-hardness construction; still a target).
 - [ ] **Route B:** poly procedure for bounded `K` (or locate the hardness threshold);
       the `K`-dichotomy write-up.
-- [ ] **Model bridge:** per-input `c_x` with `¬fires ⟹ margin = 0`, connecting the
-      static margin model to fieldrun firing measurements (do when wiring into fieldrun).
 
 ## Build
 

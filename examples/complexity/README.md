@@ -55,6 +55,16 @@ touch the fully-proven fieldrun corpus.
   irreducibility (the `c4` witness on `main` is `all_necessary` yet reducible), so
   `minimal_decider` is a sound poly UNDER-approximation and the global core is the
   hard part.
+- [`MarginBridge.thy`](MarginBridge.thy) — **GAP #4, the per-input model bridge** to
+  fieldrun measurements. The static theory uses an input-independent `c j v`; real
+  measurements are per-input `c_x x j v` with the physical gate `gated`
+  (`¬fires ⟹ c_x = 0`, i.e. `not_fires_margin_zero`). `decides_iff_active` proves the
+  decision on any input is carried entirely by the FIRING sources (`active_on`, the
+  quantity fieldrun measures); `effective_irreducible_atom_on_input` lifts
+  `irreducible_core_exists` onto firing — the decision-relevant irreducible atom sits
+  inside `active_on a θ x S`, so the measured active count upper-bounds it; and
+  `bridge_pipeline` is the measured counterpart of `pipeline_composition` over an input
+  sample (one irreducible atom per input, inside its measured active set).
 - [`hardness.i.orca.md`](hardness.i.orca.md) — a concrete i-orca witness of the
   single-competitor base case (verifies + kernel-checks).
 
