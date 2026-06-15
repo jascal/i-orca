@@ -30,15 +30,57 @@ Sanity check:
 .venv/bin/pytest -q                # 51 passing, zero Isabelle needed
 ```
 
-## 2. Isabelle (only for `check` / `hammer`)
+## 2. Isabelle (only for `check` / `hammer` / `prove`)
 
 `parse` / `verify` / `compile` / `metrics` need **zero Isabelle**. The kernel path
-(`check`, `hammer`, `prove`) needs an Isabelle distribution. Point i-orca at it via
-`ISABELLE_HOME` (or put `isabelle` on `PATH`, or set `ISABELLE`/`ISABELLE_BIN`):
+(`check`, `hammer`, `prove`) needs an Isabelle distribution — i-orca is developed
+against **Isabelle2025-2**. Download it from <https://isabelle.in.tum.de/>.
+
+### Linux
 
 ```bash
-export ISABELLE_HOME=/path/to/Isabelle2025-2
+# 1. download + unpack (anywhere; /opt and $HOME both work)
+curl -LO https://isabelle.in.tum.de/dist/Isabelle2025-2_linux.tar.gz
+tar -xzf Isabelle2025-2_linux.tar.gz -C "$HOME"          # → ~/Isabelle2025-2
+
+# 2. make `isabelle` discoverable — pick ONE:
+ln -s "$HOME/Isabelle2025-2/bin/isabelle" "$HOME/.local/bin/isabelle"   # symlink on PATH
+#   …or add to ~/.bashrc:   export ISABELLE_HOME="$HOME/Isabelle2025-2"
+
+# 3. build the heap images the examples need (~10 min, once)
+isabelle build -b HOL-Analysis     # builds HOL + HOL-Analysis session images
 ```
+
+### macOS
+
+The macOS download is an app bundle; the Isabelle tree (with `bin/isabelle`) lives
+under `Contents/Resources/` (adjust the path below if your bundle layout differs).
+
+```bash
+# 1. download the .dmg from https://isabelle.in.tum.de/ and drag
+#    Isabelle2025-2.app into /Applications, then:
+ISA="/Applications/Isabelle2025-2.app/Contents/Resources/Isabelle2025-2"
+
+# 2. make `isabelle` discoverable — pick ONE:
+ln -s "$ISA/bin/isabelle" "$HOME/.local/bin/isabelle"   # symlink on PATH
+#   …or add to ~/.zshrc:   export ISABELLE_HOME="$ISA"
+
+# 3. build the heap images (~10 min, once)
+isabelle build -b HOL-Analysis
+```
+
+### Pointing i-orca at it
+
+The backend (`i_orca/backend/isabelle.py`) locates Isabelle in this order:
+`ISABELLE` → `ISABELLE_BIN` → `$ISABELLE_HOME/bin/isabelle` → `isabelle` on `PATH`.
+For the **CLI** you can also set it inline, per command:
+
+```bash
+ISABELLE_HOME=/path/to/Isabelle2025-2 .venv/bin/python -m i_orca.cli check <file>
+```
+
+> ⚠️ Inline `ISABELLE_HOME=… i-orca check` configures only the **CLI**. The **MCP
+> server** is spawned by your client and sees a different environment — see §3.
 
 ---
 
@@ -50,8 +92,28 @@ server is already declared in [`.mcp.json`](.mcp.json):
 
 ```json
 { "mcpServers": { "i-orca": {
-  "command": ".venv/bin/python", "args": ["-m", "i_orca.mcp_server"], "env": {} } } }
+  "command": ".venv/bin/python", "args": ["-m", "i_orca.mcp_server"],
+  "env": { "ISABELLE_HOME": "${ISABELLE_HOME}" } } } }
 ```
+
+The `${ISABELLE_HOME}` passthrough forwards the value from the shell that launches
+Claude Code (kernel checks need it — see the box below). It degrades safely: if the
+var is unset, the server falls back to finding `isabelle` on `PATH`. The cheap loop
+(`parse`/`verify`/`compile`/`metrics`) works with no Isabelle at all.
+
+> ⚠️ **The MCP server's Isabelle environment.** Unlike the CLI, the server process is
+> spawned by your client, so it does **not** see an inline `ISABELLE_HOME=…` used for
+> CLI commands. It sees only (a) the environment your client itself was launched with,
+> plus (b) the `.mcp.json` `env` block. Make Isabelle reachable by **one** of:
+> - export `ISABELLE_HOME` in the shell that launches the client (`~/.bashrc` /
+>   `~/.zshrc`) — the `${ISABELLE_HOME}` passthrough then forwards it;
+> - put `isabelle` on that shell's `PATH` (the server falls back to `which isabelle`); or
+> - hardcode the absolute path in the `env` block (machine-specific — **don't commit it**).
+>
+> If `check_proof` returns `"available": false` / *"Isabelle not found"* while the CLI
+> `check` works, this is the cause. **Editing `.mcp.json` does not restart a running
+> server, and a `/mcp` reconnect can reuse the config cached at session start —
+> fully restart your client to pick up env changes.**
 
 **To use it in Claude Code:**
 

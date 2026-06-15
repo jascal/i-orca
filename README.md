@@ -28,8 +28,10 @@ uv pip install -e ".[dev]"      # add ",mcp" for the MCP server
 
 The cheap loop (`parse`/`verify`/`compile`) needs zero Isabelle. The expensive
 loop (`check`/`hammer`) needs an [Isabelle](https://isabelle.in.tum.de)
-distribution — point i-orca at it with `ISABELLE_HOME` (or put `isabelle` on
-`PATH`). Without it, `check`/`hammer` degrade gracefully.
+distribution (i-orca tracks **Isabelle2025-2**) — point i-orca at it with
+`ISABELLE_HOME` (or put `isabelle` on `PATH`). Without it, `check`/`hammer`
+degrade gracefully. See [`GETTING_STARTED.md`](GETTING_STARTED.md) for Linux/macOS
+install steps, heap-image build, and the MCP-server environment gotcha.
 
 ## A proof in i-orca
 
