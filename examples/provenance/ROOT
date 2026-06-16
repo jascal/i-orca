@@ -1,0 +1,7 @@
+session "Provenance" = "HOL" +
+  options [quick_and_dirty]
+  theories
+    Provenance
+    CondNumber
+    Attribution
+    ReprProvenance
