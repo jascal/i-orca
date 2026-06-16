@@ -93,6 +93,7 @@ supports:
 | 1 | SyntacticProvenanceExact | `synt_post_sum_one` | the indicator posterior is a valid distribution | Problem 1 is well-posed |
 | 2 | SyntacticProvenanceZeroEntropy | `synt_entropy_zero` | a point-mass posterior has Shannon entropy 0 | Problem 1 is *exact* |
 | 3 | MixedProvenancePositiveEntropy | `mixed_entropy_pos` | a 2-source split `0<q<1` has entropy `>0` | mixing ⇒ irreducible uncertainty |
+| 3b | MixedProvenancePositiveEntropyGeneral | `mixed_entropy_pos_gen` | any finite distribution with ≥2 positive masses has entropy `>0` | mixing ⇒ irreducible uncertainty (general support) |
 | 4 | InfluenceConditionNumberTight | `condition_number_tight` | worst-case amplification `= κ`, exactly | error bars scale with `κ` |
 | 5 | ConditionNumberAtLeastOne | `kappa_ge_one` | `κ ≥ 1`, `=1` iff `lo=hi` | isolated bucket ⇒ tight |
 | 6 | ProvenanceSupportBound | `provenance_support_bound` | consistent posterior is 0 off used buckets | the DPI / MI bound (loose) |
@@ -113,21 +114,21 @@ spectrum of an actual transformer Hessian.
   `‖Δx‖/‖x‖ ≤ κ ‖Δb‖/‖b‖` (and its tightness) is the same statement coordinate-free;
   the diagonal witness is what we kernel-check. Lifting to the full operator-norm
   statement is an open target.
-- **Two-point entropy (thm 3).** We prove strict positivity for the binary split.
-  The general "any support-≥2 distribution has positive entropy" is a routine
-  generalisation, left as a target.
+- **Entropy positivity (thm 3, 3b).** Proven both for the binary split and, in
+  general, for any finite distribution with ≥ 2 positive masses (`mixed_entropy_pos_gen`).
 - **DPI shadow (thm 6).** `provenance_support_bound` is the *set-theoretic* shadow of
   the mutual-information bound `I(R;C_j|T,a) ≤ I(buckets;C_j)`. A genuine
   information-theoretic DPI (KL/`log`-sum machinery) is not attempted here.
 
 ## Milestones / open targets
 
-1. **(done)** The ten-theorem development above (seven-theorem dichotomy + the
+1. **(done)** The eleven-theorem development above (eight-theorem dichotomy + the
    three scenario-(ii) results) — all kernel-checked under Isabelle2025-2
-   (`isabelle build -D . Provenance`, exit 0, zero `sorry`).
+   (`isabelle build -D . Provenance`, exit 0, zero `sorry`). See [`RESULTS.md`](RESULTS.md).
 2. Operator-norm condition-number bound (coordinate-free, with tightness).
-3. General Shannon-entropy positivity for support `≥ 2`, and the `log`-sum DPI to
-   replace the set-theoretic support bound with the real MI inequality.
+3. The `log`-sum DPI to replace the set-theoretic support bound with the real
+   mutual-information inequality. (General Shannon-entropy positivity for support
+   `≥ 2` is now done — thm 3b, `mixed_entropy_pos_gen`.)
 4. Couple the bucketing model to fieldrun's `active_on` / `density_on` directly, so
    "isolated high-density bucket" is the same object fieldrun measures, not just an
    analogue.

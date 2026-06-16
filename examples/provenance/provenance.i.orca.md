@@ -37,10 +37,12 @@
 
   Map to the design discussion's summary table:
     PROBLEM 1 (exact)            -> SyntacticProvenanceExact, SyntacticProvenanceZeroEntropy
-    PROBLEM 2 limit: mixing      -> MixedProvenancePositiveEntropy
+    PROBLEM 2 limit: mixing      -> MixedProvenancePositiveEntropy, MixedProvenancePositiveEntropyGeneral
     PROBLEM 2 limit: Hessian     -> InfluenceConditionNumberTight, ConditionNumberAtLeastOne
     density-bucket leverage      -> ProvenanceSupportBound
     synthesis (the payoff)       -> IsolatedAttributionExact
+    scenario (ii) explain        -> FaithfulRecoversGenerative, GenerativeUnderdeterminedOffCoverage,
+                                    UncoveredForcesAbstention
 -->
 
 # theorem SyntacticProvenanceExact
@@ -98,6 +100,25 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | 0 < q ⟹ q < 1 ⟹ 0 < plogp q + plogp (1 - q) | each interior term −x log₂ x is positive; their sum is positive | — | (rule mixed_entropy_pos) | method |
+
+
+# theorem MixedProvenancePositiveEntropyGeneral
+> The general form of the mixing limit. ANY provenance distribution on a finite source set S with at least two corpora of positive mass has STRICTLY POSITIVE Shannon entropy (the binary split above is the case S = {i,j}). Two distinct positive masses are each interior (each < 1, since the other is positive and the total is 1), so each contributes a positive term while every other term is non-negative. Irreducible uncertainty whenever ≥ 2 corpora genuinely mixed. Cites `mixed_entropy_pos_gen`.
+
+## imports
+| Theory     |
+|------------|
+| Provenance |
+
+## goal
+| Statement |
+|-----------|
+| finite S ⟹ i ∈ S ⟹ j ∈ S ⟹ i ≠ j ⟹ (∀k∈S. 0 ≤ p k) ⟹ (∑k∈S. p k) = 1 ⟹ 0 < p i ⟹ 0 < p j ⟹ 0 < shannon S p |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite S ⟹ i ∈ S ⟹ j ∈ S ⟹ i ≠ j ⟹ (∀k∈S. 0 ≤ p k) ⟹ (∑k∈S. p k) = 1 ⟹ 0 < p i ⟹ 0 < p j ⟹ 0 < shannon S p | two interior masses give two positive terms; the rest are non-negative | — | (rule mixed_entropy_pos_gen) | method |
 
 
 # theorem InfluenceConditionNumberTight

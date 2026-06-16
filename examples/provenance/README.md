@@ -18,7 +18,7 @@ targets, and the note on why q-orca (floated in the original thread) is excluded
 
 ## Files
 
-- [`provenance.i.orca.md`](provenance.i.orca.md) — the i-orca surface: ten
+- [`provenance.i.orca.md`](provenance.i.orca.md) — the i-orca surface: eleven
   theorems, each STATED in the table DSL and discharged by `(rule <lemma>)` against
   a kernel-checked Isabelle lemma (same pattern as
   [`../complexity/complexity.i.orca.md`](../complexity/complexity.i.orca.md)).
@@ -27,7 +27,8 @@ targets, and the note on why q-orca (floated in the original thread) is excluded
   `synt_post` (the indicator posterior), `synt_post_sum_one` (valid distribution),
   `synt_entropy_zero` (**Problem 1 is exact: zero Shannon entropy**); `plogp`/
   `shannon` (bits); `mixed_entropy_pos` (**irreversible mixing ⇒ a 2-source split has
-  strictly positive entropy** — irreducible uncertainty).
+  strictly positive entropy** — irreducible uncertainty) and `mixed_entropy_pos_gen`
+  (the general form: any finite distribution with ≥ 2 positive masses has entropy > 0).
 - [`CondNumber.thy`](CondNumber.thy) — the Hessian-conditioning limit. `kappa`,
   `condition_number_tight` (**worst-case influence-error amplification equals the
   condition number, exactly**), `kappa_ge_one` / `kappa_one` (κ ≥ 1, and κ = 1 in
@@ -45,6 +46,7 @@ targets, and the note on why q-orca (floated in the original thread) is excluded
   `uncovered_forces_abstention` (**honesty**: uncovered buckets ⇒ abstain, never
   guess). See PROPOSAL.md "Two scenarios".
 - [`ROOT`](ROOT) — the `Provenance` Isabelle session (parent `HOL`).
+- [`RESULTS.md`](RESULTS.md) — verification commands and outcomes (both layers).
 
 ## Build (kernel check)
 

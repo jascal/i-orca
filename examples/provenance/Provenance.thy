@@ -53,6 +53,33 @@ proof -
   thus ?thesis using assms(1) by (simp add: plogp_def)
 qed
 
+text \<open>On the probability range [0,1] the term is non-negative (log2 p <= 0).\<close>
+
+lemma plogp_nonneg:
+  assumes "0 \<le> p" "p \<le> 1"
+  shows "0 \<le> plogp p"
+proof (cases "p \<le> 0")
+  case True
+  thus ?thesis by (simp add: plogp_def)
+next
+  case False
+  hence pos: "0 < p" by simp
+  have "log 2 p \<le> 0"
+  proof (cases "p = 1")
+    case True
+    thus ?thesis by simp
+  next
+    case False
+    hence "p < 1" using assms(2) by simp
+    have "ln p < 0" using pos \<open>p < 1\<close> by (simp add: ln_less_zero_iff)
+    moreover have "0 < ln (2::real)" using ln_gt_zero[of 2] by simp
+    ultimately have "ln p / ln 2 < 0" by (simp add: divide_neg_pos)
+    thus ?thesis by (simp add: log_def less_imp_le)
+  qed
+  hence "p * log 2 p \<le> 0" using pos by (simp add: mult_nonneg_nonpos)
+  thus ?thesis using pos by (simp add: plogp_def)
+qed
+
 text \<open>Problem 1 -- exact syntactic provenance: the indicator posterior at the
   single true source s.\<close>
 
@@ -95,6 +122,48 @@ proof -
   have "0 < plogp q" using assms by (rule plogp_pos)
   moreover have "0 < plogp (1 - q)" using assms by (intro plogp_pos) auto
   ultimately show ?thesis by simp
+qed
+
+text \<open>The general form: ANY probability distribution on a finite S with at least
+  two points of positive mass has strictly positive Shannon entropy. (The binary
+  split above is the case S = {i, j}.) Two distinct positive masses are each
+  interior (each < 1, since the other is positive and the total is 1), so each
+  contributes a strictly positive term; every other term is non-negative.\<close>
+
+theorem mixed_entropy_pos_gen:
+  assumes fin: "finite S"
+      and iS: "i \<in> S" and jS: "j \<in> S" and ij: "i \<noteq> j"
+      and nn: "\<forall>k\<in>S. 0 \<le> p k"
+      and dist: "(\<Sum>k\<in>S. p k) = 1"
+      and posi: "0 < p i" and posj: "0 < p j"
+  shows "0 < shannon S p"
+proof -
+  have pk_le_1: "p k \<le> 1" if "k \<in> S" for k
+  proof -
+    have "(\<Sum>x\<in>S. p x) = p k + (\<Sum>x\<in>S - {k}. p x)"
+      by (rule sum.remove[OF fin that])
+    moreover have "0 \<le> (\<Sum>x\<in>S - {k}. p x)" using nn by (intro sum_nonneg) auto
+    ultimately show ?thesis using dist by linarith
+  qed
+  have plog_nn: "0 \<le> plogp (p k)" if "k \<in> S" for k
+    using nn[rule_format, OF that] pk_le_1[OF that] by (rule plogp_nonneg)
+  have ij_sub: "{i, j} \<subseteq> S" using iS jS by simp
+  have pij_le_1: "p i + p j \<le> 1"
+  proof -
+    have "p i + p j = (\<Sum>x\<in>{i, j}. p x)" using ij by simp
+    also have "\<dots> \<le> (\<Sum>x\<in>S. p x)" using fin ij_sub nn by (intro sum_mono2) auto
+    finally show ?thesis using dist by simp
+  qed
+  have "0 < plogp (p i)" using posi posj pij_le_1 by (intro plogp_pos) linarith+
+  moreover have "0 < plogp (p j)" using posi posj pij_le_1 by (intro plogp_pos) linarith+
+  moreover have "plogp (p i) + plogp (p j) \<le> shannon S p"
+  proof -
+    have "plogp (p i) + plogp (p j) = (\<Sum>k\<in>{i, j}. plogp (p k))" using ij by simp
+    also have "\<dots> \<le> (\<Sum>k\<in>S. plogp (p k))"
+      using fin ij_sub by (intro sum_mono2) (auto simp: plog_nn)
+    finally show ?thesis by (simp add: shannon_def)
+  qed
+  ultimately show ?thesis by linarith
 qed
 
 end
