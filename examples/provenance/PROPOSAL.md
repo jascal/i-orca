@@ -61,6 +61,27 @@ well-isolated high-density bucket the local condition number is `≈ 1`, so the
 estimate is tight. In the limit of perfect isolation the hard statistical question
 collapses back to the trivial syntactic one (theorem 7).
 
+## Two scenarios for an explain feature
+
+The corpus answers a *training*-provenance question, but a fielded "explain" feature
+almost never has the training data. Two epistemic regimes:
+
+- **(i) Training data known** (only at the lab that trained the model). Buckets are
+  over training data, so a bucket label *is* training provenance. The full Problem-2
+  machinery applies — and bites: a generative attribution is *attemptable* but comes
+  with `κ`-scaled error bars (thm 4–5) and irreducible mixing entropy (thm 3).
+- **(ii) Only the bucketing-pass data known** (the realistic case). The pass runs a
+  *known analysis corpus* through the *already-trained* model. A bucket label is then
+  **representational** provenance ("emitted from a feature-space region my known data
+  labels `C_j`"), **not** a claim about which corpus shaped the weights.
+
+In (ii), theorems 1–2 and 6–7 carry over **verbatim** — they are statements about the
+bucketing, which is fully known — but their *referent* shifts from generative to
+representational. What (ii) **cannot** do is reach generative provenance; the
+influence-function theorems (3–5) need training gradients and simply aren't runnable.
+[`ReprProvenance.thy`](ReprProvenance.thy) pins the gap (thms 8–10): a **recovery**
+condition, the **weakening**, and the **honesty** discipline.
+
 ## What is formalised (and the formal-vs-meta split)
 
 The Isabelle theorems are **honest, narrow, kernel-checked cores** — not claims
@@ -76,6 +97,9 @@ supports:
 | 5 | ConditionNumberAtLeastOne | `kappa_ge_one` | `κ ≥ 1`, `=1` iff `lo=hi` | isolated bucket ⇒ tight |
 | 6 | ProvenanceSupportBound | `provenance_support_bound` | consistent posterior is 0 off used buckets | the DPI / MI bound (loose) |
 | 7 | IsolatedAttributionExact | `isolated_attribution_exact` | isolated ⇒ posterior `= synt_post s` | the synthesis: Problem 2 ⇒ Problem 1 |
+| 8 | FaithfulRecoversGenerative | `faithful_posterior_agreement` | faithful on U ⇒ repr label `=` generative label | (ii) recovers (i) under faithfulness |
+| 9 | GenerativeUnderdeterminedOffCoverage | `generative_underdetermined_off_used` | off U, two training worlds fit the pass yet disagree | (ii) cannot reach generative provenance off-coverage |
+| 10 | UncoveredForcesAbstention | `uncovered_forces_abstention` | empty candidate set ⇒ posterior all-zero | uncovered ⇒ abstain ("unknown"), never guess |
 
 The **meta** column is deliberately not claimed as proven. E.g. theorem 4 proves the
 amplification factor *equals* the condition number for a worst-case signal/noise
@@ -98,8 +122,9 @@ spectrum of an actual transformer Hessian.
 
 ## Milestones / open targets
 
-1. **(done)** The seven-theorem dichotomy above — all kernel-checked under
-   Isabelle2025-2 (`isabelle build -D . Provenance`, exit 0, zero `sorry`).
+1. **(done)** The ten-theorem development above (seven-theorem dichotomy + the
+   three scenario-(ii) results) — all kernel-checked under Isabelle2025-2
+   (`isabelle build -D . Provenance`, exit 0, zero `sorry`).
 2. Operator-norm condition-number bound (coordinate-free, with tightness).
 3. General Shannon-entropy positivity for support `≥ 2`, and the `log`-sum DPI to
    replace the set-theoretic support bound with the real MI inequality.

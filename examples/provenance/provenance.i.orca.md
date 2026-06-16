@@ -158,7 +158,7 @@
 
 
 # theorem IsolatedAttributionExact
-> The synthesis / the payoff. When every bucket in a response carries the same single source `s` (a perfectly isolated, high-density, verified response), the candidate set collapses to {s} and a consistent, normalised attribution posterior is forced to be EXACTLY the syntactic indicator `synt_post s`. The hard statistical question (Problem 2) degenerates into the trivial syntactic one (Problem 1): zero uncertainty. This is "tight inside well-isolated, verified buckets" — the best practical handle the architecture provides. Cites `isolated_attribution_exact`.
+> The synthesis / the payoff. When every bucket in a response carries the same single source `s` (a perfectly isolated, high-density response), the candidate set collapses to {s} and a consistent, normalised attribution posterior is forced to be EXACTLY the syntactic indicator `synt_post s`. The hard statistical question (Problem 2) degenerates into the trivial syntactic one (Problem 1): zero uncertainty. This is "tight inside well-isolated, high-density buckets" — the best practical handle the architecture provides. Cites `isolated_attribution_exact`.
 
 ## imports
 | Theory      |
@@ -174,3 +174,69 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | bs ≠ [] ⟹ (∀b∈set bs. b = {s}) ⟹ consistent bs p ⟹ (∑j∈candidates bs. p j) = 1 ⟹ p = synt_post s | isolated buckets ⇒ candidate set {s} ⇒ the consistent normalised posterior is the indicator | — | (rule isolated_attribution_exact) | method |
+
+
+<!--
+  SCENARIO (ii) — only the BUCKETING-PASS data is known, not the model's training
+  data (the realistic case; scenario (i) is lab-only). The theorems above carry over
+  verbatim (they are about the bucketing, which is fully known) but their REFERENT
+  changes from generative/training provenance to REPRESENTATIONAL provenance. The
+  three below pin what (ii) can and cannot claim about generative provenance. See
+  ReprProvenance.thy and PROPOSAL.md "Two scenarios".
+-->
+
+# theorem FaithfulRecoversGenerative
+> Scenario (ii), the recovery condition. The bucketing pass yields an observed label map `obs`; the (unknown in ii) training truth is a generative map `g`. Where the pass is FAITHFUL on a bucket set U (obs and g agree there), representational provenance equals generative provenance on U — so (ii) recovers (i)'s exact answer exactly under faithfulness. Cites `faithful_posterior_agreement`.
+
+## imports
+| Theory         |
+|----------------|
+| ReprProvenance |
+
+## goal
+| Statement |
+|-----------|
+| faithful U obs g ⟹ b ∈ U ⟹ synt_post (obs b) = synt_post (g b) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | faithful U obs g ⟹ b ∈ U ⟹ synt_post (obs b) = synt_post (g b) | faithfulness equates the two labels, hence the two posteriors | — | (rule faithful_posterior_agreement) | method |
+
+
+# theorem GenerativeUnderdeterminedOffCoverage
+> Scenario (ii), the weakening. Off the covered region the generative label is provably ambiguous: two training worlds agree with the bucketing pass on every measured bucket U yet disagree on an unmeasured bucket b. So a token that fires a bucket the pass never covered has ambiguous GENERATIVE provenance — no matter how exact its representational provenance. This is the formal limit of (ii). Cites `generative_underdetermined_off_used`.
+
+## imports
+| Theory         |
+|----------------|
+| ReprProvenance |
+
+## goal
+| Statement |
+|-----------|
+| b ∉ U ⟹ (∃g1 g2. faithful U obs g1 ∧ faithful U obs g2 ∧ g1 b ≠ g2 b) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | b ∉ U ⟹ (∃g1 g2. faithful U obs g1 ∧ faithful U obs g2 ∧ g1 b ≠ g2 b) | obs and a single-bucket edit of obs both fit U but differ at b | — | (rule generative_underdetermined_off_used) | method |
+
+
+# theorem UncoveredForcesAbstention
+> Scenario (ii), the honesty discipline (closed world). If a response's buckets are entirely uncovered by the bucketing pass — candidate set empty — then any consistent posterior is identically zero, so no normalised posterior exists and the only sound output is "unknown". The explain feature must abstain, never guess a source. Cites `uncovered_forces_abstention`.
+
+## imports
+| Theory         |
+|----------------|
+| ReprProvenance |
+
+## goal
+| Statement |
+|-----------|
+| consistent bs p ⟹ candidates bs = {} ⟹ p j = 0 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | consistent bs p ⟹ candidates bs = {} ⟹ p j = 0 | an empty candidate set zeroes every source, so the posterior cannot normalise | — | (rule uncovered_forces_abstention) | method |

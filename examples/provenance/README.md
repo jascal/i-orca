@@ -18,7 +18,7 @@ targets, and the note on why q-orca (floated in the original thread) is excluded
 
 ## Files
 
-- [`provenance.i.orca.md`](provenance.i.orca.md) — the i-orca surface: seven
+- [`provenance.i.orca.md`](provenance.i.orca.md) — the i-orca surface: ten
   theorems, each STATED in the table DSL and discharged by `(rule <lemma>)` against
   a kernel-checked Isabelle lemma (same pattern as
   [`../complexity/complexity.i.orca.md`](../complexity/complexity.i.orca.md)).
@@ -37,6 +37,13 @@ targets, and the note on why q-orca (floated in the original thread) is excluded
   no influence mass off the used buckets — the discrete shadow of the MI bound);
   `isolated_attribution_exact` (**the payoff**: inside an isolated single-source
   response the statistical posterior IS the exact syntactic indicator).
+- [`ReprProvenance.thy`](ReprProvenance.thy) — **scenario (ii)** (only the
+  bucketing-pass data is known, not the model's training data — the realistic case).
+  `faithful_posterior_agreement` (**recovery**: faithfulness ⇒ representational =
+  generative provenance), `generative_underdetermined_off_used` (**the weakening**:
+  off-coverage the generative label is provably ambiguous),
+  `uncovered_forces_abstention` (**honesty**: uncovered buckets ⇒ abstain, never
+  guess). See PROPOSAL.md "Two scenarios".
 - [`ROOT`](ROOT) — the `Provenance` Isabelle session (parent `HOL`).
 
 ## Build (kernel check)
@@ -46,7 +53,7 @@ ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/provenance \
   -o quick_and_dirty Provenance
 ```
 
-All three theories build clean under **Isabelle2025-2** (exit 0, zero `sorry`).
+All four theories build clean under **Isabelle2025-2** (exit 0, zero `sorry`).
 Compiling the surface and building it in-session likewise kernel-checks every
 theorem:
 
