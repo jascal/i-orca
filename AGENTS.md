@@ -91,10 +91,12 @@ Four further corpora extend the examples on the same substrate-`.thy` +
 thin-`.i.orca.md`-surface pattern: `examples/complexity/` (non-paper extensions) and
 `examples/provenance/` (the attribution dichotomy), both in-house, plus a **"canonical
 proofs from other authors"** track — `examples/watermark/` (Aaronson's LLM watermark:
-distortion-free sampling + key-based detectability, 12 theorems) and
-`examples/tropical/` (the tropical-geometry view of ReLU networks — Zhang–Naitzat–Lim,
-ICML 2018, with Pachter–Sturmfels and Maragos et al.; 20 theorems). All kernel-checked
-under Isabelle2025-2; each ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md`.
+distortion-free sampling + key-based detectability, 12 theorems), `examples/tropical/`
+(the tropical-geometry view of ReLU networks — Zhang–Naitzat–Lim, ICML 2018, with
+Pachter–Sturmfels and Maragos et al.; 20 theorems), and `examples/superposition/` (the
+geometric core of Anthropic's "Toy Models of Superposition": interference, orthogonal
+capacity, and the Welch bound; 10 theorems). All kernel-checked under Isabelle2025-2;
+each ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md`.
 
 ## Gotchas
 
