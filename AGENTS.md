@@ -87,6 +87,14 @@ research note in `examples/fieldrun/RESULTS.md` and the companion
 `examples/fieldrun/separation/Separation.thy`. Generated `.thy` / `.tex` /
 `.lean` artifacts live under `examples/fieldrun/artifacts/`.
 
+Three further corpora extend the examples on the same substrate-`.thy` +
+thin-`.i.orca.md`-surface pattern: `examples/complexity/` (non-paper extensions) and
+`examples/provenance/` (the attribution dichotomy), both in-house, plus
+`examples/watermark/` — the first **"canonical proofs from other authors"** entry,
+formalising the math core of Aaronson's LLM watermark (distortion-free sampling +
+key-based detectability), 12 theorems kernel-checked under Isabelle2025-2. Each ships
+its own `PROPOSAL.md` / `README.md` / `RESULTS.md`.
+
 ## Gotchas
 
 - **Emit Isabelle `\<...>` symbol escapes in propositions, not raw Unicode** —

@@ -102,6 +102,21 @@ Generated `.thy`/`.tex`/`.lean` artifacts and the kernel-check report are in
 [`examples/fieldrun/artifacts/`](examples/fieldrun/artifacts/) — see
 [`examples/fieldrun/RESULTS.md`](examples/fieldrun/RESULTS.md).
 
+## Example corpora
+
+The `examples/` tree holds four kernel-checked corpora — three formalising this
+workspace's own research, plus a **"canonical proofs from other authors"** track:
+
+| Corpus | What it formalises | Kernel status |
+|--------|--------------------|---------------|
+| [`fieldrun/`](examples/fieldrun) | all ten theorems of the fieldrun paper *"What a Transformer Retrieves and What It Computes"* | 10/10, zero `sorry` |
+| [`complexity/`](examples/complexity) | non-paper extensions (minimal deciders, decomposition, the per-input pipeline bridge) | zero `sorry` |
+| [`provenance/`](examples/provenance) | the syntactic-vs-statistical attribution dichotomy + two-scenario explain analysis | 11/11, zero `sorry` |
+| [`watermark/`](examples/watermark) | **canonical / other authors:** the math core of Aaronson's LLM watermark — distortion-free sampling + key-based detectability | 12/12, zero `sorry` |
+
+Each corpus ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md` and follows the
+same substrate-`.thy` + thin-`.i.orca.md`-surface pattern.
+
 ## Docs
 
 - [`SPEC.md`](SPEC.md) — full design + honest reckonings
