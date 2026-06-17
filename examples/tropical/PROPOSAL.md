@@ -34,7 +34,7 @@ polynomials.
 
 The Isabelle theorems are **honest, narrow, kernel-checked cores** — the algebra and
 the analytic facts that carry the theory, not the full multivariate region-counting
-geometry. Five theories, eighteen surfaced theorems:
+geometry. Six theories, twenty surfaced theorems:
 
 | # | i-orca theorem | Isabelle lemma | Proves (formal) | Supports (meta) |
 |---|----------------|----------------|------------------|------------------|
@@ -56,6 +56,8 @@ geometry. Five theories, eighteen surfaced theorems:
 | 16 | TropicalProductIsPointwiseSum | `tpoly_tprod` | `tpoly(P⊗Q) = tpoly P + tpoly Q` | **polytope propagation** (Pachter–Sturmfels) |
 | 17 | MonomialCountSubmultiplicative | `tprod_card_le` | `card(P⊗Q) ≤ card P · card Q` | the region-count mechanism (Cor 3.4) |
 | 18 | NewtonSupportIsMinkowskiSum | `tprod_slope_sumset` | slope support of a product is the sumset | Newton polytope = Minkowski sum |
+| 19 | AbsValueNetworkComputesAbs | `relu_plus_relu_neg` | `relu x + relu(−x) = ¦x¦` | a concrete 2-neuron net computes `¦x¦` |
+| 20 | AbsValueNetworkIsTropicalRational | `abs_network_troprat` | that network is tropical rational | **Thm 5.4 in miniature** — `¦x¦ = max x (−x)` |
 
 The **meta** column is deliberately not claimed as proven. E.g. theorem 12 proves that
 *one concrete* one-hidden-layer scalar network is a tropical rational function (from the
@@ -86,9 +88,11 @@ Theorem 5.4.
 
 ## Milestones / open targets
 
-1. **(done)** The eighteen-theorem development above — all kernel-checked under
+1. **(done)** The twenty-theorem development above — all kernel-checked under
    Isabelle2025-2 (`isabelle build -D examples/tropical Tropical`, exit 0, zero
-   `sorry`). See [`RESULTS.md`](RESULTS.md).
+   `sorry`), including the concrete worked example `Examples.thy` (a two-neuron ReLU
+   net computing `¦x¦`, rendered as the tropical polynomial `max x (−x)`). See
+   [`RESULTS.md`](RESULTS.md).
 2. The full multivariate / multilayer Theorem 5.4: a network `ℝⁿ → ℝᵐ` as a tropical
    rational map, via an explicit per-layer max-plus matrix form.
 3. Multivariate Newton polytopes and the linear-region upper bound of Theorem 6.3

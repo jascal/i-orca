@@ -41,6 +41,8 @@
     POLYTOPE PROPAGATION     -> TropicalProductIsPointwiseSum, MonomialCountSubmultiplicative,
       (Pachter-Sturmfels;       NewtonSupportIsMinkowskiSum
        Cor 3.4)
+    WORKED EXAMPLE           -> AbsValueNetworkComputesAbs, AbsValueNetworkIsTropicalRational
+      (a concrete ReLU net)
 -->
 
 # theorem TropicalDistributivity
@@ -383,3 +385,41 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | fst ` tprod P Q = (λ(a, b). a + b) ` (fst ` P × fst ` Q) | the slope of a product monomial is the sum of the factor slopes | — | (rule tprod_slope_sumset) | method |
+
+
+# theorem AbsValueNetworkComputesAbs
+> Worked example. The two-neuron ReLU network `x ↦ relu x + relu (−x)` computes the absolute value `|x|`. A concrete network whose function is, by the next theorem, exactly a tropical polynomial. Cites `relu_plus_relu_neg`.
+
+## imports
+| Theory   |
+|----------|
+| Examples |
+
+## goal
+| Statement |
+|-----------|
+| relu x + relu (- x) = abs x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | relu x + relu (- x) = abs x | one neuron keeps the positive part, the other the negative part; their sum is the absolute value | — | (rule relu_plus_relu_neg) | method |
+
+
+# theorem AbsValueNetworkIsTropicalRational
+> Theorem 5.4, in miniature and fully concrete. The two-neuron network `x ↦ relu x + relu (−x)` is a tropical rational function — indeed the tropical polynomial `max x (−x) = x ⊕ (−x)`, a max of the two monomials `x` and `−x`. Cites `abs_network_troprat`.
+
+## imports
+| Theory   |
+|----------|
+| Examples |
+
+## goal
+| Statement |
+|-----------|
+| troprat (λx::real. relu x + relu (- x)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | troprat (λx::real. relu x + relu (- x)) | the network equals abs, which is the tropical polynomial max x (−x) | — | (rule abs_network_troprat) | method |

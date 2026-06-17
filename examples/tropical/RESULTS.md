@@ -9,7 +9,7 @@ real kernel check (`isabelle build`).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/tropical/tropical.i.orca.md
-#   -> all 18 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
+#   -> all 20 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/tropical \
@@ -27,7 +27,7 @@ i-orca compile examples/tropical/tropical.i.orca.md --target isar \
 
 | Layer | Tool | Result |
 |-------|------|--------|
-| Skeleton | `i-orca verify` | 18/18 VALID, `formal_fraction_static = 1.000` |
+| Skeleton | `i-orca verify` | 20/20 VALID, `formal_fraction_static = 1.000` |
 | Substrate | `isabelle build` (`Tropical` session) | exit 0, **zero `sorry`** |
 | Surface | `isabelle build` (compiled `TropicalSurface` in-session) | exit 0 — every `(rule …)` non-vacuous |
 
@@ -63,6 +63,10 @@ is a concrete method the kernel accepts.
 - `TropicalProductIsPointwiseSum` → `tpoly_tprod`
 - `MonomialCountSubmultiplicative` → `tprod_card_le`
 - `NewtonSupportIsMinkowskiSum` → `tprod_slope_sumset`
+
+**Worked example** (`Examples.thy`, a concrete ReLU net)
+- `AbsValueNetworkComputesAbs` → `relu_plus_relu_neg` (`relu x + relu(−x) = ¦x¦`)
+- `AbsValueNetworkIsTropicalRational` → `abs_network_troprat` (that net is the tropical polynomial `max x (−x)`)
 
 ## Notes
 

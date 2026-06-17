@@ -29,8 +29,9 @@ its **linear regions** are governed by the Newton polytopes of those polynomials
 | [`ReLUNet.thy`](ReLUNet.thy) | **Theorem 5.4 core**: ReLU/affine are tropical rational, the class is closed under the network ops, a one-hidden-layer net is tropical rational, and tropical rationals are continuous |
 | [`MaxPlus.thy`](MaxPlus.thy) | max-plus matrix–vector product and **residuation** (Maragos): feasibility + greatest subsolution |
 | [`Newton.thy`](Newton.thy) | **polytope propagation** (Pachter–Sturmfels): tropical product = pointwise sum, submultiplicative monomial count, Minkowski-sum slope support |
+| [`Examples.thy`](Examples.thy) | a concrete worked example: the two-neuron ReLU net `relu x + relu(−x)` computes `¦x¦`, rendered as the tropical polynomial `max x (−x)` |
 | [`ROOT`](ROOT) | Isabelle session `Tropical` (parent `HOL-Analysis`) |
-| [`tropical.i.orca.md`](tropical.i.orca.md) | the i-orca surface: 18 theorems, each `(rule <lemma>)` |
+| [`tropical.i.orca.md`](tropical.i.orca.md) | the i-orca surface: 20 theorems, each `(rule <lemma>)` |
 | [`PROPOSAL.md`](PROPOSAL.md) | the sources, the formal-vs-meta table, honest reckonings, open targets |
 | [`RESULTS.md`](RESULTS.md) | verification status and commands |
 
@@ -42,7 +43,7 @@ is the thin i-orca surface over it (the `watermark` / `provenance` pattern).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/tropical/tropical.i.orca.md
-#   -> all 18 theorems VALID, formal_fraction_static = 1.000
+#   -> all 20 theorems VALID, formal_fraction_static = 1.000
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/tropical \
@@ -65,9 +66,10 @@ caveat as the `watermark` / `provenance` / `complexity` corpora).
 
 ## What it proves (and what it doesn't)
 
-Eighteen kernel-checked cores spanning the max-plus semiring, the convexity of tropical
+Twenty kernel-checked cores spanning the max-plus semiring, the convexity of tropical
 polynomials, the ReLU-network–tropical-rational correspondence (Thm 5.4, scalar/closure
-form), max-plus residuation, and polytope propagation — see the table in
+form), max-plus residuation, polytope propagation, and a concrete worked example (a
+two-neuron ReLU net as a tropical polynomial) — see the table in
 [`PROPOSAL.md`](PROPOSAL.md). The theorems are honest about scope: the full multivariate
 multilayer Theorem 5.4, the multivariate Newton-polytope linear-region bound (Thm 6.3),
 and the decision-boundary = tropical-hypersurface result (Prop 6.1) are flagged as open
