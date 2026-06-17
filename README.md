@@ -104,8 +104,8 @@ Generated `.thy`/`.tex`/`.lean` artifacts and the kernel-check report are in
 
 ## Example corpora
 
-The `examples/` tree holds five kernel-checked corpora — three formalising this
-workspace's own research, plus two in a **"canonical proofs from other authors"** track:
+The `examples/` tree holds six kernel-checked corpora — three formalising this
+workspace's own research, plus three in a **"canonical proofs from other authors"** track:
 
 | Corpus | What it formalises | Kernel status |
 |--------|--------------------|---------------|
@@ -114,6 +114,7 @@ workspace's own research, plus two in a **"canonical proofs from other authors"*
 | [`provenance/`](examples/provenance) | the syntactic-vs-statistical attribution dichotomy + two-scenario explain analysis | 11/11, zero `sorry` |
 | [`watermark/`](examples/watermark) | **canonical / other authors:** the math core of Aaronson's LLM watermark — distortion-free sampling + key-based detectability | 12/12, zero `sorry` |
 | [`tropical/`](examples/tropical) | **canonical / other authors:** the tropical-geometry view of ReLU networks — Zhang–Naitzat–Lim (ICML 2018), with Pachter–Sturmfels and Maragos et al. | 20/20, zero `sorry` |
+| [`superposition/`](examples/superposition) | **canonical / other authors:** the geometric core of Anthropic's "Toy Models of Superposition" — interference, orthogonal capacity, and the Welch bound | 10/10, zero `sorry` |
 
 Each corpus ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md` and follows the
 same substrate-`.thy` + thin-`.i.orca.md`-surface pattern.
