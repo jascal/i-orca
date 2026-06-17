@@ -60,6 +60,9 @@ is a concrete method the kernel accepts.
   eigenvalue, or inner-product-space library.
 - The Welch sum-of-squares proof needs `sum_squared_le_sum_of_squares` from
   `HOL-Analysis.Convex`; that is the only non-`Main` dependency.
+- The antipodal pair (`AntipodalAchievesWelch`) is the **optimal** packing of two
+  features into one dimension: both the realised off-diagonal interference and the Welch
+  lower bound `n(n−m)/m` equal `2` (at `n = 2`, `m = 1`), so the bound is saturated.
 - The four corollaries with per-feature hypotheses are surfaced via primed variants
   (`orthogonal_perfect_recovery'`, `orth_capacity'`,
   `superposition_forces_interference'`, `welch_offdiag'`) that state the unit-norm /

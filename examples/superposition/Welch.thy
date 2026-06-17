@@ -22,6 +22,8 @@
 
 theory Welch
   imports Superposition "HOL-Analysis.Convex"
+    \<comment> \<open>HOL-Analysis.Convex is used only for sum_squared_le_sum_of_squares
+        (Cauchy-Schwarz on the Gram diagonal) -- the sole non-Main dependency.\<close>
 begin
 
 text \<open>The Welch sum-of-squares inequality. Proof: expand each inner product over the

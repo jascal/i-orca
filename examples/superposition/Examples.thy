@@ -37,6 +37,14 @@ theorem antipodal_achieves_welch:
   "(\<Sum>i\<in>{0,1::nat}. \<Sum>j\<in>{0,1} - {i}. (ip {0::nat} (antipodal i) (antipodal j))\<^sup>2)
    = real (card {0,1::nat}) * (real (card {0,1::nat}) - real (card {0::nat}))
      / real (card {0::nat})"
-  by (simp add: ip_def antipodal_def insert_Diff_if)
+proof -
+  \<comment> \<open>both sides evaluate to 2 = n(n-m)/m at n = 2, m = 1.\<close>
+  have lhs: "(\<Sum>i\<in>{0,1::nat}. \<Sum>j\<in>{0,1} - {i}. (ip {0::nat} (antipodal i) (antipodal j))\<^sup>2) = 2"
+    by (simp add: ip_def antipodal_def insert_Diff_if)
+  have rhs: "real (card {0,1::nat}) * (real (card {0,1::nat}) - real (card {0::nat}))
+             / real (card {0::nat}) = 2"
+    by simp
+  show ?thesis using lhs rhs by simp
+qed
 
 end
