@@ -1,0 +1,8 @@
+session "Tropical" = "HOL-Analysis" +
+  options [quick_and_dirty]
+  theories
+    TropicalSemiring
+    TropicalPoly
+    ReLUNet
+    MaxPlus
+    Newton
