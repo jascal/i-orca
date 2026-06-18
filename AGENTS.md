@@ -97,7 +97,7 @@ Pachter–Sturmfels and Maragos et al.; 20 theorems), `examples/superposition/` 
 geometric core of Anthropic's "Toy Models of Superposition": interference, orthogonal
 capacity, and the Welch bound; 10 theorems), and `examples/jl/` (the
 Johnson–Lindenstrauss random-projection lemma: unbiased projection, O(log n/ε²)
-dimension, probabilistic-method existence; 6 theorems). All kernel-checked under Isabelle2025-2;
+dimension, probabilistic-method existence; 7 theorems). All kernel-checked under Isabelle2025-2;
 each ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md`.
 
 ## Gotchas

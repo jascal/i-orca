@@ -9,7 +9,7 @@ the cheap structural skeleton (`i-orca verify`, no Isabelle) and the real kernel
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/jl/jl.i.orca.md
-#   -> all 6 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
+#   -> all 7 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/jl -o quick_and_dirty JL
@@ -26,7 +26,7 @@ i-orca compile examples/jl/jl.i.orca.md --target isar \
 
 | Layer | Tool | Result |
 |-------|------|--------|
-| Skeleton | `i-orca verify` | 6/6 VALID, `formal_fraction_static = 1.000` |
+| Skeleton | `i-orca verify` | 7/7 VALID, `formal_fraction_static = 1.000` |
 | Substrate | `isabelle build` (`JL` session) | exit 0, **zero `sorry`** |
 | Surface | `isabelle build` (compiled `JLSurface` in-session) | exit 0 — every `(rule …)` non-vacuous |
 
@@ -47,6 +47,9 @@ parent is plain `HOL`; everything is in `Complex_Main`).
 **Existence pillar** (`JLExistence.thy`)
 - `ProbabilisticMethod` → `probabilistic_method'`
 - `GoodProjectionExists` → `jl_good_projection_exists'`
+
+**Worked example** (`Examples.thy`)
+- `ExampleGoodProjectionExists` → `example_good_projection_exists` (4 projections, 2 constraints, a good one exists)
 
 ## Notes
 

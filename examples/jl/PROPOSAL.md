@@ -29,7 +29,7 @@ factor `1 ± ε`**. The standard proof projects with a random matrix `R` (scaled
 
 We kernel-check the **deterministic structural pillars (1 and 3) and the dimension
 arithmetic**; the Gaussian **concentration (2)** is the honest meta input, supplied as a
-hypothesis. Three theories, six surfaced theorems:
+hypothesis. Four theories, seven surfaced theorems:
 
 | # | i-orca theorem | Isabelle lemma | Proves (formal) | Supports (meta) |
 |---|----------------|----------------|------------------|------------------|
@@ -39,6 +39,7 @@ hypothesis. Three theories, six surfaced theorems:
 | 4 | LogarithmicDimension | `jl_log_dimension` | `k > 16 ln n / ε² ⟹ n²·exp(−(ε²/8)k) < 1` | **the `O(log n/ε²)` dimension** |
 | 5 | ProbabilisticMethod | `probabilistic_method'` | few bad events ⟹ a point avoids them all | **pillar 3**: combinatorial core |
 | 6 | GoodProjectionExists | `jl_good_projection_exists'` | per-pair concentration + small count ⟹ a good projection exists | **pillar 3**: the assembled existence |
+| 7 | ExampleGoodProjectionExists | `example_good_projection_exists` | a concrete 4-projection / 2-constraint instance | the union-bound argument in miniature |
 
 The **meta** column is deliberately not claimed as proven. E.g. theorem 2 proves the
 exact second moment for *any* expectation functional with orthonormal coordinates; it
@@ -67,7 +68,7 @@ bound `card(bad p) ≤ q·card Ω`; the chi-squared tail that justifies it is me
 
 ## Milestones / open targets
 
-1. **(done)** The six-theorem development above — all kernel-checked under Isabelle2025-2
+1. **(done)** The seven-theorem development above — all kernel-checked under Isabelle2025-2
    (`isabelle build -D examples/jl JL`, exit 0, zero `sorry`). See [`RESULTS.md`](RESULTS.md).
 2. The Gaussian (or Rademacher) concentration bound itself — the chi-squared tail giving
    the per-pair failure probability — in `HOL-Probability`.

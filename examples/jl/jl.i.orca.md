@@ -30,9 +30,10 @@
       the other corpora.)
 
   Map to the proof:
-    EXPECTATION -> ExpectationLinearOverSum, ProjectionUnbiased
-    DIMENSION   -> DimensionUnionBound, LogarithmicDimension
-    EXISTENCE   -> ProbabilisticMethod, GoodProjectionExists
+    EXPECTATION    -> ExpectationLinearOverSum, ProjectionUnbiased
+    DIMENSION      -> DimensionUnionBound, LogarithmicDimension
+    EXISTENCE      -> ProbabilisticMethod, GoodProjectionExists
+    WORKED EXAMPLE -> ExampleGoodProjectionExists
 -->
 
 # theorem ExpectationLinearOverSum
@@ -147,3 +148,22 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite Omega ⟹ Omega ≠ {} ⟹ finite P ⟹ (∀p∈P. bad p ⊆ Omega) ⟹ (∀p∈P. real (card (bad p)) ≤ q * real (card Omega)) ⟹ real (card P) * q < 1 ⟹ (∃R∈Omega. ∀p∈P. R ∉ bad p) | the total bad mass is below the whole space, so a good projection survives | — | (rule jl_good_projection_exists') | method |
+
+
+# theorem ExampleGoodProjectionExists
+> A concrete instance of the existence pillar: four candidate projections `{0,1,2,3}`, two constraints, each violated only by one projection (`bad i = {i}`). Only two of the four are ever bad, so a projection avoiding both constraints exists (2 or 3) — the union-bound argument in miniature. Cites `example_good_projection_exists`.
+
+## imports
+| Theory   |
+|----------|
+| Examples |
+
+## goal
+| Statement |
+|-----------|
+| ∃w∈{0,1,2,3::nat}. ∀i∈{0,1::nat}. w ∉ {i} |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∃w∈{0,1,2,3::nat}. ∀i∈{0,1::nat}. w ∉ {i} | two bad projections out of four leave a good one standing | — | (rule example_good_projection_exists) | method |

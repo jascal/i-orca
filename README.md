@@ -115,7 +115,7 @@ workspace's own research, plus four in a **"canonical proofs from other authors"
 | [`watermark/`](examples/watermark) | **canonical / other authors:** the math core of Aaronson's LLM watermark — distortion-free sampling + key-based detectability | 12/12, zero `sorry` |
 | [`tropical/`](examples/tropical) | **canonical / other authors:** the tropical-geometry view of ReLU networks — Zhang–Naitzat–Lim (ICML 2018), with Pachter–Sturmfels and Maragos et al. | 20/20, zero `sorry` |
 | [`superposition/`](examples/superposition) | **canonical / other authors:** the geometric core of Anthropic's "Toy Models of Superposition" — interference, orthogonal capacity, and the Welch bound | 10/10, zero `sorry` |
-| [`jl/`](examples/jl) | **canonical / other authors:** the Johnson–Lindenstrauss random-projection lemma — unbiased projection, `O(log n/ε²)` dimension, probabilistic-method existence | 6/6, zero `sorry` |
+| [`jl/`](examples/jl) | **canonical / other authors:** the Johnson–Lindenstrauss random-projection lemma — unbiased projection, `O(log n/ε²)` dimension, probabilistic-method existence | 7/7, zero `sorry` |
 
 Each corpus ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md` and follows the
 same substrate-`.thy` + thin-`.i.orca.md`-surface pattern.

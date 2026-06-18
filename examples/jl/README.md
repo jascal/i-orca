@@ -24,8 +24,9 @@ projection exists. See [`PROPOSAL.md`](PROPOSAL.md).
 | [`JLProjection.thy`](JLProjection.thy) | the expectation pillar: a linear `E` commutes with finite sums, and `E[(∑ⱼ xⱼ gⱼ)²] = ∑ⱼ xⱼ²` (norm preserved in expectation) |
 | [`JLDimension.thy`](JLDimension.thy) | the dimension pillar: `k > ln N / c ⟹ N·exp(−c k) < 1`, and the `O(log n/ε²)` bound |
 | [`JLExistence.thy`](JLExistence.thy) | the existence pillar: the probabilistic method, and the assembled "a distance-preserving projection exists" |
+| [`Examples.thy`](Examples.thy) | a concrete instance: four projections, two constraints, a good projection exists (the union bound in miniature) |
 | [`ROOT`](ROOT) | Isabelle session `JL` (parent `HOL`) |
-| [`jl.i.orca.md`](jl.i.orca.md) | the i-orca surface: 6 theorems, each `(rule <lemma>)` |
+| [`jl.i.orca.md`](jl.i.orca.md) | the i-orca surface: 7 theorems, each `(rule <lemma>)` |
 | [`PROPOSAL.md`](PROPOSAL.md) | the source, the formal-vs-meta table, honest reckonings, open targets |
 | [`RESULTS.md`](RESULTS.md) | verification status and commands |
 
@@ -34,7 +35,7 @@ projection exists. See [`PROPOSAL.md`](PROPOSAL.md).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/jl/jl.i.orca.md
-#   -> all 6 theorems VALID, formal_fraction_static = 1.000
+#   -> all 7 theorems VALID, formal_fraction_static = 1.000
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/jl -o quick_and_dirty JL
@@ -56,7 +57,7 @@ caveat as the other corpora).
 
 ## What it proves (and what it doesn't)
 
-Six kernel-checked cores: the unbiased random projection (norm preserved in expectation),
+Seven kernel-checked cores: the unbiased random projection (norm preserved in expectation),
 the `O(log n/ε²)` dimension arithmetic, and the probabilistic-method existence assembly —
 see the table in [`PROPOSAL.md`](PROPOSAL.md). The theorems are honest about scope: the
 expectation is modelled abstractly (no Gaussian measure), the probabilistic method is the
