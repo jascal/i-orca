@@ -29,7 +29,9 @@
 *)
 
 theory DistortionRate
-  imports "HOL-Analysis.Analysis"
+  imports "HOL-Analysis.Complex_Transcendental"
+    \<comment> \<open>imported only for pi_approx (the rational bounds on pi used in
+        mse_const_approx); the rest is Complex_Main. sqrt 3 bounds come from NthRoot.\<close>
 begin
 
 definition mse_ub :: "nat \<Rightarrow> real" where "mse_ub b = (sqrt 3 * pi / 2) / 4 ^ b"
@@ -39,8 +41,8 @@ definition prod_ub :: "nat \<Rightarrow> real \<Rightarrow> nat \<Rightarrow> re
 definition prod_lb :: "nat \<Rightarrow> real \<Rightarrow> nat \<Rightarrow> real" where
   "prod_lb d ny b = (ny / real d) / 4 ^ b"
 
-text \<open>Near-optimality (MSE): the upper bound is a fixed constant multiple of the lower
-  bound, the same multiple for every bit-width -- the 4^b cancels.\<close>
+text \<open>Near-optimality (MSE): the upper bound (paper Thm 1) is a fixed constant multiple of
+  the lower bound (paper Thm 3), the same multiple for every bit-width -- the 4^b cancels.\<close>
 
 theorem mse_ratio_const: "mse_ub b = (sqrt 3 * pi / 2) * mse_lb b"
   by (simp add: mse_ub_def mse_lb_def)
@@ -48,13 +50,14 @@ theorem mse_ratio_const: "mse_ub b = (sqrt 3 * pi / 2) * mse_lb b"
 theorem mse_ratio_eq: "mse_ub b / mse_lb b = sqrt 3 * pi / 2"
   by (simp add: mse_ub_def mse_lb_def)
 
-text \<open>Near-optimality (inner product): the ratio is the constant sqrt3*pi^2, the same for
-  every dimension d, norm ||y||^2, and bit-width b.\<close>
+text \<open>Near-optimality (inner product, paper Thm 2 vs Thm 3): the ratio is the constant
+  sqrt3*pi^2, the same for every dimension d, norm ||y||^2, and bit-width b.\<close>
 
 theorem prod_ratio_const: "prod_ub d ny b = (sqrt 3 * pi\<^sup>2) * prod_lb d ny b"
   by (simp add: prod_ub_def prod_lb_def)
 
-text \<open>Geometric rate: each extra bit quarters the distortion bound.\<close>
+text \<open>Geometric rate (the 1/4^b factor of paper Thm 1 / Thm 2): each extra bit quarters
+  the distortion bound.\<close>
 
 theorem mse_decay: "mse_ub (Suc b) = mse_ub b / 4"
   by (simp add: mse_ub_def)
@@ -62,7 +65,8 @@ theorem mse_decay: "mse_ub (Suc b) = mse_ub b / 4"
 theorem prod_decay: "prod_ub d ny (Suc b) = prod_ub d ny b / 4"
   by (simp add: prod_ub_def)
 
-text \<open>The near-optimality constant sqrt3*pi/2 is approximately 2.7.\<close>
+text \<open>The near-optimality constant sqrt3*pi/2 (paper Thm 1 upper bound over Thm 3 lower
+  bound) is approximately 2.7.\<close>
 
 lemma sqrt3_bounds: "1.7320 < sqrt 3 \<and> sqrt 3 < 1.7321"
 proof
@@ -100,8 +104,8 @@ proof -
   thus ?thesis by (simp add: mse_ratio_const)
 qed
 
-text \<open>High-dimensional advantage: the inner-product distortion bound shrinks as the
-  embedding dimension grows.\<close>
+text \<open>High-dimensional advantage (the 1/d factor of paper Thm 2): the inner-product
+  distortion bound shrinks as the embedding dimension grows.\<close>
 
 theorem prod_dim_decay:
   assumes "0 < d" and "d \<le> d'" and "0 \<le> ny"

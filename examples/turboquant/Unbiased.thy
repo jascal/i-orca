@@ -49,8 +49,9 @@ corollary expectation_sum':
   shows "Exp (\<lambda>s. \<Sum>a\<in>A. F a s) = (\<Sum>a\<in>A. Exp (F a))"
   using assms unfolding lin_exp_def by (intro expectation_sum) auto
 
-text \<open>The inner-product estimator is unbiased: from coordinatewise unbiasedness of the
-  dequantized residual and linearity, E[<y, dq>] = <y, x>.\<close>
+text \<open>The inner-product estimator is unbiased (the unbiasedness claim of paper Thm 2):
+  from coordinatewise unbiasedness of the dequantized residual and linearity,
+  E[<y, dq>] = <y, x>.\<close>
 
 theorem inner_product_unbiased:
   fixes Exp :: "('s \<Rightarrow> real) \<Rightarrow> real" and dq :: "'j \<Rightarrow> 's \<Rightarrow> real" and x y :: "'j \<Rightarrow> real"
