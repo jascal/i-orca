@@ -97,10 +97,13 @@ Pachter–Sturmfels and Maragos et al.; 20 theorems), `examples/superposition/` 
 geometric core of Anthropic's "Toy Models of Superposition": interference, orthogonal
 capacity, and the Welch bound; 10 theorems), `examples/jl/` (the
 Johnson–Lindenstrauss random-projection lemma: unbiased projection, O(log n/ε²)
-dimension, probabilistic-method existence; 7 theorems), and `examples/turboquant/` (the
+dimension, probabilistic-method existence; 7 theorems), `examples/turboquant/` (the
 distortion-rate structure of Google's TurboQuant, arXiv:2504.19874: near-optimal ≈2.7×
-ratio, geometric 1/4ᵇ rate, unbiased inner products; 11 theorems). All kernel-checked
-under Isabelle2025-2; each ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md`.
+ratio, geometric 1/4ᵇ rate, unbiased inner products; 11 theorems), and
+`examples/bitnet/` (ternary-weight LLMs, BitNet b1.58, arXiv:2402.17764: multiplication-free
+matmul, the ≈1.58-bit width, and a lossless ternary realization by balanced-ternary
+expansion; 9 theorems). All kernel-checked under Isabelle2025-2; each ships its own
+`PROPOSAL.md` / `README.md` / `RESULTS.md`.
 
 ## Gotchas
 

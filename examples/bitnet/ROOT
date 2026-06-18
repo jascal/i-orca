@@ -1,0 +1,7 @@
+session "BitNet" = "HOL" +
+  options [quick_and_dirty]
+  theories
+    Ternary
+    BalancedTernary
+    Lossless
+    BitWidth
