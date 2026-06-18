@@ -104,8 +104,8 @@ Generated `.thy`/`.tex`/`.lean` artifacts and the kernel-check report are in
 
 ## Example corpora
 
-The `examples/` tree holds eight kernel-checked corpora — three formalising this
-workspace's own research, plus five in a **"canonical proofs from other authors"** track:
+The `examples/` tree holds nine kernel-checked corpora — three formalising this
+workspace's own research, plus six in a **"canonical proofs from other authors"** track:
 
 | Corpus | What it formalises | Kernel status |
 |--------|--------------------|---------------|
@@ -117,6 +117,7 @@ workspace's own research, plus five in a **"canonical proofs from other authors"
 | [`superposition/`](examples/superposition) | **canonical / other authors:** the geometric core of Anthropic's "Toy Models of Superposition" — interference, orthogonal capacity, and the Welch bound | 10/10, zero `sorry` |
 | [`jl/`](examples/jl) | **canonical / other authors:** the Johnson–Lindenstrauss random-projection lemma — unbiased projection, `O(log n/ε²)` dimension, probabilistic-method existence | 7/7, zero `sorry` |
 | [`turboquant/`](examples/turboquant) | **canonical / other authors:** the distortion-rate structure of Google's TurboQuant (arXiv:2504.19874) — near-optimal `≈2.7×` ratio, geometric `1/4ᵇ` rate, unbiased inner products | 11/11, zero `sorry` |
+| [`bitnet/`](examples/bitnet) | **canonical / other authors:** ternary-weight LLMs (BitNet b1.58, arXiv:2402.17764) — multiplication-free matmul, the `≈1.58`-bit width, and a *lossless* ternary realization by balanced-ternary expansion | 9/9, zero `sorry` |
 
 Each corpus ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md` and follows the
 same substrate-`.thy` + thin-`.i.orca.md`-surface pattern.
