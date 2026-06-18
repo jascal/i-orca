@@ -93,9 +93,11 @@ thin-`.i.orca.md`-surface pattern: `examples/complexity/` (non-paper extensions)
 proofs from other authors"** track — `examples/watermark/` (Aaronson's LLM watermark:
 distortion-free sampling + key-based detectability, 12 theorems), `examples/tropical/`
 (the tropical-geometry view of ReLU networks — Zhang–Naitzat–Lim, ICML 2018, with
-Pachter–Sturmfels and Maragos et al.; 20 theorems), and `examples/superposition/` (the
+Pachter–Sturmfels and Maragos et al.; 20 theorems), `examples/superposition/` (the
 geometric core of Anthropic's "Toy Models of Superposition": interference, orthogonal
-capacity, and the Welch bound; 10 theorems). All kernel-checked under Isabelle2025-2;
+capacity, and the Welch bound; 10 theorems), and `examples/jl/` (the
+Johnson–Lindenstrauss random-projection lemma: unbiased projection, O(log n/ε²)
+dimension, probabilistic-method existence; 7 theorems). All kernel-checked under Isabelle2025-2;
 each ships its own `PROPOSAL.md` / `README.md` / `RESULTS.md`.
 
 ## Gotchas

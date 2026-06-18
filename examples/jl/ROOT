@@ -1,0 +1,7 @@
+session "JL" = "HOL" +
+  options [quick_and_dirty]
+  theories
+    JLProjection
+    JLDimension
+    JLExistence
+    Examples
