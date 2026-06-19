@@ -104,15 +104,19 @@ the next rung.
 # real kernel certificate (authoritative):
 isabelle build -D examples/provable_opt        # zero sorry, no quick_and_dirty
 
+# per-theorem kernel check via the CLI (auto-detects this dir's ROOT):
+i-orca check examples/provable_opt/provable_opt.i.orca.md    # 5/5 formal_fraction_real = 1.000
+
 # structural surface (no Isabelle):
 i-orca verify examples/provable_opt/provable_opt.i.orca.md   # 5/5 VALID, formal_fraction_static=1.000
 ```
 
-The standalone `i-orca check` builds each theorem under a plain HOL parent and
-cannot load this directory's project-local session, so it reports
-`formal_fraction_real = 0.0` for the `(rule <local lemma>)` discharges — an
-import-resolution limit of the batch backend, **not** a math failure (same caveat
-as [`../complexity`](../complexity)). Use the session `isabelle build`.
+`i-orca check` resolves the `(rule <local lemma>)` discharges against this
+corpus's `ProvableOpt` session automatically: when a `ROOT` sits beside the
+`.i.orca.md`, the backend declares it as a `sessions` dependency and qualifies the
+project-local `## imports`, so each theorem kernel-checks to
+`formal_fraction_real = 1.000`. (The session `isabelle build` above remains the
+authoritative, strict — no `quick_and_dirty` — certificate.)
 
 ## Roadmap (PROVABLE_OPT, formal arm)
 

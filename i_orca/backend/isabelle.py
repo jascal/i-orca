@@ -182,6 +182,7 @@ class IsabelleBackend:
         (The warm-session optimisation replaces this with a routed PIDE call.)
         """
         parent = self._parent_for(theorem)
+        thy_src = self._qualify_imports(thy_src)
         with tempfile.TemporaryDirectory(prefix="iorca_") as d:
             root = Path(d)
             (root / f"{thy_name}.thy").write_text(thy_src, encoding="utf-8")
@@ -189,24 +190,97 @@ class IsabelleBackend:
             (root / "ROOT").write_text(
                 self._root_text(session, parent, thy_name), encoding="utf-8"
             )
+            # `-d <dir>` registers each project-local session ROOT so the temp
+            # session can take a project session (e.g. ``ProvableOpt``, ``Hardness``)
+            # as parent and resolve ``## imports`` of theories it owns. `-D <tmp>`
+            # selects only the temp session to build; the parent is a cached
+            # dependency. ``quick_and_dirty`` is scoped to the temp ROOT (not `-o`),
+            # so the parent session is never rebuilt under it.
+            cmd = [self.isabelle_bin, "build"]
+            for ed in self._session_dirs():
+                cmd += ["-d", ed]
+            cmd += ["-D", str(root)]
             proc = subprocess.run(
-                [self.isabelle_bin, "build", "-D", str(root), "-o", "quick_and_dirty"],
-                capture_output=True, text=True, timeout=timeout_s,
+                cmd, capture_output=True, text=True, timeout=timeout_s,
             )
             return proc.returncode == 0, (proc.stdout + "\n" + proc.stderr)
 
+    def _session_dirs(self) -> list[str]:
+        """Extra dirs that carry a ``ROOT`` — a project-local session to discover
+        via ``isabelle build -d`` so it (and the qualified imports it owns) resolve."""
+        return [ed for ed in self._extra_dirs if (Path(ed) / "ROOT").exists()]
+
+    def _project_sessions(self) -> list[tuple[str, str]]:
+        """``(session_name, dir)`` for each extra dir that declares a session ROOT."""
+        out: list[tuple[str, str]] = []
+        for ed in self._extra_dirs:
+            rootf = Path(ed) / "ROOT"
+            if not rootf.exists():
+                continue
+            try:
+                m = re.search(r'session\s+"([^"]+)"', rootf.read_text(encoding="utf-8"))
+            except OSError:
+                m = None
+            if m:
+                out.append((m.group(1), str(Path(ed).resolve())))
+        return out
+
+    def _theory_to_session(self) -> dict[str, str]:
+        """Map each project-local theory base-name to the session that owns it, so a
+        cross-session ``## imports`` can be rewritten to the qualified
+        ``Session.Theory`` form. Bare cross-session imports do not resolve in
+        Isabelle — only the importing session's own + qualified names do."""
+        t2s: dict[str, str] = {}
+        for sess, ed in self._project_sessions():
+            for thy in Path(ed).rglob("*.thy"):
+                t2s.setdefault(thy.stem, sess)
+        return t2s
+
+    def _qualify_imports(self, thy_src: str) -> str:
+        """Rewrite project-local imports in the theory *header* to ``"Session.Theory"``.
+        Only the text before ``begin`` is touched, so identifiers/prose in the proof
+        body (and in ``text`` docstrings) are never rewritten."""
+        t2s = self._theory_to_session()
+        if not t2s:
+            return thy_src
+        head, sep, body = thy_src.partition("\nbegin")
+        if not sep:
+            return thy_src
+
+        def repl(mo: re.Match[str]) -> str:
+            name = mo.group(0)
+            return f'"{t2s[name]}.{name}"' if name in t2s else name
+
+        head = re.sub(r"(?<![\w.\"])[A-Za-z][\w']*(?![\w.\"])", repl, head)
+        return head + sep + body
+
     def _root_text(self, session: str, parent: str, thy_name: str) -> str:
-        """ROOT for the one-theory build session. Project-local theory directories
-        (``self._extra_dirs``) are registered as ``directories`` so ``## imports`` may
-        name a sibling theory (e.g. ``MinimalDecider``) and have it resolve from source
-        rather than be looked up as a bare file under the temp dir."""
-        dirs_block = ""
-        if self._extra_dirs:
-            body = "".join(f'    "{ed}"\n' for ed in self._extra_dirs)
-            dirs_block = f"  directories\n{body}"
+        """ROOT for the one-theory build session.
+
+        Two ways a project-local ``## imports`` resolves:
+        - dirs that carry a ``ROOT`` are declared as ``sessions`` (and discovered via
+          ``isabelle build -d``); their theories are imported by the qualified
+          ``Session.Theory`` name that ``_qualify_imports`` rewrites them to. This
+          handles transitive project imports for free (the whole session is loaded);
+        - dirs *without* a ROOT are registered as ``directories`` so ``## imports``
+          may name a bare sibling theory resolved from source.
+
+        ``quick_and_dirty`` is set in-session so frontier ``sorry`` holes load
+        cleanly (they are attributed separately) without forcing it on the parent.
+        """
+        src_dirs = [ed for ed in self._extra_dirs if not (Path(ed) / "ROOT").exists()]
+        blocks = ""
+        proj = self._project_sessions()
+        if proj:
+            body = "".join(f"    {s}\n" for s, _ in proj)
+            blocks += f"  sessions\n{body}"
+        if src_dirs:
+            body = "".join(f'    "{ed}"\n' for ed in src_dirs)
+            blocks += f"  directories\n{body}"
         return (
             f'session "{session}" = "{parent}" +\n'
-            f"{dirs_block}"
+            f"  options [quick_and_dirty]\n"
+            f"{blocks}"
             f"  theories\n    {thy_name}\n"
         )
 

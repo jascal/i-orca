@@ -17,11 +17,13 @@
   Verification:
     - `i-orca verify` (structural, zero Isabelle): all theorems VALID,
       formal_fraction_static = 1.000.
-    - Kernel check: `isabelle build -D .` (ROOT session "ProvableOpt", parent HOL,
-      NO quick_and_dirty) builds ProvableOpt.thy with zero `sorry` — the real
-      certificate. The standalone `i-orca check` builds each theorem under a plain
-      HOL parent and cannot load this directory's project-local session, so prefer
-      the session build (same limitation noted in ../complexity/complexity.i.orca.md).
+    - `i-orca check provable_opt.i.orca.md` (per-theorem kernel check): resolves
+      each `(rule …)` against this dir's "ProvableOpt" session automatically (it
+      auto-detects the sibling ROOT, declares it as a `sessions` dependency, and
+      qualifies the project-local `## imports`) — all theorems formal_fraction_real
+      = 1.000.
+    - Authoritative certificate: `isabelle build -D .` (ROOT session "ProvableOpt",
+      parent HOL, NO quick_and_dirty) builds ProvableOpt.thy with zero `sorry`.
 
   What this certifies (honest scope): the LOSSLESS demand-restriction family
   (dead-stratum / `lastpos`), i.e. PO-T1 made a fixpoint theorem and PO-T4's first
