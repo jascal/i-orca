@@ -1,0 +1,24 @@
+Started at Fri Jun 19 02:32:45 GMT 2026 (polyml-5.9.2_x86_64_32-linux on pop-os)
+ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx4g -Xss16m"
+ISABELLE_BUILD_OPTIONS=""
+
+ML_PLATFORM="x86_64_32-linux"
+ML_HOME="/home/allans/Isabelle2025-2/contrib/polyml-5.9.2-2/x86_64_32-linux"
+ML_SYSTEM="polyml-5.9.2"
+ML_OPTIONS="--minheap 500"
+
+Session Pure/Pure
+Session Misc/Tools
+Session HOL/HOL (main)
+Session Unsorted/ProvableOpt
+Cleaned ProvableOpt
+Running ProvableOpt ...
+ProvableOpt: theory ProvableOpt.ProvableOpt
+ProvableOpt: theory ProvableOpt.ProvableOpt_Surface
+ProvableOpt: theory ProvableOpt.ProvableOpt 100% (0.569s cumulated time)
+ProvableOpt: theory ProvableOpt.ProvableOpt_Surface 100% (0.058s cumulated time)
+Timing ProvableOpt (8 threads, 0.467s elapsed time, 0.901s cpu time, 0.023s GC time, factor 1.93)
+Finished ProvableOpt (0:00:01 elapsed time)
+
+Finished at Fri Jun 19 02:32:49 GMT 2026
+0:00:03 elapsed time
