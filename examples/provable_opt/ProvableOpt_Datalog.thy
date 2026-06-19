@@ -16,7 +16,17 @@ text \<open>PO-T1, the KERNEL BRIDGE. ``ProvableOpt_Common`` proves the lossless
 
   Model: a program is a set of \<open>(head, body)\<close> rules over ground atoms \<open>'a\<close>; \<open>body\<close>
   is the set of atoms that must all hold to fire the rule (EDB facts are empty-body
-  rules). This is the standard ground \<open>T_P\<close> / least-fixpoint Datalog semantics.\<close>
+  rules). This is the standard ground \<open>T_P\<close> / least-fixpoint Datalog semantics.
+
+  ABSTRACTION GAP (kept deliberately small, stated honestly). The model is GROUND
+  (atoms are opaque \<open>'a\<close>) and POSITIVE (no negation). That is exactly the fragment
+  the emitted \<open>\<Pi>\<close> lives in for this rung: LO3a's forward pass is positive and
+  stratified, and the lossless dead-stratum question is about which ground atoms the
+  query reads -- which is what \<open>demand_closure.py\<close> decides at the (relation, position)
+  level, a sound abstraction of these ground atoms. NOT modelled here (not needed for
+  PO-T1 demand-restriction): rule variables/grounding, aggregates, and negation. The
+  binding-pattern *adornment* transform (a later rung) is where variables would have
+  to enter the kernel model.\<close>
 
 type_synonym 'a "rule" = "'a \<times> 'a set"
 type_synonym 'a program = "'a rule set"
@@ -36,7 +46,13 @@ text \<open>\<open>D\<close> is SYNTACTICALLY demand-closed for \<open>R\<close>
 definition syn_demand_closed :: "'a program \<Rightarrow> 'a set \<Rightarrow> bool" where
   "syn_demand_closed R D \<longleftrightarrow> (\<forall>(h, b) \<in> R. h \<in> D \<longrightarrow> b \<subseteq> D)"
 
-text \<open>THE BRIDGE: the syntactic check implies the semantic demand-closure.\<close>
+text \<open>THE BRIDGE: the syntactic check implies the semantic demand-closure.
+
+  This is the precise point where the EXTERNAL checker's output becomes a
+  KERNEL-PROVED fact. ``lo3a/demand_closure.py`` decides \<open>syn_demand_closed R D\<close> by
+  inspecting the rules; this theorem turns that verdict into \<open>demand_closed (T_P R) D\<close>,
+  which ``demand_restrict_query`` then converts to lossless decode-preservation.
+  Everything upstream of the parser is now proof, not trust.\<close>
 
 theorem syn_demand_closed_imp_demand_closed:
   assumes syn: "syn_demand_closed R D"
