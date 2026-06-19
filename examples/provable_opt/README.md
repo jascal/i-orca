@@ -134,9 +134,17 @@ Cross-repo progress on carrying fieldrun's PROVABLE_OPT claims as kernel theorem
 - [x] **PO-T3 — margin-certified decode invariance** (`margin > 2δ`) + boundary
       witnesses (sound local certificate; the `2δ` guard is proved **necessary and
       tight** — `margin_guard_tight`: `>` cannot relax to `≥`).
-- [ ] **Real-bundle `Π`** — discharge `demand_closed` (PO-T1) / the per-logit `δ`
-      bound (PO-T3) on strata actually emitted by LOGIC_EXPORT + Soufflé on a small
-      trained model. The general theorems already cover any `Π` meeting the hypotheses.
+- [x] **Real-bundle `Π` (checker level)** — `demand_closed` discharged on a *real*
+      emitted `Π`: fieldrun's `lo3a/demand_closure.py` soundly certifies the dead
+      stratum on `whole_base.dl` (it's the whole final-layer post-attention cone, a
+      generalisation of `xf`/`ssf`). This establishes the *premise* of
+      `demand_restrict_query` on real strata; the kernel theorem supplies the
+      conclusion. *(fieldrun PR #73.)*
+- [ ] **Kernel bridge for the checker** — a machine-checked
+      `syntactically_demand_closed rules D ⟹ demand_closed (T_P rules) D` (lift from
+      the abstract operator to a modelled rule-set), so the checker's syntactic
+      output plugs into the kernel proof — closing "premise certified by a tool" →
+      "premise proved". *(Then a per-logit-`δ` real-bundle discharge for PO-T3.)*
 - [ ] **Full magic-sets *adornment* transform** — binding-pattern predicate
       specialisation (strictly heavier than demand restriction).
 
