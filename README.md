@@ -111,7 +111,7 @@ workspace's own research, plus six in a **"canonical proofs from other authors"*
 |--------|--------------------|---------------|
 | [`fieldrun/`](examples/fieldrun) | all ten theorems of the fieldrun paper *"What a Transformer Retrieves and What It Computes"* | 10/10, zero `sorry` |
 | [`complexity/`](examples/complexity) | non-paper extensions (minimal deciders, decomposition, the per-input pipeline bridge) | zero `sorry` |
-| [`provable_opt/`](examples/provable_opt) | fieldrun **PROVABLE_OPT** PO-T4/PO-T1 — a `T_P`-equivalence for the lossless demand / dead-stratum (`lastpos`) transform on the exported Datalog program `Π`; general fixpoint theorem + a concrete lossless-and-strict instance | 5/5 + compiled surface, zero `sorry` |
+| [`provable_opt/`](examples/provable_opt) | fieldrun **PROVABLE_OPT** formal arm — PO-T1 (`T_P`-equivalence for the lossless demand/dead-stratum `lastpos` transform) **and** PO-T3 (margin-certified decode invariance + a boundary flip-witness), on a shared general theory + two concrete instances | 9/9 surfaced + 2 compiled surfaces, zero `sorry` |
 | [`provenance/`](examples/provenance) | the syntactic-vs-statistical attribution dichotomy + two-scenario explain analysis | 11/11, zero `sorry` |
 | [`watermark/`](examples/watermark) | **canonical / other authors:** the math core of Aaronson's LLM watermark — distortion-free sampling + key-based detectability | 12/12, zero `sorry` |
 | [`tropical/`](examples/tropical) | **canonical / other authors:** the tropical-geometry view of ReLU networks — Zhang–Naitzat–Lim (ICML 2018), with Pachter–Sturmfels and Maragos et al. | 20/20, zero `sorry` |

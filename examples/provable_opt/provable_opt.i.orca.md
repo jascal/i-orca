@@ -4,9 +4,11 @@
   program Π (see ../../../fieldrun/PROVABLE_OPT_PROPOSAL.md §5–6, and
   ../../../fieldrun/LOGIC_EXPORT.md for the export of the model as Π).
 
-  The real proofs (a least-fixpoint argument via lfp_lowerbound / lfp_unfold, a
-  datatype-modelled concrete program, and its demand-closure) live in the Isabelle
-  theory ProvableOpt.thy in this directory; the i-orca table DSL is a structural
+  The real proofs live in this directory's Isabelle theories — the general
+  least-fixpoint argument (lfp_lowerbound / lfp_unfold) in ProvableOpt_Common.thy,
+  the datatype-modelled concrete program + its demand-closure in ProvableOpt.thy
+  (the PO-T3 margin rung is the sibling provable_opt_margin.i.orca.md). The i-orca
+  table DSL is a structural
   skeleton, so each theorem is STATED in i-orca form and discharged by
   `(rule <lemma>)` against its kernel-checked Isabelle lemma, resolved through
   `## imports`. (As in the complexity corpus we deliberately do NOT list the cited
