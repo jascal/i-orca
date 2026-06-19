@@ -39,7 +39,13 @@ definition var_share :: "real \<Rightarrow> real \<Rightarrow> real \<Rightarrow
 
 text \<open>The reverse-water-filling rate of a Gaussian mode of variance lam at water level
   th: zero below the water line, positive above. This is what makes allocation
-  variance-greedy.\<close>
+  variance-greedy.
+
+  Feature-coding reading: lam is the variance the coder pays to reconstruct the
+  feature's direction = its between-class variance = (var_share c p 1) (with budget
+  V = 1). So (rd_rate (var_share c p 1) th) is the rate the coder spends on the
+  feature, and the lemmas below say it is zero whenever the feature's var_share is at
+  or below the water level -- independent of how detectable it is.\<close>
 
 definition rd_rate :: "real \<Rightarrow> real \<Rightarrow> real" where
   "rd_rate lam th = (if lam > th then ln (lam / th) / 2 else 0)"
@@ -112,6 +118,23 @@ proof -
     finally show ?thesis .
   qed
   ultimately show ?thesis using s2pos cpos th by force
+qed
+
+text \<open>The "variance-cheap" point made sharp: at a FIXED detectability F, the
+  reconstruction-relevance can be driven arbitrarily small but still positive -- the
+  feature stays exactly as readable while becoming as cheap to drop as you like.\<close>
+
+corollary arbitrarily_variance_cheap:
+  assumes "F > 0" and "0 < p" and "p < 1" and "V > 0" and "eps > 0"
+  shows "\<exists>c s2. s2 > 0 \<and> c > 0 \<and> fisher c s2 = F
+                \<and> 0 < var_share c p V \<and> var_share c p V < eps"
+proof -
+  from present_not_allocated[OF assms(1) assms(5) assms(2) assms(3) assms(4)]
+  obtain c s2 where cs: "s2 > 0" "c > 0" "fisher c s2 = F" "var_share c p V < eps" by auto
+  have "var_share c p V > 0"
+    using cs(2) assms(2,3,4)
+    by (auto simp: var_share_def zero_less_divide_iff zero_less_mult_iff)
+  thus ?thesis using cs by blast
 qed
 
 text \<open>Stated against the rate-distortion coder directly: a feature of ARBITRARY

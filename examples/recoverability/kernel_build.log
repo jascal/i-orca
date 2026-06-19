@@ -1,4 +1,4 @@
-Started at Fri Jun 19 12:28:32 GMT 2026 (polyml-5.9.2_x86_64_32-linux on pop-os)
+Started at Fri Jun 19 12:44:51 GMT 2026 (polyml-5.9.2_x86_64_32-linux on pop-os)
 ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx4g -Xss16m"
 ISABELLE_BUILD_OPTIONS=""
 
@@ -15,10 +15,10 @@ Cleaned Recoverability
 Running Recoverability ...
 Recoverability: theory Recoverability.Recoverability
 Recoverability: theory Recoverability.Recoverability_Surface
-Recoverability: theory Recoverability.Recoverability 100% (0.272s cumulated time)
-Recoverability: theory Recoverability.Recoverability_Surface 100% (0.062s cumulated time)
-Timing Recoverability (8 threads, 0.234s elapsed time, 0.480s cpu time, 0.017s GC time, factor 2.05)
+Recoverability: theory Recoverability.Recoverability 100% (0.319s cumulated time)
+Recoverability: theory Recoverability.Recoverability_Surface 100% (0.048s cumulated time)
+Timing Recoverability (8 threads, 0.234s elapsed time, 0.511s cpu time, 0.018s GC time, factor 2.18)
 Finished Recoverability (0:00:01 elapsed time)
 
-Finished at Fri Jun 19 12:28:36 GMT 2026
+Finished at Fri Jun 19 12:44:54 GMT 2026
 0:00:03 elapsed time
