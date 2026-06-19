@@ -104,7 +104,7 @@ Generated `.thy`/`.tex`/`.lean` artifacts and the kernel-check report are in
 
 ## Example corpora
 
-The `examples/` tree holds ten kernel-checked corpora — four formalising this
+The `examples/` tree holds eleven kernel-checked corpora — five formalising this
 workspace's own research, plus six in a **"canonical proofs from other authors"** track:
 
 | Corpus | What it formalises | Kernel status |
@@ -112,6 +112,7 @@ workspace's own research, plus six in a **"canonical proofs from other authors"*
 | [`fieldrun/`](examples/fieldrun) | all ten theorems of the fieldrun paper *"What a Transformer Retrieves and What It Computes"* | 10/10, zero `sorry` |
 | [`complexity/`](examples/complexity) | non-paper extensions (minimal deciders, decomposition, the per-input pipeline bridge) | zero `sorry` |
 | [`provable_opt/`](examples/provable_opt) | fieldrun **PROVABLE_OPT** formal arm — PO-T1 (`T_P`-equivalence for the lossless demand/dead-stratum `lastpos` transform) **and** PO-T3 (margin-certified decode invariance + a **tight** boundary), the **kernel bridge** (rule-level Datalog: the syntactic demand-closure check fieldrun's tool runs ⟹ the semantic one), and a **verified executable decision procedure** (`echeck`, faithful + `eval`-run + `export_code`) shrinking the trusted base to just the parser | 18/18 surfaced + 4 compiled surfaces, zero `sorry` |
+| [`recoverability/`](examples/recoverability) | **when does an SAE recover a feature?** — presence = Fisher SNR (detection theory), allocation = between-class variance thresholded by reverse water-filling (rate–distortion), decoupled via the direction's variance ⇒ a feature can be maximally detectable yet dropped (*"compression is variance-greedy, meaning is variance-cheap"*); the formal core of the econ-sae empirical result | 4/4 surfaced + 1 compiled surface, zero `sorry` |
 | [`provenance/`](examples/provenance) | the syntactic-vs-statistical attribution dichotomy + two-scenario explain analysis | 11/11, zero `sorry` |
 | [`watermark/`](examples/watermark) | **canonical / other authors:** the math core of Aaronson's LLM watermark — distortion-free sampling + key-based detectability | 12/12, zero `sorry` |
 | [`tropical/`](examples/tropical) | **canonical / other authors:** the tropical-geometry view of ReLU networks — Zhang–Naitzat–Lim (ICML 2018), with Pachter–Sturmfels and Maragos et al. | 20/20, zero `sorry` |

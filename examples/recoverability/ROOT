@@ -1,0 +1,5 @@
+session "Recoverability" = "HOL" +
+  description "A formal model of SAE feature recoverability: presence = Fisher SNR (detection theory), allocation = between-class variance thresholded by reverse water-filling (rate-distortion), and they decouple via the direction's variance — so a feature can be maximally detectable yet dropped (compression is variance-greedy, meaning is variance-cheap). Empirically validated on econ-sae. Recoverability_Surface = the compiled i-orca surface, re-derived via (rule ...)."
+  theories
+    Recoverability
+    Recoverability_Surface
