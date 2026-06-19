@@ -1,0 +1,5 @@
+session "ProvableOpt" = "HOL" +
+  description "PO-T4: a kernel-checked T_P-equivalence for fieldrun's lossless demand / dead-stratum transform on the exported semiring-Datalog program. ProvableOpt = the proofs; ProvableOpt_Surface = the compiled i-orca surface (provable_opt.i.orca.md -> Isar), re-derived via (rule ...) to certify the surface end-to-end."
+  theories
+    ProvableOpt
+    ProvableOpt_Surface
