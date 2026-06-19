@@ -58,7 +58,16 @@ text \<open>\<open>lfp (restrict_op T D) = lfp T \<inter> D\<close>: running the
   computes exactly the demanded part of the full least model. Proven by the two
   standard fixpoint moves -- \<open>lfp_lowerbound\<close> (least pre-fixpoint) and
   \<open>lfp_unfold\<close> (the fixpoint property) -- i.e. by induction on \<open>T_P\<close>, as the
-  proposal says it must be.\<close>
+  proposal says it must be.
+
+  KEY INSIGHT (the \<open>\<supseteq>\<close> direction, where demand-closure pays). We show
+  \<open>lfp T' \<union> (-D)\<close> is a pre-fixpoint of the FULL \<open>T\<close>. A newly derived atom \<open>x \<notin> D\<close>
+  is absorbed by \<open>-D\<close>; a newly derived \<open>x \<in> D\<close> is produced -- by \<open>demand_closed\<close> --
+  using only \<open>D\<close>-atoms, which on \<open>lfp T' \<union> (-D)\<close> are exactly \<open>lfp T'\<close>, so \<open>x\<close> is
+  already in \<open>lfp T'\<close>. Hence no derivation the transform DROPS can ever feed a
+  demanded atom: the dropped strata are invisible to every query in \<open>D\<close>. The proof
+  is fully manual structured Isar (no Sledgehammer); \<open>metis\<close> only discharges the
+  equational glue produced by the \<open>demand_closed\<close> rewrite.\<close>
 
 theorem demand_restrict_lfp:
   assumes mono: "mono T"

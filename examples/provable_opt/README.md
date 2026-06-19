@@ -17,6 +17,30 @@ read by `logit`). The proposal's whole point is that these are *provable*: under
 least-fixpoint semantics correctness is "a theorem about the fixpoint, not a
 measurement." This corpus makes that one kernel theorem.
 
+## The transform, as Datalog rules (before → after)
+
+The concrete `lastpos` instance, written as the Datalog `Π` it models (`L` =
+`lastpos`; the query is `logit`):
+
+```prolog
+% --- BEFORE: the full program Π ---
+res(P)  :- pos(P), P =< L.     % EDB: a residual feature at EVERY position
+acc(P)  :- res(P).             % the per-position accumulate / final-norm
+logit   :- acc(L).             % the output reads ONLY the lastpos accumulate
+
+% --- AFTER: demand-restricted to D = { logit, acc(L), res(L) } ---
+res(L)  :- .                   % only the lastpos residual is kept
+acc(L)  :- res(L).             % only the lastpos accumulate is computed
+logit   :- acc(L).             %   (unchanged)
+```
+
+The transform **drops `acc(P)` and `res(P)` for every `P < L`** — the
+per-position final-norm work that no query reads. It is safe because `logit` (the
+query) demands only `acc(L)`, whose single producer reads only `res(L) ∈ D`: the
+demand frontier `D` is **closed** (`demand_closed`), so the dropped derivations
+can never feed `logit`. That closure is the lemma `Tlm_demand_closed`; the
+"drops `acc(P)` yet keeps `logit`" payoff is `lastpos_transform_lossless_and_strict`.
+
 ## What is proved (Isabelle 2025-2, zero `sorry`, no `quick_and_dirty`)
 
 [`ProvableOpt.thy`](ProvableOpt.thy):
@@ -48,8 +72,20 @@ measurement." This corpus makes that one kernel theorem.
 
 [`ProvableOpt_Surface.thy`](ProvableOpt_Surface.thy) is the **compiled i-orca
 surface** — `provable_opt.i.orca.md` lowered to Isar and re-deriving each result
-via `(rule …)`. It builds inside the session, so the Markdown surface itself is
-certified end-to-end (table → Isar → kernel), not just the hand-written theory.
+via `(rule …)`. Its sole purpose is to provide each result under the exact name
+the PO-T4 / i-orca surface contract expects (`demandrestrictlfp`,
+`lastpostransformlosslessandstrict`, …) and to *check that the Markdown surface
+itself kernel-builds*. It builds inside the session, so the surface is certified
+end-to-end (table → Isar → kernel), not just the hand-written theory.
+
+> **This file is generated, not hand-written** — and deterministically so (the
+> committed copy is byte-identical to a fresh regenerate). Do not edit it by hand;
+> regenerate with:
+> ```bash
+> i-orca compile examples/provable_opt/provable_opt.i.orca.md \
+>   --target isar --document --theory ProvableOpt_Surface \
+>   --out examples/provable_opt/ProvableOpt_Surface.thy
+> ```
 
 ## Honest scope
 
@@ -77,6 +113,23 @@ cannot load this directory's project-local session, so it reports
 `formal_fraction_real = 0.0` for the `(rule <local lemma>)` discharges — an
 import-resolution limit of the batch backend, **not** a math failure (same caveat
 as [`../complexity`](../complexity)). Use the session `isabelle build`.
+
+## Roadmap (PROVABLE_OPT, formal arm)
+
+Cross-repo progress on carrying fieldrun's PROVABLE_OPT claims as kernel theorems
+(tracked here + in `fieldrun/PROVABLE_OPT_PROPOSAL.md §6`):
+
+- [x] **PO-T4 rung 1 — lossless demand / dead-stratum (`lastpos`)** `T_P`-equivalence
+      (general `demand_restrict_lfp`/`demand_restrict_query` + concrete instance). *This corpus.*
+- [ ] **Shared `PO_T1` lemma extraction** — lift the general fixpoint theorems into a
+      reusable theory once a second consumer exists (the PO-T3 rung below).
+- [ ] **PO-T3 — margin-certified decode invariance** (`m > 2δ`) as a companion kernel
+      theorem; sound locally, bounded globally by LE-T2 (so state the bound, don't overclaim).
+- [ ] **Real-bundle `Π`** — discharge `demand_closed` on strata actually emitted by
+      LOGIC_EXPORT + Soufflé on a small trained model (the general theorem already
+      covers *any* `Π` meeting the hypotheses; this verifies the hypotheses on real strata).
+- [ ] **Full magic-sets *adornment* transform** — binding-pattern predicate
+      specialisation (strictly heavier than demand restriction).
 
 ## Files
 - [`ProvableOpt.thy`](ProvableOpt.thy) — the proofs (general + concrete instance).

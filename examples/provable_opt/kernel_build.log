@@ -1,4 +1,4 @@
-Started at Thu Jun 18 23:47:44 GMT 2026 (polyml-5.9.2_x86_64_32-linux on pop-os)
+Started at Fri Jun 19 02:32:45 GMT 2026 (polyml-5.9.2_x86_64_32-linux on pop-os)
 ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx4g -Xss16m"
 ISABELLE_BUILD_OPTIONS=""
 
@@ -15,10 +15,10 @@ Cleaned ProvableOpt
 Running ProvableOpt ...
 ProvableOpt: theory ProvableOpt.ProvableOpt
 ProvableOpt: theory ProvableOpt.ProvableOpt_Surface
-ProvableOpt: theory ProvableOpt.ProvableOpt 100% (0.588s cumulated time)
-ProvableOpt: theory ProvableOpt.ProvableOpt_Surface 100% (0.056s cumulated time)
-Timing ProvableOpt (8 threads, 0.480s elapsed time, 0.900s cpu time, 0.022s GC time, factor 1.88)
+ProvableOpt: theory ProvableOpt.ProvableOpt 100% (0.569s cumulated time)
+ProvableOpt: theory ProvableOpt.ProvableOpt_Surface 100% (0.058s cumulated time)
+Timing ProvableOpt (8 threads, 0.467s elapsed time, 0.901s cpu time, 0.023s GC time, factor 1.93)
 Finished ProvableOpt (0:00:01 elapsed time)
 
-Finished at Thu Jun 18 23:47:48 GMT 2026
+Finished at Fri Jun 19 02:32:49 GMT 2026
 0:00:03 elapsed time
