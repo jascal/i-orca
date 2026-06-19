@@ -48,9 +48,9 @@ This is the program's signature move — the same claim, *measured* and *proved*
 
 | formal (here) | empirical (econ-sae) |
 |---|---|
-| presence = `fisher` | partial Spearman(Fisher → probe) = **+0.94** (vs var_share **+0.09**) |
-| allocation = `var_share` | presence-controlled Spearman(var_share → SAE) = **+1.00** (vs Fisher **+0.37**) |
-| `present_not_allocated` | `fiscal_active`: Fisher **239** (max), var_share **0.002**, SAE recovery **0.65** |
+| presence = `fisher` | partial Spearman(Fisher → probe) = **+0.97** (vs var_share **+0.21**) |
+| allocation = `var_share` | presence-controlled Spearman(var_share → SAE) = **+0.94** (vs Fisher **+0.37**) |
+| `present_not_allocated` | `fiscal_active`: Fisher **169** (max), var_share **0.0006**, SAE recovery **0.67** |
 
 ## Honest scope
 

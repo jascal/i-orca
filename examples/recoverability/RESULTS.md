@@ -34,11 +34,11 @@ Proofs are manual structured Isar over `Complex_Main` (real analysis: `ln`, `sqr
 
 ## Empirical correspondence (econ-sae)
 
-| formal | measured (econ-sae PRs #13/#14) |
+| formal | measured (econ-sae PR #15; 3 seeds) |
 |---|---|
-| presence = `fisher` | partial Spearman(Fisher→probe) +0.94 (var_share +0.09) |
-| allocation = `var_share` | presence-controlled Spearman(var_share→SAE) +1.00 (Fisher +0.37) |
-| `present_not_allocated` | `fiscal_active`: Fisher 239 / var_share 0.002 / SAE 0.65 |
+| presence = `fisher` | partial Spearman(Fisher→probe) +0.97 (var_share +0.21) |
+| allocation = `var_share` | presence-controlled Spearman(var_share→SAE) +0.94 (Fisher +0.37) |
+| `present_not_allocated` | `fiscal_active`: Fisher 169 / var_share 0.0006 / SAE 0.67 |
 
 **Open / next:** the general multivariate water-filling; the SAE-nonlinearity gap; and
 the structure-aware (predictive / coverage) objective that the empirical work leaves
