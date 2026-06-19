@@ -121,6 +121,16 @@ qed
 
 section \<open>PO-T3 — the margin-certified decode invariance\<close>
 
+text \<open>PO-T1 and PO-T3 are the two complementary faces of "provable optimization".
+  PO-T1 is the EXACT / STRUCTURAL face: a demand-closed rewrite preserves the whole
+  least model on the query, losslessly, for every input. PO-T3 is the APPROXIMATE /
+  QUANTITATIVE face: a rewrite that only *perturbs* the logits (it changes the
+  numbers, so PO-T1's exactness is gone) still preserves the DECODE, but only where
+  there is enough margin to absorb the perturbation. PO-T1 covers the part of \<open>\<Pi>\<close>
+  the query does not read; PO-T3 covers the part it does read but does not depend on
+  sharply. Together they are the lossless and the margin-bounded halves of the same
+  "optimize \<open>\<Pi>\<close>, carry a proof" program.\<close>
+
 text \<open>A logit vector \<open>L : 'tok \<Rightarrow> real\<close> over a token set \<open>V\<close> decodes to its strict
   argmax. A transform that perturbs each logit by at most \<open>\<delta>\<close> (e.g. dropping a
   margin-dominated neuron) preserves the decode on every token whose margin
@@ -161,10 +171,13 @@ next
 qed
 
 text \<open>The same, with the margin written as the gap to the best competitor (the
-  ``margin L V t > 2\<delta>`` form fieldrun states), for a finite token set.\<close>
+  ``margin L V t > 2\<delta>`` form fieldrun states), for a finite token set. The
+  \<open>finite V\<close> precondition is what lets \<open>margin\<close> use \<open>Max\<close>; it holds for any real
+  vocabulary (finite) -- only an idealised infinite-vocabulary model would need the
+  pointwise ``decode_margin_certified`` instead.\<close>
 
 corollary decode_margin_Max_certified:
-  assumes fin:    "finite V"
+  assumes fin:    "finite V"          \<comment> \<open>real vocabularies are finite; needed for \<open>Max\<close>\<close>
       and nonemp: "V - {t} \<noteq> {}"
       and tV:     "t \<in> V"
       and pert:   "\<And>v. v \<in> V \<Longrightarrow> \<bar>L' v - L v\<bar> \<le> \<delta>"
