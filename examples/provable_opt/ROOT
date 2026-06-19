@@ -1,8 +1,10 @@
 session "ProvableOpt" = "HOL" +
-  description "PROVABLE_OPT formal arm (fieldrun): kernel-checked T_P-equivalences. ProvableOpt_Common = the reusable general theory (PO-T1 demand/dead-stratum + PO-T3 margin); ProvableOpt = the lossless lastpos instance (PO-T4 rung 1); ProvableOpt_Margin = the margin-certificate instance (PO-T3) with its boundary flip-witness; the *_Surface theories are the compiled i-orca surfaces, re-derived via (rule ...) to certify the surfaces end-to-end."
+  description "PROVABLE_OPT formal arm (fieldrun): kernel-checked T_P-equivalences. ProvableOpt_Common = the reusable general theory (PO-T1 demand/dead-stratum + PO-T3 margin); ProvableOpt = the lossless lastpos instance (PO-T4 rung 1); ProvableOpt_Margin = the margin-certificate instance (PO-T3) with its boundary flip-witness; ProvableOpt_Datalog = the kernel bridge (syntactic demand-closure on a rule-level program implies the semantic one, so fieldrun's lo3a/demand_closure.py output plugs into the proof); the *_Surface theories are the compiled i-orca surfaces, re-derived via (rule ...) to certify the surfaces end-to-end."
   theories
     ProvableOpt_Common
     ProvableOpt
     ProvableOpt_Margin
+    ProvableOpt_Datalog
     ProvableOpt_Surface
     ProvableOpt_Margin_Surface
+    ProvableOpt_Datalog_Surface
