@@ -41,6 +41,33 @@ Proofs are manual structured Isar over `Complex_Main` (real analysis: `ln`, `sqr
 | allocation = `var_share` | presence-controlled Spearman(var_share→SAE) +0.94 (Fisher +0.37) |
 | `present_not_allocated` | `fiscal_active`: Fisher 169 / var_share 0.0006 / SAE 0.67 |
 
-**Open / next:** the general multivariate water-filling; the SAE-nonlinearity gap; and
-the structure-aware (predictive / coverage) objective that the empirical work leaves
-as the only untried label-free route to close the allocation gap.
+## Scope of the empirical claim — read this before citing "allocation = var_share"
+
+A three-substrate test (econ-sae macro-regime; **bio-sae** ESM-2, 7 987 + 11 376
+GO/Pfam/EC features; **lm-sae** GPT-2 + the SAELens 24 576-feature dictionary; see the
+workspace `SUPERVISION_DEPENDENCE.md`) sharpens what is and isn't established:
+
+- ✅ **`present_not_allocated` and the presence axis hold empirically and robustly.**
+  Present-yet-dropped features exist on all three substrates (bio: 693/5 953 ≈ 12%);
+  presence ~ Fisher SNR everywhere (partial `fisher→probe` +0.64 to +0.97).
+- ⚠️ **The empirical claim `allocation = var_share` does *not* generalize.** The +0.94
+  above is an econ *within-low-Fisher-tier* slice; across all features even econ has
+  Fisher dominating (+0.85), and on both real foundation models var_share's *unique*
+  contribution to recovery is null-to-negative (partial −0.26 to −0.35). On trained
+  models, allocation tracks **distinctiveness (Fisher) + statistical mass**, not
+  variance-share.
+
+This does **not** weaken any theorem here: `present_not_allocated`,
+`arbitrarily_variance_cheap`, and `same_fisher_opposite_allocation` are
+**possibility** results — they prove a feature *can* be maximally detectable yet
+variance-cheap, so an L2/rate-distortion compressor *can* drop it. That existence
+claim is exactly right and substrate-independent. What the cross-substrate sweep
+falsifies is the stronger *empirical* reading that variance-share is the operative
+predictor of recovery on real SAEs — the scalar `var_share` model is the idealization,
+not the measured allocation law.
+
+**Open / next:** the general multivariate water-filling; the SAE-nonlinearity gap; a
+formal model of the *measured* allocation predictor (distinctiveness + statistical
+mass, with feature-splitting) rather than variance-share; and the structure-aware
+(predictive / coverage) objective that the empirical work leaves as the only untried
+label-free route to close the allocation gap.
