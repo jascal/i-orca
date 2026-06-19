@@ -1,142 +1,18 @@
 theory ProvableOpt
-  imports Main
+  imports ProvableOpt_Common
 begin
 
-text \<open>PO-T4 / PO-T1 (fieldrun PROVABLE_OPT_PROPOSAL.md): a machine-checked
-  \<open>T_P\<close>-equivalence for the LOSSLESS DEMAND / DEAD-STRATUM transform on the
-  exported semiring-Datalog program \<open>\<Pi>\<close>.
-
-  The model's next-token computation is exported (LOGIC_EXPORT.md) as a Datalog
-  program whose semantics is the least fixpoint of its immediate-consequence
-  operator \<open>T_P\<close>. fieldrun's Souffle pipeline applies demand / dead-stratum
-  rewrites (e.g. the `lastpos` restriction: `xf`, `ssf` are computed at every
-  position but only `lastpos` is read by `logit`, so restrict them to `lastpos`).
-  The proposal asks for ONE such transform carried with a kernel-checked
-  \<open>T_P\<close>-equivalence proof; PO-T4 status there is "open".
-
-  This theory closes that first rung. We model \<open>T_P\<close> as an arbitrary MONOTONE
-  operator on atom-sets and the transform as restriction to a DEMAND-CLOSED set
-  \<open>D\<close> (the atoms the query transitively reads). The general theorem
-  (\<open>demand_restrict_lfp\<close>) proves the restricted fixpoint equals the full fixpoint
-  projected onto \<open>D\<close>; the corollary (\<open>demand_restrict_query\<close>) proves the decode is
-  preserved for EVERY context (EDB). Correctness is then a theorem about the
-  fixpoint, not a measurement -- exactly PO-T1's claim.
+text \<open>PO-T4 / PO-T1 instance: the LOSSLESS DEMAND / DEAD-STRATUM (`lastpos`)
+  transform on the exported semiring-Datalog program \<open>\<Pi>\<close> (fieldrun
+  PROVABLE_OPT_PROPOSAL.md §5-6; LOGIC_EXPORT.md for the export of the model as
+  \<open>\<Pi>\<close>). The general \<open>T_P\<close>-equivalence lives in ``ProvableOpt_Common``
+  (\<open>demand_restrict_lfp\<close> / \<open>demand_restrict_query\<close>); here we instantiate it on the
+  smallest \<open>\<Pi>\<close> that exhibits the transform faithfully and exhibit the saving.
 
   HONEST SCOPE. This certifies the LOSSLESS demand-restriction family
   (dead-stratum / `lastpos`), i.e. PO-T1 / the `--magic-transform` "nothing the
   query does not read" guarantee. It does NOT certify the full magic-sets
-  ADORNMENT transform (which also specialises/reorders predicates by binding
-  pattern); that is a strictly heavier equivalence and stays open. The concrete
-  instance below is the smallest Datalog program that exhibits the `lastpos`
-  saving faithfully, not a real bundle.\<close>
-
-section \<open>The transformed operator and the demand-closure condition\<close>
-
-text \<open>\<open>restrict_op T D\<close> is the immediate-consequence operator of the transformed
-  program \<open>\<Pi>'\<close>: derive as before, but keep only the demanded atoms \<open>D\<close>.\<close>
-
-definition restrict_op :: "('a set \<Rightarrow> 'a set) \<Rightarrow> 'a set \<Rightarrow> ('a set \<Rightarrow> 'a set)" where
-  "restrict_op T D = (\<lambda>S. T S \<inter> D)"
-
-text \<open>\<open>D\<close> is DEMAND-CLOSED for \<open>T\<close> when the producers of a \<open>D\<close>-atom read only
-  \<open>D\<close>-atoms: the one-step \<open>D\<close>-consequences of \<open>S\<close> depend on \<open>S\<close> only through
-  \<open>S \<inter> D\<close>. This is precisely the structural fact that licenses the `lastpos`
-  restriction -- the rules deriving a `lastpos` atom mention only `lastpos`
-  atoms (a stratum boundary / a closed demand frontier).\<close>
-
-definition demand_closed :: "('a set \<Rightarrow> 'a set) \<Rightarrow> 'a set \<Rightarrow> bool" where
-  "demand_closed T D \<longleftrightarrow> (\<forall>S. T S \<inter> D = T (S \<inter> D) \<inter> D)"
-
-lemma mono_restrict_op:
-  assumes "mono T"
-  shows "mono (restrict_op T D)"
-  using assms by (auto simp: restrict_op_def mono_def)
-
-section \<open>The general theorem: demand restriction preserves the fixpoint on D\<close>
-
-text \<open>\<open>lfp (restrict_op T D) = lfp T \<inter> D\<close>: running the transformed program
-  computes exactly the demanded part of the full least model. Proven by the two
-  standard fixpoint moves -- \<open>lfp_lowerbound\<close> (least pre-fixpoint) and
-  \<open>lfp_unfold\<close> (the fixpoint property) -- i.e. by induction on \<open>T_P\<close>, as the
-  proposal says it must be.
-
-  KEY INSIGHT (the \<open>\<supseteq>\<close> direction, where demand-closure pays). We show
-  \<open>lfp T' \<union> (-D)\<close> is a pre-fixpoint of the FULL \<open>T\<close>. A newly derived atom \<open>x \<notin> D\<close>
-  is absorbed by \<open>-D\<close>; a newly derived \<open>x \<in> D\<close> is produced -- by \<open>demand_closed\<close> --
-  using only \<open>D\<close>-atoms, which on \<open>lfp T' \<union> (-D)\<close> are exactly \<open>lfp T'\<close>, so \<open>x\<close> is
-  already in \<open>lfp T'\<close>. Hence no derivation the transform DROPS can ever feed a
-  demanded atom: the dropped strata are invisible to every query in \<open>D\<close>. The proof
-  is fully manual structured Isar (no Sledgehammer); \<open>metis\<close> only discharges the
-  equational glue produced by the \<open>demand_closed\<close> rewrite.\<close>
-
-theorem demand_restrict_lfp:
-  assumes mono: "mono T"
-      and dc:   "demand_closed T D"
-  shows "lfp (restrict_op T D) = lfp T \<inter> D"
-proof -
-  have monoT': "mono (restrict_op T D)" using mono by (rule mono_restrict_op)
-  from dc have dcS: "\<And>S. T S \<inter> D = T (S \<inter> D) \<inter> D"
-    by (simp add: demand_closed_def)
-
-  \<comment> \<open>(1) \<open>lfp T'\<close> is below \<open>lfp T \<inter> D\<close>, because the latter is a fixpoint of \<open>T'\<close>.\<close>
-  have fixR: "restrict_op T D (lfp T \<inter> D) = lfp T \<inter> D"
-  proof -
-    have "restrict_op T D (lfp T \<inter> D) = T (lfp T \<inter> D) \<inter> D"
-      by (simp add: restrict_op_def)
-    also have "\<dots> = T (lfp T) \<inter> D" by (metis dcS)
-    also have "\<dots> = lfp T \<inter> D" by (metis lfp_unfold[OF mono])
-    finally show ?thesis .
-  qed
-  have le1: "lfp (restrict_op T D) \<subseteq> lfp T \<inter> D"
-    by (rule lfp_lowerbound) (simp add: fixR)
-
-  \<comment> \<open>\<open>lfp T'\<close> only ever contains demanded atoms.\<close>
-  have subD: "lfp (restrict_op T D) \<subseteq> D"
-  proof -
-    have "lfp (restrict_op T D) = restrict_op T D (lfp (restrict_op T D))"
-      by (metis lfp_unfold[OF monoT'])
-    also have "\<dots> \<subseteq> D" by (simp add: restrict_op_def)
-    finally show ?thesis .
-  qed
-
-  \<comment> \<open>(2) \<open>lfp T \<inter> D \<subseteq> lfp T'\<close>: show \<open>lfp T' \<union> (-D)\<close> is a pre-fixpoint of \<open>T\<close>.\<close>
-  have pre: "T (lfp (restrict_op T D) \<union> (- D)) \<subseteq> lfp (restrict_op T D) \<union> (- D)"
-  proof
-    fix x assume x: "x \<in> T (lfp (restrict_op T D) \<union> (- D))"
-    show "x \<in> lfp (restrict_op T D) \<union> (- D)"
-    proof (cases "x \<in> D")
-      case False thus ?thesis by simp
-    next
-      case True
-      have "x \<in> T (lfp (restrict_op T D) \<union> (- D)) \<inter> D" using x True by simp
-      also have "T (lfp (restrict_op T D) \<union> (- D)) \<inter> D
-                   = T ((lfp (restrict_op T D) \<union> (- D)) \<inter> D) \<inter> D"
-        by (rule dcS)
-      also have "(lfp (restrict_op T D) \<union> (- D)) \<inter> D = lfp (restrict_op T D)"
-        using subD by auto
-      finally have "x \<in> T (lfp (restrict_op T D)) \<inter> D" .
-      hence "x \<in> restrict_op T D (lfp (restrict_op T D))"
-        by (simp add: restrict_op_def)
-      also have "\<dots> = lfp (restrict_op T D)" by (metis lfp_unfold[OF monoT'])
-      finally show ?thesis by simp
-    qed
-  qed
-  have "lfp T \<subseteq> lfp (restrict_op T D) \<union> (- D)"
-    by (rule lfp_lowerbound) (rule pre)
-  hence le2: "lfp T \<inter> D \<subseteq> lfp (restrict_op T D)" using subD by auto
-
-  from le1 le2 show ?thesis by auto
-qed
-
-corollary demand_restrict_query:
-  assumes "mono T" and "demand_closed T D" and "Q \<subseteq> D"
-  shows "lfp T \<inter> Q = lfp (restrict_op T D) \<inter> Q"
-proof -
-  have "lfp (restrict_op T D) \<inter> Q = (lfp T \<inter> D) \<inter> Q"
-    using demand_restrict_lfp[OF assms(1,2)] by simp
-  also have "\<dots> = lfp T \<inter> Q" using \<open>Q \<subseteq> D\<close> by auto
-  finally show ?thesis by simp
-qed
+  ADORNMENT transform (binding-pattern specialisation); that stays open.\<close>
 
 section \<open>A concrete instance: the `lastpos` dead-stratum restriction\<close>
 

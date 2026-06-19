@@ -1,54 +1,66 @@
-# PO-T4 / PO-T1 — results
+# PROVABLE_OPT formal arm — results
 
-Backend: **Isabelle 2025-2** (HOL). Session `ProvableOpt` (see `ROOT`), built with
-`isabelle build -D .` — **no `quick_and_dirty`**, so every step is kernel-checked
-and any `sorry` would fail the build. Build: `Finished ProvableOpt` (exit 0), both
-theories at 100%. See `kernel_build.log`.
+Backend: **Isabelle 2025-2** (HOL / Complex_Main). Session `ProvableOpt` (see
+`ROOT`), built with `isabelle build -D .` — **no `quick_and_dirty`**, so every step
+is kernel-checked and any `sorry` would fail the build. Build: `Finished
+ProvableOpt` (exit 0), all 5 theories at 100%. See `kernel_build.log`.
 
-## General theorem (PO-T1 as a fixpoint statement)
+## Reusable general theory — `ProvableOpt_Common.thy`
 
-| Lemma (`ProvableOpt.thy`) | Statement | Status |
+### PO-T1 (lossless demand / dead-stratum)
+
+| Lemma | Statement | Status |
 |---|---|---|
 | `mono_restrict_op` | `mono T ⟹ mono (restrict_op T D)` | ✅ kernel |
 | `demand_restrict_lfp` | `mono T ⟹ demand_closed T D ⟹ lfp (restrict_op T D) = lfp T ∩ D` | ✅ kernel |
 | `demand_restrict_query` | `mono T ⟹ demand_closed T D ⟹ Q ⊆ D ⟹ lfp T ∩ Q = lfp (restrict_op T D) ∩ Q` | ✅ kernel |
 
-Proof spine: `lfp_lowerbound` (least pre-fixpoint, both inclusions) + `lfp_unfold`
-(the fixpoint property) + the `demand_closed` equation — induction on `T_P`.
+Proof spine: `lfp_lowerbound` + `lfp_unfold` + the `demand_closed` equation (induction on `T_P`). Manual Isar; `metis` only for the equational glue.
 
-## Concrete instance (the `lastpos` dead-stratum restriction)
+### PO-T3 (margin-certified decode invariance)
 
 | Lemma | Statement | Status |
 |---|---|---|
-| `Tlm_mono` | the `lastpos` program's `T_P` is monotone | ✅ kernel |
-| `Tlm_demand_closed` | `demand_closed (Tlm L) (Dlm L)`, `Dlm L = {Logit, Acc L, Res L}` | ✅ kernel |
+| `decode_margin_certified` | `(∀v∈V. ¦L' v − L v¦ ≤ δ) ⟹ t∈V ⟹ (∀v∈V. v≠t ⟶ L t − L v > 2δ) ⟹ decodes_to L' V t` | ✅ kernel |
+| `decode_margin_Max_certified` | finite `V`, `V−{t}≠{}`, `t∈V`, δ-bounded perturbation, `margin L V t > 2δ` ⟹ `decodes_to L' V t` | ✅ kernel |
+
+Proof: `abs_le_iff` → linear bounds → `linarith`; the Max form reduces to the pointwise one via `Max_ge`. Manual Isar, no Sledgehammer.
+
+## Concrete instances
+
+### `ProvableOpt.thy` — the `lastpos` PO-T1 instance
+
+| Lemma | Statement | Status |
+|---|---|---|
+| `Tlm_mono` / `Tlm_demand_closed` | the `lastpos` `T_P` is monotone; `Dlm L = {Logit, Acc L, Res L}` is demand-closed | ✅ kernel |
 | `Tlm_demand_restrict_lfp` | `lfp (restrict_op (Tlm L) (Dlm L)) = lfp (Tlm L) ∩ Dlm L` | ✅ kernel |
-| `Logit_in_full` | `Logit ∈ lfp (Tlm L)` (model actually emits — preservation non-vacuous) | ✅ kernel |
-| `Tlm_decode_preserved` | `Logit ∈ lfp (Tlm L) ⟷ Logit ∈ lfp (restrict_op (Tlm L) (Dlm L))` | ✅ kernel |
+| `Logit_in_full` / `Tlm_decode_preserved` | the model emits; `Logit` derivable iff derivable after the transform | ✅ kernel |
 | `lastpos_transform_lossless_and_strict` | `p < L ⟹` full derives `Acc p` ∧ transform drops `Acc p` ∧ decode preserved | ✅ kernel |
 
-## i-orca surface
+### `ProvableOpt_Margin.thy` — the PO-T3 instance + boundary
 
-| Theorem (`provable_opt.i.orca.md`) | Cites | structural | compiled-to-Isar kernel |
-|---|---|---|---|
-| `DemandRestrictLfp` | `demand_restrict_lfp` | VALID | ✅ (`ProvableOpt_Surface`) |
-| `DemandRestrictQuery` | `demand_restrict_query` | VALID | ✅ |
-| `LastposDemandClosed` | `Tlm_demand_closed` | VALID | ✅ |
-| `LastposDemandRestrictLfp` | `Tlm_demand_restrict_lfp` | VALID | ✅ |
-| `LastposTransformLosslessAndStrict` | `lastpos_transform_lossless_and_strict` | VALID | ✅ |
+| Lemma | Statement | Status |
+|---|---|---|
+| `drop_neuron_pert` / `margin_full_A` | the neuron-drop perturbation is `≤ 1`; `margin Lfull UNIV A = 12 > 2δ` | ✅ kernel |
+| `margin_drop_decode_preserved` | `decodes_to Lbase UNIV A` (big-margin token: decode certified preserved) | ✅ kernel |
+| `small_margin_decode_can_flip` | margin `=1 ≤ 2δ` token where a δ-bounded perturbation **flips** the decode `A→B` — the `2δ` guard is necessary | ✅ kernel |
+| `margin_guard_tight` | at margin `= 2δ` exactly (δ=½) a δ-bounded perturbation **ties** the logits — so `> 2δ` cannot weaken to `≥ 2δ`: the guard is **tight** | ✅ kernel |
 
-`i-orca verify`: 5/5 VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
-`ProvableOpt_Surface.thy` (the compiled surface) builds in-session, so the
-Markdown surface is certified end-to-end (table → Isar → kernel).
+## i-orca surfaces (table → Isar → kernel)
+
+| Surface | Theorems | `i-orca verify` | `i-orca check` | compiled-in-session |
+|---|---|---|---|---|
+| `provable_opt.i.orca.md` | 5 (PO-T1) | VALID | 5/5 = 1.000 | ✅ `ProvableOpt_Surface` |
+| `provable_opt_margin.i.orca.md` | 5 (PO-T3) | VALID | 5/5 = 1.000 | ✅ `ProvableOpt_Margin_Surface` |
 
 ## Maps to fieldrun
 
 | fieldrun claim | here |
 |---|---|
 | PO-T1 — lossless `T_P`-preserving rewrites keep `decide`/`logit` for every context | `demand_restrict_query` |
-| PO-T4 — a concrete `Π` transform (the `lastpos` dead-stratum restriction) carried with a machine-checked `T_P`-equivalence | `lastpos_transform_lossless_and_strict` + the surface; **first rung closed** |
-| LOGIC_EXPORT — `Π`'s semantics is `lfp T_P`; "same least model" is provable by induction on `T_P` | the whole proof spine |
+| PO-T4 — a concrete `Π` transform (`lastpos` dead-stratum) with a machine-checked `T_P`-equivalence | `lastpos_transform_lossless_and_strict` + surface; **rung 1 closed** |
+| PO-T3 — margin-certified decode invariance (`m > 2δ`), sound **local**, bounded globally by LE-T2 | `decode_margin_Max_certified` + `small_margin_decode_can_flip` (the bound made explicit) |
 
-**Still open (next rungs):** the full magic-sets adornment transform; the
-certificate on an emitted real-bundle `Π` (not the tiny model); PO-T3's
-margin-certified decode invariance as a companion kernel theorem.
+**Still open (next rungs):** the full magic-sets adornment transform; discharging
+the PO-T1 `demand_closed` / PO-T3 per-logit `δ` hypotheses on an **emitted
+real-bundle `Π`** (the general theorems already cover any `Π` meeting them).
