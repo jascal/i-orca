@@ -56,6 +56,16 @@ Proof: `abs_le_iff` → linear bounds → `linarith`; the Max form reduces to th
 | `dprog_syn_closed` | the `lastpos` final stratum as a ground rule-set passes the syntactic check | ✅ kernel |
 | `dprog_lossless_and_strict` | the lossless-and-strict result re-derived *through the bridge* from the syntactic check | ✅ kernel |
 
+### Verified decision procedure — `ProvableOpt_Checker.thy`
+
+| Lemma | Statement | Status |
+|---|---|---|
+| `echeck_iff` | `echeck ER KD ⟷ syn_demand_closed (prog_of ER) (set KD)` — the executable checker is **faithful** (sound + complete) | ✅ kernel |
+| `echeck_lossless` | `echeck ER KD ⟹ Q ⊆ set KD ⟹` the demand-restricted program preserves `Q` | ✅ kernel |
+| `dprog_e_checks` | `echeck (dprog_e 5) (dkeep_e 5)` — the verified checker **executes** (`by eval`) and passes | ✅ kernel (eval) |
+| `executable_checker_certifies_lossless` | the lossless guarantee for the concrete `lastpos` program, obtained by **running** the checker — not a hand proof | ✅ kernel (eval) |
+| `export_code echeck in SML` | the procedure extracts to runnable SML (diff-able against the Python checker) | ✅ exported |
+
 ## i-orca surfaces (table → Isar → kernel)
 
 | Surface | Theorems | `i-orca verify` | `i-orca check` | compiled-in-session |
@@ -63,6 +73,7 @@ Proof: `abs_le_iff` → linear bounds → `linarith`; the Max form reduces to th
 | `provable_opt.i.orca.md` | 5 (PO-T1) | VALID | 5/5 = 1.000 | ✅ `ProvableOpt_Surface` |
 | `provable_opt_margin.i.orca.md` | 5 (PO-T3) | VALID | 5/5 = 1.000 | ✅ `ProvableOpt_Margin_Surface` |
 | `provable_opt_datalog.i.orca.md` | 5 (bridge) | VALID | 5/5 = 1.000 | ✅ `ProvableOpt_Datalog_Surface` |
+| `provable_opt_checker.i.orca.md` | 3 (verified checker) | VALID | 3/3 = 1.000 | ✅ `ProvableOpt_Checker_Surface` |
 
 ## Maps to fieldrun
 
@@ -72,8 +83,12 @@ Proof: `abs_le_iff` → linear bounds → `linarith`; the Max form reduces to th
 | PO-T4 — a concrete `Π` transform (`lastpos` dead-stratum) with a machine-checked `T_P`-equivalence | `lastpos_transform_lossless_and_strict` + surface; **rung 1 closed** |
 | PO-T3 — margin-certified decode invariance (`m > 2δ`), sound **local**, bounded globally by LE-T2 | `decode_margin_Max_certified` + `small_margin_decode_can_flip` (the bound made explicit) |
 | PO-T1 real-bundle — `lo3a/demand_closure.py` certifies the dead stratum on a real `Π`; that *syntactic* premise now provably entails the lossless conclusion | `syn_demand_closed_imp_demand_closed` → `syn_demand_closed_lossless` (the kernel bridge) |
+| PO-T1 real-bundle — the checker's *decision* is itself kernel-proved (not trusted); only the parser remains | `echeck_iff` + `executable_checker_certifies_lossless` (run by `eval`) |
 
-**Still open (next rungs):** a reflected/verified `syn_demand_closed` decision
-procedure (closes the last trust gap — parser + checker faithfulness); the
+**Trusted base now:** only the **parser** (`.dl` text → rule list). Everything from
+the rule list onward (the demand-closure decision via `echeck`, and its lossless
+consequence) is machine-checked.
+
+**Still open (next rungs):** a verified **parser** (the last trust boundary); the
 per-logit `δ` real-bundle discharge for PO-T3; the full magic-sets adornment
 transform.

@@ -28,6 +28,10 @@ theorem about the fixpoint, not a measurement." This corpus makes those theorems
 - **[`ProvableOpt_Datalog.thy`](ProvableOpt_Datalog.thy)** — the **kernel bridge**:
   rule-level Datalog (`T_P`) + the proof that the *syntactic* demand-closure check
   (what the tool runs) implies the *semantic* one the lossless theorem needs.
+- **[`ProvableOpt_Checker.thy`](ProvableOpt_Checker.thy)** — the **verified decision
+  procedure**: an executable, faithful `echeck` whose *pass yields losslessness by
+  `eval`* — the checker's verdict computed by kernel-trusted code, shrinking the
+  trusted base to just the parser.
 
 ## PO-T1: the demand / dead-stratum transform, as Datalog rules (before → after)
 
@@ -98,10 +102,30 @@ the emitted rules. `ProvableOpt_Datalog.thy` closes that gap:
   bridge* — the same verdict the tool returns on `whole_base.dl`, now a theorem.
 
 So the checker's output `D` plugs straight into the kernel proof: **"premise
-certified by a tool" → "premise proved"**. The only remaining trust is that the
-parser faithfully reflects the `.dl` and the checker correctly decides
-`syn_demand_closed` (a verified parser/decision-procedure is the next, separate
-rung).
+certified by a tool" → "premise proved"**.
+
+### The verified decision procedure (`ProvableOpt_Checker.thy`)
+
+The bridge consumes `syn_demand_closed`, but that's still a predicate someone has to
+*decide* — the same thing `lo3a/demand_closure.py` computes, in Python, on trust.
+`ProvableOpt_Checker.thy` replaces that trust with proof:
+
+- `echeck ER KD` — an **executable** decision procedure (pure list operations,
+  code-generatable for any `'a` with equality).
+- **`echeck_iff`** — it's **faithful**: `echeck ER KD ⟷ syn_demand_closed
+  (prog_of ER) (set KD)` (sound *and* complete). Hence `echeck_lossless`: a pass
+  yields the lossless decode guarantee directly.
+- **`executable_checker_certifies_lossless`** — the payoff: the lossless guarantee
+  for the concrete `lastpos` program is obtained by **running** the checker
+  (`echeck … by eval`, inside the proof), not by a hand proof — the verdict is
+  computed by kernel-trusted code. `export_code` confirms it extracts to runnable
+  SML (the form one would diff against the Python).
+
+This shrinks the trusted base of the whole real-bundle line to a **single
+irreducible boundary: the parser** (`.dl` text → rule list). Everything from the
+rule list onward — the demand-closure decision *and* its lossless consequence — is
+machine-checked. (fieldrun ships `lo3a/test_demand_closure.py` as a regression test
+of the Python checker against the same shape `echeck` certifies.)
 
 ## The compiled i-orca surfaces
 
@@ -173,17 +197,23 @@ Cross-repo progress on carrying fieldrun's PROVABLE_OPT claims as kernel theorem
       rule-set, so the checker's syntactic output plugs into the kernel proof —
       "premise certified by a tool" → "premise proved". Residual trust: parser
       faithfulness + a verified `syn_demand_closed` decision procedure.
-- [ ] **Verified checker / per-logit-`δ` PO-T3 real-bundle, magic-sets adornment** —
-      a reflected/verified parser+decision-procedure (closes the last trust gap);
-      a per-logit-`δ` real-bundle discharge for PO-T3; the full magic-sets
-      *adornment* transform (binding-pattern specialisation, strictly heavier).
+- [x] **Verified decision procedure** — `ProvableOpt_Checker.thy`: an executable,
+      *faithful* `echeck` (`echeck_iff`) whose pass yields losslessness by `eval`
+      (`executable_checker_certifies_lossless`), `export_code`-extractable. The
+      checker's *decision* is now kernel-proved, not trusted — only the parser
+      (`.dl` → rule list) remains in the trusted base. fieldrun ships
+      `lo3a/test_demand_closure.py` as a checker regression test.
+- [ ] **Remaining rungs** — a verified **parser** (`.dl` text → rule list; the last
+      trust boundary); a per-logit-`δ` real-bundle discharge for **PO-T3**; the full
+      magic-sets **adornment** transform (binding-pattern specialisation, heavier).
 
 ## Files
 - [`ProvableOpt_Common.thy`](ProvableOpt_Common.thy) — reusable general theory (PO-T1 + PO-T3).
 - [`ProvableOpt.thy`](ProvableOpt.thy) — the `lastpos` PO-T1 instance.
 - [`ProvableOpt_Margin.thy`](ProvableOpt_Margin.thy) — the PO-T3 instance + flip-witness.
 - [`ProvableOpt_Datalog.thy`](ProvableOpt_Datalog.thy) — the kernel bridge (syntactic ⟹ semantic demand-closure).
-- [`ProvableOpt_Surface.thy`](ProvableOpt_Surface.thy) / [`ProvableOpt_Margin_Surface.thy`](ProvableOpt_Margin_Surface.thy) / [`ProvableOpt_Datalog_Surface.thy`](ProvableOpt_Datalog_Surface.thy) — compiled i-orca surfaces.
-- [`provable_opt.i.orca.md`](provable_opt.i.orca.md) / [`provable_opt_margin.i.orca.md`](provable_opt_margin.i.orca.md) / [`provable_opt_datalog.i.orca.md`](provable_opt_datalog.i.orca.md) — the i-orca table surfaces.
+- [`ProvableOpt_Checker.thy`](ProvableOpt_Checker.thy) — the verified, executable decision procedure (`echeck`).
+- `ProvableOpt_{Surface,Margin_Surface,Datalog_Surface,Checker_Surface}.thy` — compiled i-orca surfaces.
+- `provable_opt{,_margin,_datalog,_checker}.i.orca.md` — the i-orca table surfaces.
 - [`ROOT`](ROOT) — the `ProvableOpt` Isabelle session.
 - [`RESULTS.md`](RESULTS.md) — theorem-by-theorem status.
