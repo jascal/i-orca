@@ -96,3 +96,22 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | margin Lsmall UNIV A = 1 ∧ (∀v. abs (Lflip v - Lsmall v) ≤ 1) ∧ decodes_to Lsmall UNIV A ∧ ¬ decodes_to Lflip UNIV A ∧ decodes_to Lflip UNIV B | the boundary flip-witness | — | (rule small_margin_decode_can_flip) | method |
+
+
+# theorem MarginGuardTight
+> Tightness: the `margin > 2δ` guard cannot be weakened to `margin ≥ 2δ`. At margin = 2δ exactly (δ = 1/2), a δ-bounded perturbation drives the logits to a TIE, so the decode is no longer determined — preservation fails. The strict inequality is exactly right, not conservative. Cites `margin_guard_tight`.
+
+## imports
+| Theory             |
+|--------------------|
+| ProvableOpt_Margin |
+
+## goal
+| Statement |
+|-----------|
+| margin Lsmall UNIV A = 2 * (1/2) ∧ (∀v. abs (Lhalf v - Lsmall v) ≤ 1/2) ∧ ¬ decodes_to Lhalf UNIV A ∧ ¬ decodes_to Lhalf UNIV B |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | margin Lsmall UNIV A = 2 * (1/2) ∧ (∀v. abs (Lhalf v - Lsmall v) ≤ 1/2) ∧ ¬ decodes_to Lhalf UNIV A ∧ ¬ decodes_to Lhalf UNIV B | margin = 2δ exactly yet a δ-bounded perturbation ties → the strict guard is tight | — | (rule margin_guard_tight) | method |

@@ -44,13 +44,14 @@ Proof: `abs_le_iff` → linear bounds → `linarith`; the Max form reduces to th
 | `drop_neuron_pert` / `margin_full_A` | the neuron-drop perturbation is `≤ 1`; `margin Lfull UNIV A = 12 > 2δ` | ✅ kernel |
 | `margin_drop_decode_preserved` | `decodes_to Lbase UNIV A` (big-margin token: decode certified preserved) | ✅ kernel |
 | `small_margin_decode_can_flip` | margin `=1 ≤ 2δ` token where a δ-bounded perturbation **flips** the decode `A→B` — the `2δ` guard is necessary | ✅ kernel |
+| `margin_guard_tight` | at margin `= 2δ` exactly (δ=½) a δ-bounded perturbation **ties** the logits — so `> 2δ` cannot weaken to `≥ 2δ`: the guard is **tight** | ✅ kernel |
 
 ## i-orca surfaces (table → Isar → kernel)
 
 | Surface | Theorems | `i-orca verify` | `i-orca check` | compiled-in-session |
 |---|---|---|---|---|
 | `provable_opt.i.orca.md` | 5 (PO-T1) | VALID | 5/5 = 1.000 | ✅ `ProvableOpt_Surface` |
-| `provable_opt_margin.i.orca.md` | 4 (PO-T3) | VALID | 4/4 = 1.000 | ✅ `ProvableOpt_Margin_Surface` |
+| `provable_opt_margin.i.orca.md` | 5 (PO-T3) | VALID | 5/5 = 1.000 | ✅ `ProvableOpt_Margin_Surface` |
 
 ## Maps to fieldrun
 

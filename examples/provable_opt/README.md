@@ -64,10 +64,17 @@ on every token whose margin exceeds `2δ`:
 
 **Honest boundedness (the whole point of stating PO-T3 carefully).** The
 certificate is *silent* when margin `≤ 2δ` — the small-margin / dense-`G`
-forge-tax tokens, bounded globally by LE-T2. `small_margin_decode_can_flip`
-exhibits a token with margin `= 1` where an **equally δ-bounded** perturbation
-**flips** the decode `A → B`. So the `2δ` guard is necessary, not cosmetic: PO-T3
-is a sound *local* certificate, not a global one.
+forge-tax tokens, bounded globally by LE-T2. Two witnesses pin the boundary down:
+
+- `small_margin_decode_can_flip` — a token with margin `= 1` where an **equally
+  δ-bounded** perturbation **flips** the decode `A → B` (the guard is *necessary*).
+- `margin_guard_tight` — at margin `= 2δ` **exactly** (δ = ½) a δ-bounded
+  perturbation drives the logits to a **tie**, so preservation fails. Hence the
+  guard cannot be weakened from `> 2δ` to `≥ 2δ`: the strict threshold is **tight**,
+  not conservative.
+
+So PO-T3 is a sound *local* certificate with an exactly-characterised boundary —
+not a global one.
 
 ## The compiled i-orca surfaces
 
@@ -124,8 +131,9 @@ Cross-repo progress on carrying fieldrun's PROVABLE_OPT claims as kernel theorem
       (`demand_restrict_lfp` / `demand_restrict_query` + the `lastpos` instance).
 - [x] **Shared general-theory extraction** — `ProvableOpt_Common.thy` holds the
       reusable PO-T1 + PO-T3 theorems; the two instances are thin consumers.
-- [x] **PO-T3 — margin-certified decode invariance** (`margin > 2δ`) + its boundary
-      flip-witness (sound local certificate; the `2δ` bound is proved necessary).
+- [x] **PO-T3 — margin-certified decode invariance** (`margin > 2δ`) + boundary
+      witnesses (sound local certificate; the `2δ` guard is proved **necessary and
+      tight** — `margin_guard_tight`: `>` cannot relax to `≥`).
 - [ ] **Real-bundle `Π`** — discharge `demand_closed` (PO-T1) / the per-logit `δ`
       bound (PO-T3) on strata actually emitted by LOGIC_EXPORT + Soufflé on a small
       trained model. The general theorems already cover any `Π` meeting the hypotheses.

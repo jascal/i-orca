@@ -30,4 +30,11 @@ proof -
   show "margin Lsmall UNIV A = 1 \<and> (\<forall>v. abs (Lflip v - Lsmall v) \<le> 1) \<and> decodes_to Lsmall UNIV A \<and> \<not> decodes_to Lflip UNIV A \<and> decodes_to Lflip UNIV B" by (rule small_margin_decode_can_flip)
 qed
 
+text \<open>Tightness: the `margin > 2δ` guard cannot be weakened to `margin ≥ 2δ`. At margin = 2δ exactly (δ = 1/2), a δ-bounded perturbation drives the logits to a TIE, so the decode is no longer determined — preservation fails. The strict inequality is exactly right, not conservative. Cites `margin_guard_tight`.\<close>
+theorem marginguardtight:
+  shows "margin Lsmall UNIV A = 2 * (1/2) \<and> (\<forall>v. abs (Lhalf v - Lsmall v) \<le> 1/2) \<and> \<not> decodes_to Lhalf UNIV A \<and> \<not> decodes_to Lhalf UNIV B"
+proof -
+  show "margin Lsmall UNIV A = 2 * (1/2) \<and> (\<forall>v. abs (Lhalf v - Lsmall v) \<le> 1/2) \<and> \<not> decodes_to Lhalf UNIV A \<and> \<not> decodes_to Lhalf UNIV B" by (rule margin_guard_tight)
+qed
+
 end

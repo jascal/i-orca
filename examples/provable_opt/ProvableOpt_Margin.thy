@@ -70,4 +70,28 @@ proof (intro conjI)
     by (auto simp: decodes_to_def UNIV_tok Lflip_def)
 qed
 
+text \<open>TIGHTNESS of the \<open>2\<delta>\<close> threshold: the guard \<open>margin > 2\<delta>\<close> cannot be weakened
+  to \<open>margin \<ge> 2\<delta>\<close>. At \<open>margin = 2\<delta>\<close> exactly (here \<open>\<delta> = 1/2\<close>) a \<open>\<delta>\<close>-bounded
+  perturbation can drive the two logits to a TIE, so the decode is no longer
+  determined (\<open>t\<close> is not the STRICT argmax) -- preservation fails. So the strict
+  inequality in ``decode_margin_certified`` is exactly right, not conservative.\<close>
+
+definition Lhalf :: "tok \<Rightarrow> real" where "Lhalf x = 1/2"
+
+theorem margin_guard_tight:
+  "margin Lsmall UNIV A = 2 * (1/2)             \<comment> \<open>margin = 2\<delta> exactly, for \<delta> = 1/2\<close>
+ \<and> (\<forall>v. \<bar>Lhalf v - Lsmall v\<bar> \<le> 1/2)            \<comment> \<open>the perturbation is \<delta>-bounded\<close>
+ \<and> \<not> decodes_to Lhalf UNIV A                    \<comment> \<open>yet preservation FAILS (a tie)\<close>
+ \<and> \<not> decodes_to Lhalf UNIV B"
+proof (intro conjI)
+  show "margin Lsmall UNIV A = 2 * (1/2)"
+    by (simp add: margin_def UNIV_tok Lsmall_def)
+  show "\<forall>v. \<bar>Lhalf v - Lsmall v\<bar> \<le> 1/2"
+    by (simp add: Lhalf_def Lsmall_def)
+  show "\<not> decodes_to Lhalf UNIV A"
+    by (simp add: decodes_to_def UNIV_tok Lhalf_def)
+  show "\<not> decodes_to Lhalf UNIV B"
+    by (simp add: decodes_to_def UNIV_tok Lhalf_def)
+qed
+
 end

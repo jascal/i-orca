@@ -1,4 +1,4 @@
-Started at Fri Jun 19 03:37:25 GMT 2026 (polyml-5.9.2_x86_64_32-linux on pop-os)
+Started at Fri Jun 19 08:18:36 GMT 2026 (polyml-5.9.2_x86_64_32-linux on pop-os)
 ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx4g -Xss16m"
 ISABELLE_BUILD_OPTIONS=""
 
@@ -18,13 +18,13 @@ ProvableOpt: theory ProvableOpt.ProvableOpt_Margin
 ProvableOpt: theory ProvableOpt.ProvableOpt
 ProvableOpt: theory ProvableOpt.ProvableOpt_Margin_Surface
 ProvableOpt: theory ProvableOpt.ProvableOpt_Surface
-ProvableOpt: theory ProvableOpt.ProvableOpt_Common 100% (0.270s cumulated time)
-ProvableOpt: theory ProvableOpt.ProvableOpt 100% (0.381s cumulated time)
-ProvableOpt: theory ProvableOpt.ProvableOpt_Margin 100% (0.341s cumulated time)
-ProvableOpt: theory ProvableOpt.ProvableOpt_Surface 100% (0.040s cumulated time)
-ProvableOpt: theory ProvableOpt.ProvableOpt_Margin_Surface 100% (0.058s cumulated time)
-Timing ProvableOpt (8 threads, 0.609s elapsed time, 1.524s cpu time, 0.064s GC time, factor 2.50)
+ProvableOpt: theory ProvableOpt.ProvableOpt_Common 100% (0.267s cumulated time)
+ProvableOpt: theory ProvableOpt.ProvableOpt 100% (0.388s cumulated time)
+ProvableOpt: theory ProvableOpt.ProvableOpt_Margin 100% (0.350s cumulated time)
+ProvableOpt: theory ProvableOpt.ProvableOpt_Surface 100% (0.050s cumulated time)
+ProvableOpt: theory ProvableOpt.ProvableOpt_Margin_Surface 100% (0.062s cumulated time)
+Timing ProvableOpt (8 threads, 0.607s elapsed time, 1.538s cpu time, 0.075s GC time, factor 2.53)
 Finished ProvableOpt (0:00:01 elapsed time)
 
-Finished at Fri Jun 19 03:37:29 GMT 2026
+Finished at Fri Jun 19 08:18:40 GMT 2026
 0:00:03 elapsed time
