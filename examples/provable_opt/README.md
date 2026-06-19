@@ -25,6 +25,9 @@ theorem about the fixpoint, not a measurement." This corpus makes those theorems
 - **[`ProvableOpt.thy`](ProvableOpt.thy)** — the `lastpos` PO-T1 instance.
 - **[`ProvableOpt_Margin.thy`](ProvableOpt_Margin.thy)** — the PO-T3 instance + the
   boundary flip-witness.
+- **[`ProvableOpt_Datalog.thy`](ProvableOpt_Datalog.thy)** — the **kernel bridge**:
+  rule-level Datalog (`T_P`) + the proof that the *syntactic* demand-closure check
+  (what the tool runs) implies the *semantic* one the lossless theorem needs.
 
 ## PO-T1: the demand / dead-stratum transform, as Datalog rules (before → after)
 
@@ -75,6 +78,30 @@ forge-tax tokens, bounded globally by LE-T2. Two witnesses pin the boundary down
 
 So PO-T3 is a sound *local* certificate with an exactly-characterised boundary —
 not a global one.
+
+## The kernel bridge: from the tool's syntactic check to the kernel proof
+
+`demand_restrict_query` needs the *semantic* `demand_closed T D`. fieldrun's
+checker (`lo3a/demand_closure.py`) instead establishes a *syntactic* fact about
+the emitted rules. `ProvableOpt_Datalog.thy` closes that gap:
+
+- `T_P R` — the standard ground immediate-consequence operator of a rule-set `R`
+  (`(head, body)` rules; a head fires when its whole body is present). `T_P_mono`.
+- `syn_demand_closed R D` — the **syntactic check the tool runs**: every rule
+  whose head is a *kept* atom (`∈ D`) has its whole body inside `D`.
+- **`syn_demand_closed_imp_demand_closed`** — the bridge: the syntactic check
+  *implies* `demand_closed (T_P R) D`. Hence `syn_demand_closed_lossless`: from the
+  syntactic check **alone**, the demand-restricted program preserves every query
+  atom `Q ⊆ D`, for every input.
+- A concrete instance (`dprog`/`dkeep`) models the real `lastpos` final stratum as
+  a ground rule-set and re-derives the lossless-and-strict result *through the
+  bridge* — the same verdict the tool returns on `whole_base.dl`, now a theorem.
+
+So the checker's output `D` plugs straight into the kernel proof: **"premise
+certified by a tool" → "premise proved"**. The only remaining trust is that the
+parser faithfully reflects the `.dl` and the checker correctly decides
+`syn_demand_closed` (a verified parser/decision-procedure is the next, separate
+rung).
 
 ## The compiled i-orca surfaces
 
@@ -140,19 +167,23 @@ Cross-repo progress on carrying fieldrun's PROVABLE_OPT claims as kernel theorem
       generalisation of `xf`/`ssf`). This establishes the *premise* of
       `demand_restrict_query` on real strata; the kernel theorem supplies the
       conclusion. *(fieldrun PR #73.)*
-- [ ] **Kernel bridge for the checker** — a machine-checked
-      `syntactically_demand_closed rules D ⟹ demand_closed (T_P rules) D` (lift from
-      the abstract operator to a modelled rule-set), so the checker's syntactic
-      output plugs into the kernel proof — closing "premise certified by a tool" →
-      "premise proved". *(Then a per-logit-`δ` real-bundle discharge for PO-T3.)*
-- [ ] **Full magic-sets *adornment* transform** — binding-pattern predicate
-      specialisation (strictly heavier than demand restriction).
+- [x] **Kernel bridge for the checker** — `ProvableOpt_Datalog.thy`:
+      `syn_demand_closed_imp_demand_closed` (`syn_demand_closed R D ⟹
+      demand_closed (T_P R) D`) lifts the abstract operator theorem to a modelled
+      rule-set, so the checker's syntactic output plugs into the kernel proof —
+      "premise certified by a tool" → "premise proved". Residual trust: parser
+      faithfulness + a verified `syn_demand_closed` decision procedure.
+- [ ] **Verified checker / per-logit-`δ` PO-T3 real-bundle, magic-sets adornment** —
+      a reflected/verified parser+decision-procedure (closes the last trust gap);
+      a per-logit-`δ` real-bundle discharge for PO-T3; the full magic-sets
+      *adornment* transform (binding-pattern specialisation, strictly heavier).
 
 ## Files
 - [`ProvableOpt_Common.thy`](ProvableOpt_Common.thy) — reusable general theory (PO-T1 + PO-T3).
 - [`ProvableOpt.thy`](ProvableOpt.thy) — the `lastpos` PO-T1 instance.
 - [`ProvableOpt_Margin.thy`](ProvableOpt_Margin.thy) — the PO-T3 instance + flip-witness.
-- [`ProvableOpt_Surface.thy`](ProvableOpt_Surface.thy) / [`ProvableOpt_Margin_Surface.thy`](ProvableOpt_Margin_Surface.thy) — compiled i-orca surfaces.
-- [`provable_opt.i.orca.md`](provable_opt.i.orca.md) / [`provable_opt_margin.i.orca.md`](provable_opt_margin.i.orca.md) — the i-orca table surfaces.
+- [`ProvableOpt_Datalog.thy`](ProvableOpt_Datalog.thy) — the kernel bridge (syntactic ⟹ semantic demand-closure).
+- [`ProvableOpt_Surface.thy`](ProvableOpt_Surface.thy) / [`ProvableOpt_Margin_Surface.thy`](ProvableOpt_Margin_Surface.thy) / [`ProvableOpt_Datalog_Surface.thy`](ProvableOpt_Datalog_Surface.thy) — compiled i-orca surfaces.
+- [`provable_opt.i.orca.md`](provable_opt.i.orca.md) / [`provable_opt_margin.i.orca.md`](provable_opt_margin.i.orca.md) / [`provable_opt_datalog.i.orca.md`](provable_opt_datalog.i.orca.md) — the i-orca table surfaces.
 - [`ROOT`](ROOT) — the `ProvableOpt` Isabelle session.
 - [`RESULTS.md`](RESULTS.md) — theorem-by-theorem status.
