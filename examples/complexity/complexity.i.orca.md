@@ -13,11 +13,13 @@
     - `i-orca verify` (structural, zero Isabelle): all theorems VALID,
       formal_fraction_static = 1.000.
     - Kernel check: the compiled `theorem T: "<goal>" by (rule <lemma>)` (imports the
-      local theory) is non-vacuous and kernel-checks when built INSIDE the `Hardness`
-      session (this directory's ROOT). The standalone `i-orca check` returns 0 only
-      because its batch backend builds each theorem under a plain HOL/HOL-Analysis
-      parent and cannot load a project-local session — an import-resolution limit, not
-      a math failure.
+      local theory) is non-vacuous and kernel-checks against the `Hardness` session.
+      `i-orca check complexity.i.orca.md` now resolves this automatically — it
+      auto-detects the sibling ROOT, declares `Hardness` as a `sessions` dependency,
+      and qualifies the project-local `## imports` (incl. the transitive
+      `../fieldrun/separation` chain) — so every theorem reports formal_fraction_real
+      = 1.000. (Building INSIDE the `Hardness` session via `isabelle build` remains
+      the authoritative path.)
 
   Companion file: hardness.i.orca.md — the concrete single-competitor witness.
 -->

@@ -32,6 +32,22 @@ def _load(args) -> list[Theorem]:
     return parse_file(args.file).theorems
 
 
+def _augment_session(args) -> tuple[list[str], str | None]:
+    """Auto-register the input file's directory as a project-session dir when it
+    ships a ``ROOT`` beside the ``.i.orca.md``, so ``check <file>`` resolves
+    project-local ``## imports`` with no extra flags (the session name and its
+    theories are read from the ROOT by the backend). ``--session`` stays an
+    optional library-parent override and is passed through untouched."""
+    extra = list(getattr(args, "dir", None) or [])
+    session = getattr(args, "session", None)
+    fpath = getattr(args, "file", None)
+    if fpath:
+        fdir = Path(fpath).resolve().parent
+        if (fdir / "ROOT").exists() and str(fdir) not in extra:
+            extra.append(str(fdir))
+    return extra, session
+
+
 def _emit(obj, as_json: bool) -> None:
     if as_json:
         print(json.dumps(obj, indent=2, ensure_ascii=False))
@@ -97,10 +113,8 @@ def cmd_metrics(args) -> int:
 
 def cmd_check(args) -> int:
     theorems = _load(args)
-    backend = IsabelleBackend(
-        extra_dirs=getattr(args, "dir", None),
-        parent_session=getattr(args, "session", None),
-    )
+    extra, session = _augment_session(args)
+    backend = IsabelleBackend(extra_dirs=extra, parent_session=session)
     results = [backend.check_proof(t, timeout_s=args.timeout) for t in theorems]
     if args.json:
         _emit({"results": [r.to_dict() for r in results]}, True)
@@ -132,10 +146,8 @@ def cmd_hammer(args) -> int:
 def cmd_prove(args) -> int:
     """Autonomous loop (SPEC §7): verify → compile isar → check → report."""
     theorems = _load(args)
-    backend = IsabelleBackend(
-        extra_dirs=getattr(args, "dir", None),
-        parent_session=getattr(args, "session", None),
-    )
+    extra, session = _augment_session(args)
+    backend = IsabelleBackend(extra_dirs=extra, parent_session=session)
     overall = {"theorems": []}
     exit_code = 0
     for t in theorems:
