@@ -1,0 +1,4 @@
+session "PIC_Core" = "HOL-Analysis" +
+  options [quick_and_dirty = false]
+  theories
+    PIC_Core
