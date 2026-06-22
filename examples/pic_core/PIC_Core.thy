@@ -168,6 +168,80 @@ text \<open>Note: @{const retrieved} does NOT imply @{const decides} in general 
 end \<comment> \<open>pic\<close>
 
 
+section \<open>The PIC encoder: how the residual is WRITTEN (the generator / encode side)\<close>
+
+text \<open>A PIC encoder factors the residual itself: on input @{term x} the residual is a gated sum of
+  FIXED write directions, @{term "enc x = (\<Sum>k\<in>K. g k x *\<^sub>R a k)"}, where @{term "a k"} are the
+  fixed rule write-directions (the output-projection columns -- attention AND MLP both have this form:
+  a block's write is @{text "W_out \<cdot> (input-dependent vector)"}) and @{term "g k x"} is the
+  input-dependent gate (the neuron activation / attention-weighted coefficient). PIC does NOT model the
+  gate's internal computation (the nonlinear forge-tax); it formalizes the LINEAR write/read algebra
+  the gate feeds. Requires a finite-dimensional frame (@{class euclidean_space}) for the rank bound.\<close>
+locale pic_encoder = pic_frame U b
+  for U :: "'v \<Rightarrow> 'a::euclidean_space" and b :: "'v \<Rightarrow> real" +
+  fixes K :: "'k set"          \<comment> \<open>the rules (neurons / heads)\<close>
+    and a :: "'k \<Rightarrow> 'a"        \<comment> \<open>fixed write directions (output-projection columns)\<close>
+    and g :: "'k \<Rightarrow> 'x \<Rightarrow> real" \<comment> \<open>input-dependent gates (activations) -- left uninterpreted\<close>
+  assumes finK: "finite K"
+begin
+
+text \<open>The residual written on input @{term x}: a gated sum of the fixed write directions.\<close>
+definition enc :: "'x \<Rightarrow> 'a" where
+  "enc x = (\<Sum>k\<in>K. g k x *\<^sub>R a k)"
+
+text \<open>Rule @{term k}'s incidence on token @{term v}: fixed (input-independent), unlike a per-input source.\<close>
+definition incidA :: "'k \<Rightarrow> 'v \<Rightarrow> real" where
+  "incidA k v = inner (a k) (U v)"
+
+text \<open>The input-dependent logit, read out of the encoded residual over the frame.\<close>
+definition Lx :: "'v \<Rightarrow> 'x \<Rightarrow> real" where
+  "Lx v x = inner (enc x) (U v) + b v"
+
+text \<open>ENCODE \<rightarrow> DECODE composition: the logit is a GATED SUM of fixed rule-incidences. This is the whole
+  forward pass as a PIC term -- the gates select/weight rules, the fixed incidences carry the geometry.\<close>
+lemma Lx_gated_incidence:
+  "Lx v x = (\<Sum>k\<in>K. g k x * incidA k v) + b v"
+  unfolding Lx_def enc_def incidA_def by (simp add: inner_sum_left inner_scaleR_left)
+
+text \<open>ROUTING RANK, now a property of the explicit encoder: every encoded residual -- for EVERY input --
+  lies in the fixed rule span, of dimension at most @{term "card K"} (and at most the ambient dimension).
+  Superposition is forced when the number of rules exceeds the ambient dimension.\<close>
+lemma enc_in_rule_span: "enc x \<in> span (a ` K)"
+  unfolding enc_def
+proof (rule span_sum)
+  fix k assume "k \<in> K"
+  hence "a k \<in> span (a ` K)" by (simp add: span_base)
+  thus "g k x *\<^sub>R a k \<in> span (a ` K)" by (rule span_scale)
+qed
+
+lemma routing_rank: "dim (span (a ` K)) \<le> card K"
+proof -
+  have "dim (span (a ` K)) = dim (a ` K)" by (rule dim_span)
+  also have "\<dots> \<le> card (a ` K)" by (rule dim_le_card'[OF finite_imageI[OF finK]])
+  also have "\<dots> \<le> card K" using finK by (rule card_image_le)
+  finally show ?thesis .
+qed
+
+lemma routing_rank_dim: "dim (span (a ` K)) \<le> DIM('a)"
+  by (simp add: dim_span dim_subset_UNIV)
+
+text \<open>BRIDGE: every input-slice of a PIC encoder is a PIC source-model, with sources the gated rules
+  \<open>\<lambda>k. g k x *\<^sub>R a k\<close>. The interpretation below succeeds (so the encoder IS a family of @{locale pic}
+  models, one per input), and the slice's logit is exactly the encoder logit \<open>Lx v x\<close>. The encoder
+  adds the input axis and the fixed-write / gate factorisation that @{locale pic} leaves implicit.\<close>
+context fixes x :: 'x
+begin
+interpretation slice: pic U b K "\<lambda>k. g k x *\<^sub>R a k"
+  by unfold_locales (rule finK)
+
+lemma encoder_slice_logit: "slice.Lt v = Lx v x"
+  unfolding slice.Lt_def slice.Lc_def slice.incid_def Lx_def enc_def
+  by (simp add: inner_sum_left inner_scaleR_left)
+end
+
+end \<comment> \<open>pic_encoder\<close>
+
+
 section \<open>The turnstile in abstract form, and the proved witnesses (Separation)\<close>
 
 text \<open>The turnstile read off a free contribution table -- the form the concrete witnesses use; tied
