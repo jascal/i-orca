@@ -95,11 +95,14 @@ Confident decoding forces separated frames. Call token `v` **γ-decodable over t
 - `HeadCapacity` → `head_capacity` (any HeadTail-style head ⊆ the γ-decodable set is a γ-code, so `|head|` ≤ the
   γ-packing number `(1 + 2ρ/γ)^d`, `ρ = max‖U_v‖`)
 
-This is the formal face of "structure is the hard limit": no frame tuning or rule allocation yields more than a
-bounded number of cleanly-separable decodes without raising the (effective) dimension — the same packing-capacity
-that the **Welch bound** governs from the coherence side, with `τ⋆ = min(e^H, d)` the effective dimension in the
-exponent. It **bounds the `HeadTail` head** (head ⊆ γ-code) and is the existence-over-`r` companion to PO-T3's
-fixed-`r` margin certificate.
+This is the **cell-capacity half** of the two-sided packing story — a structural upper bound on how many tokens
+can be made γ-margin decodable in frame space, the same packing-capacity the **Welch bound** governs from the
+coherence side. It **bounds the `HeadTail` head** (head ⊆ γ-code) and is the existence-over-`r` companion to PO-T3's
+fixed-`r` margin certificate. **Scope (honest):** cell capacity is *foundational, not currently binding* — PIL
+experiments find it hugely slack (packing bound ~1e59 vs ~50 tokens); the binding constraint in those regimes is
+**routing complexity** on the generator side (`RoutingRank.thy` below + `RoutingWelch.thy` in `../superposition`).
+The measured law `τ⋆ = min(e^H, d)` is the effective dimension entering the packing *exponent* — an **empirical**
+law, not formalized here.
 
 **Routing rank — the generator-side dual** (`RoutingRank.thy`, a *fieldrun* contribution)
 

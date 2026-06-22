@@ -14,9 +14,21 @@
                              certifiable HEAD, cf. HeadTail.thy) has gamma-separated direction images -- it
                              is a gamma-code in R^d, so its cardinality is bounded by the packing number
                              (1 + 2 rho / gamma)^d (rho = max ||U_v||).  Decision-side sibling of the Welch
-                             bound; the formal "structure is the hard limit" -- no frame tuning or rule
-                             allocation yields more than a bounded number of cleanly-separable decodes
-                             without raising the (effective) dimension (= tau* = min(exp H, d)).
+                             bound.
+
+  SCOPE (what this is and is NOT).  This is the CELL-CAPACITY half of the two-sided packing story: a
+  structural upper bound on how many tokens can be made gamma-margin decodable in frame space.  It is
+  FOUNDATIONAL, not the currently-binding constraint: PIL experiments find cell capacity is hugely slack
+  in the regimes measured (packing bound ~ 1e59 vs ~50 tokens; pil capacity_diagnostic.py).  The binding
+  constraint there is ROUTING / realization complexity on the GENERATOR side -- a rank + interference
+  problem proved separately:
+    * cell capacity (here)     = an upper bound on the number of usable gamma-decodable cells (frame side);
+    * routing complexity       = the cost of steering inputs into those cells with a limited number of
+                                 trainable generators -- RoutingRank.thy (the rank: M rules move logits in a
+                                 <=min(M,d)-dim subspace) and RoutingWelch.thy in examples/superposition
+                                 (the coherence: n routing features in R^M force Welch interference when n>M).
+  The measured law tau* = min(exp H, d) (the effective output-distribution rank) is the effective dimension
+  that enters the packing EXPONENT -- it is an EMPIRICAL law, NOT formalized here.
 
   Ties to HeadTail.thy (the certifiable head is gamma-decodable, hence gamma-separated, hence bounded).
 *)
