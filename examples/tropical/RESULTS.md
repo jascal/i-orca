@@ -9,7 +9,7 @@ real kernel check (`isabelle build`).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/tropical/tropical.i.orca.md
-#   -> all 24 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
+#   -> all 27 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/tropical \
@@ -27,7 +27,7 @@ i-orca compile examples/tropical/tropical.i.orca.md --target isar \
 
 | Layer | Tool | Result |
 |-------|------|--------|
-| Skeleton | `i-orca verify` | 24/24 VALID, `formal_fraction_static = 1.000` |
+| Skeleton | `i-orca verify` | 27/27 VALID, `formal_fraction_static = 1.000` |
 | Substrate | `isabelle build` (`Tropical` session) | exit 0, **zero `sorry`** |
 | Surface | `isabelle build` (compiled `TropicalSurface` in-session) | exit 0 — every `(rule …)` non-vacuous |
 
@@ -83,6 +83,23 @@ certifiably reproduces ~65% of real-model decodes; the ~35% tail is irreducible 
 It is the exact-decode sibling of the bounded-perturbation PO-T3 margin
 (`../provable_opt/ProvableOpt_Common.decode_margin_certified`): there a δ-bounded change can't flip a >2δ margin;
 here the head can't be beaten when it out-values the whole tail.
+
+**Decode capacity — the decision-side Welch sibling** (`DecodeCapacity.thy`, a *fieldrun* contribution)
+
+Confident decoding forces separated frames. Call token `v` **γ-decodable over the unit ball** if some residual
+`r` with `‖r‖ ≤ 1` decodes to `v` with margin `≥ γ`. Then (all kernel-discharged, zero `sorry`):
+
+- `MarginPairSeparation` → `margin_pair_separation` (if `v`, `w` are each γ-decodable then `γ ≤ ‖U v − U w‖` —
+  **bias-free**, the biases cancel when the two witness inequalities are added; Cauchy–Schwarz + `‖rv−rw‖ ≤ 2`)
+- `DecodeCapacitySeparated` → `decode_capacity_separated` (the γ-decodable set is a γ-separated code: `γ ≤ dist(U v,U w)`)
+- `HeadCapacity` → `head_capacity` (any HeadTail-style head ⊆ the γ-decodable set is a γ-code, so `|head|` ≤ the
+  γ-packing number `(1 + 2ρ/γ)^d`, `ρ = max‖U_v‖`)
+
+This is the formal face of "structure is the hard limit": no frame tuning or rule allocation yields more than a
+bounded number of cleanly-separable decodes without raising the (effective) dimension — the same packing-capacity
+that the **Welch bound** governs from the coherence side, with `τ⋆ = min(e^H, d)` the effective dimension in the
+exponent. It **bounds the `HeadTail` head** (head ⊆ γ-code) and is the existence-over-`r` companion to PO-T3's
+fixed-`r` margin certificate.
 
 ## Notes
 

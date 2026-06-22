@@ -510,3 +510,70 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L H < decode L T ⟹ (∃t∈T. L t = decode L (H ∪ T) ∧ (∀h∈H. L h < L t)) | a tail token attaining the tail Max attains the full Max and strictly beats every head token | — | (rule tail_is_residue) | method |
+
+
+<!-- ============================================================================
+     DECODE CAPACITY (DecodeCapacity.thy) — the decision-side Welch sibling; a fieldrun contribution.
+     Confident decoding forces separated frames: if tokens v and w are each gamma-margin-decodable somewhere
+     in the unit ball, then ||U_v - U_w|| >= gamma (bias-free — it cancels across the two witnesses). Hence the
+     gamma-decodable set (and any certifiable HEAD, cf. HeadTail) is a gamma-code in R^d, of cardinality at most
+     the packing number (1 + 2 rho / gamma)^d. This is the formal "structure is the hard limit": no frame tuning
+     or rule allocation yields more than a bounded number of cleanly-separable decodes without raising the
+     effective dimension (= tau* = min(exp H, d), the exponent of the packing bound). Sibling of the Welch bound.
+     ============================================================================ -->
+
+# theorem MarginPairSeparation
+> CORE. If token `v` is `γ`-margin-decodable at `rv` and `w` at `rw` (both in the unit ball), their proposition directions are `γ`-separated: `γ ≤ ‖U v − U w‖`. The bias cancels (add the two witness inequalities; the cross term is `⟨rv − rw, U v − U w⟩`, bounded by Cauchy–Schwarz and `‖rv − rw‖ ≤ 2`). Cites `margin_pair_separation`.
+
+## imports
+| Theory         |
+|----------------|
+| DecodeCapacity |
+
+## goal
+| Statement |
+|-----------|
+| gdecodes U b γ v rv ⟹ gdecodes U b γ w rw ⟹ norm rv ≤ 1 ⟹ norm rw ≤ 1 ⟹ v ≠ w ⟹ γ ≤ norm (U v - U w) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | gdecodes U b γ v rv ⟹ gdecodes U b γ w rw ⟹ norm rv ≤ 1 ⟹ norm rw ≤ 1 ⟹ v ≠ w ⟹ γ ≤ norm (U v - U w) | adding the two margin witnesses cancels the bias; Cauchy–Schwarz with ‖rv−rw‖≤2 gives the separation | — | (rule margin_pair_separation) | method |
+
+
+# theorem DecodeCapacitySeparated
+> The `γ`-decodable set is a `γ`-separated code: any two tokens that each win by margin `≥ γ` somewhere in the unit ball have frames at least `γ` apart, `γ ≤ dist(U v, U w)`. Cardinality is therefore bounded by the `γ`-packing number of the frame ball — the decision-side sibling of the Welch bound. Cites `decode_capacity_separated`.
+
+## imports
+| Theory         |
+|----------------|
+| DecodeCapacity |
+
+## goal
+| Statement |
+|-----------|
+| v ∈ gdecodable U b γ ⟹ w ∈ gdecodable U b γ ⟹ v ≠ w ⟹ γ ≤ dist (U v) (U w) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | v ∈ gdecodable U b γ ⟹ w ∈ gdecodable U b γ ⟹ v ≠ w ⟹ γ ≤ dist (U v) (U w) | each token supplies a unit-ball witness; apply the core separation pairwise | — | (rule decode_capacity_separated) | method |
+
+
+# theorem HeadCapacity
+> The certifiable HEAD is capacity-bounded. Any set `S` of `γ`-decodable tokens (in particular a HeadTail head that dominates its tail) is a `γ`-code: `∀ v,w ∈ S. v ≠ w ⟹ γ ≤ dist(U v, U w)`. So `|S|` ≤ the `γ`-packing number `(1 + 2ρ/γ)^d` — bounding the head bridges DecodeCapacity to HeadTail. Cites `head_capacity`.
+
+## imports
+| Theory         |
+|----------------|
+| DecodeCapacity |
+
+## goal
+| Statement |
+|-----------|
+| S ⊆ gdecodable U b γ ⟹ (∀v∈S. ∀w∈S. v ≠ w ⟶ γ ≤ dist (U v) (U w)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | S ⊆ gdecodable U b γ ⟹ (∀v∈S. ∀w∈S. v ≠ w ⟶ γ ≤ dist (U v) (U w)) | every pair in the head is γ-decodable, so the pairwise separation applies | — | (rule head_capacity) | method |
