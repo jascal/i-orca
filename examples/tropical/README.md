@@ -30,8 +30,9 @@ its **linear regions** are governed by the Newton polytopes of those polynomials
 | [`MaxPlus.thy`](MaxPlus.thy) | max-plus matrix–vector product and **residuation** (Maragos): feasibility + greatest subsolution |
 | [`Newton.thy`](Newton.thy) | **polytope propagation** (Pachter–Sturmfels): tropical product = pointwise sum, submultiplicative monomial count, Minkowski-sum slope support |
 | [`Examples.thy`](Examples.thy) | a concrete worked example: the two-neuron ReLU net `relu x + relu(−x)` computes `¦x¦`, rendered as the tropical polynomial `max x (−x)` |
+| [`HeadTail.thy`](HeadTail.thy) | a **fieldrun** contribution: the LLM decode `argmax_v ⟨x,U_v⟩` as a max-plus polynomial, split into a compact HEAD + open-class TAIL; the head certifiably reproduces the decode when it out-values the tail, the tail is the explicit residue |
 | [`ROOT`](ROOT) | Isabelle session `Tropical` (parent `HOL-Analysis`) |
-| [`tropical.i.orca.md`](tropical.i.orca.md) | the i-orca surface: 20 theorems, each `(rule <lemma>)` |
+| [`tropical.i.orca.md`](tropical.i.orca.md) | the i-orca surface: 24 theorems, each `(rule <lemma>)` |
 | [`PROPOSAL.md`](PROPOSAL.md) | the sources, the formal-vs-meta table, honest reckonings, open targets |
 | [`RESULTS.md`](RESULTS.md) | verification status and commands |
 
@@ -43,7 +44,7 @@ is the thin i-orca surface over it (the `watermark` / `provenance` pattern).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/tropical/tropical.i.orca.md
-#   -> all 20 theorems VALID, formal_fraction_static = 1.000
+#   -> all 24 theorems VALID, formal_fraction_static = 1.000
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/tropical \

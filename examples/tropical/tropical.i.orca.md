@@ -423,3 +423,90 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | troprat (λx::real. relu x + relu (- x)) | the network equals abs, which is the tropical polynomial max x (−x) | — | (rule abs_network_troprat) | method |
+
+
+<!-- ============================================================================
+     HEAD/TAIL DECODE CERTIFICATE (HeadTail.thy) — a fieldrun contribution, not from Zhang–Naitzat–Lim.
+     An LLM decode argmax_v <x,U_v> is the tropical polynomial max_v (logit v). Splitting the vocabulary into a
+     compact HEAD (the Zipf-frequent winning monomials) and an open-class TAIL, these theorems state EXACTLY what
+     fieldrun measured (lo3a/tropical_rank.py + pr_core_residual_gate.py): the compact head certifiably reproduces the
+     decode WHEN its tropical value dominates the tail (~65% of real-model decodes), and the tail is the explicit
+     irreducible residue (~35%). It is the exact-decode sibling of the bounded-perturbation PO-T3 margin
+     (../provable_opt/decode_margin_certified): there a δ-bounded change can't flip a >2δ margin; here the head can't
+     be beaten when it out-values the whole tail.
+     ============================================================================ -->
+
+# theorem DecodePartition
+> The decode value splits over the head/tail partition: the tropical sum (⊕ = max) over `H ∪ T` is the tropical sum of the head value and the tail value, `max (decode L H) (decode L T)`. The single max-plus fact behind localizing the forge tax to a named program region. Cites `decode_partition`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L (H ∪ T) = tadd (decode L H) (decode L T) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L (H ∪ T) = tadd (decode L H) (decode L T) | Max over a union of finite nonempty sets is the max of the two Maxes | — | (rule decode_partition) | method |
+
+
+# theorem HeadCertifiesDecode
+> HEAD CERTIFICATE. When the head's tropical value dominates the tail's (`decode L T ≤ decode L H`), the FULL decode equals the head decode — the compact head reproduces the model's argmax exactly, with no read of the tail. Cites `head_certifies_decode`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L T ≤ decode L H ⟹ decode L (H ∪ T) = decode L H |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L T ≤ decode L H ⟹ decode L (H ∪ T) = decode L H | the union-Max is max of the two; domination collapses it to the head Max | — | (rule head_certifies_decode) | method |
+
+
+# theorem HeadArgmaxInHead
+> Under the same domination, the decode's argmaximiser lies IN the head: some head token attains the full decode value and is ≥ every candidate in `H ∪ T`. So the certified decode is a head token — the tail is provably never read. Cites `head_argmax_in_head`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L T ≤ decode L H ⟹ (∃h∈H. L h = decode L (H ∪ T) ∧ (∀v∈H ∪ T. L v ≤ L h)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L T ≤ decode L H ⟹ (∃h∈H. L h = decode L (H ∪ T) ∧ (∀v∈H ∪ T. L v ≤ L h)) | a head token attaining the head Max attains the full Max and dominates every candidate | — | (rule head_argmax_in_head) | method |
+
+
+# theorem TailIsResidue
+> TAIL RESIDUE. When the head does NOT dominate (`decode L H < decode L T`), the decode lies in the open-class tail: a tail token attains the full decode and strictly beats every head token. This is the explicit, uncertified ~35% — the irreducible open-class residue the compact head cannot reach. Cites `tail_is_residue`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L H < decode L T ⟹ (∃t∈T. L t = decode L (H ∪ T) ∧ (∀h∈H. L h < L t)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L H < decode L T ⟹ (∃t∈T. L t = decode L (H ∪ T) ∧ (∀h∈H. L h < L t)) | a tail token attaining the tail Max attains the full Max and strictly beats every head token | — | (rule tail_is_residue) | method |
