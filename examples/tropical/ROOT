@@ -6,4 +6,5 @@ session "Tropical" = "HOL-Analysis" +
     ReLUNet
     MaxPlus
     Newton
+    HeadTail
     Examples
