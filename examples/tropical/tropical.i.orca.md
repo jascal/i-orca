@@ -510,3 +510,137 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ decode L H < decode L T ⟹ (∃t∈T. L t = decode L (H ∪ T) ∧ (∀h∈H. L h < L t)) | a tail token attaining the tail Max attains the full Max and strictly beats every head token | — | (rule tail_is_residue) | method |
+
+
+<!-- ============================================================================
+     DECODE CAPACITY (DecodeCapacity.thy) — the decision-side Welch sibling; a fieldrun contribution.
+     Confident decoding forces separated frames: if tokens v and w are each gamma-margin-decodable somewhere
+     in the unit ball, then ||U_v - U_w|| >= gamma (bias-free — it cancels across the two witnesses). Hence the
+     gamma-decodable set (and any certifiable HEAD, cf. HeadTail) is a gamma-code in R^d, of cardinality at most
+     the packing number (1 + 2 rho / gamma)^d. This is the formal "structure is the hard limit": no frame tuning
+     or rule allocation yields more than a bounded number of cleanly-separable decodes without raising the
+     effective dimension (= tau* = min(exp H, d), the exponent of the packing bound). Sibling of the Welch bound.
+     ============================================================================ -->
+
+# theorem MarginPairSeparation
+> CORE. If token `v` is `γ`-margin-decodable at `rv` and `w` at `rw` (both in the unit ball), their proposition directions are `γ`-separated: `γ ≤ ‖U v − U w‖`. The bias cancels (add the two witness inequalities; the cross term is `⟨rv − rw, U v − U w⟩`, bounded by Cauchy–Schwarz and `‖rv − rw‖ ≤ 2`). Cites `margin_pair_separation`.
+
+## imports
+| Theory         |
+|----------------|
+| DecodeCapacity |
+
+## goal
+| Statement |
+|-----------|
+| gdecodes U b γ v rv ⟹ gdecodes U b γ w rw ⟹ norm rv ≤ 1 ⟹ norm rw ≤ 1 ⟹ v ≠ w ⟹ γ ≤ norm (U v - U w) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | gdecodes U b γ v rv ⟹ gdecodes U b γ w rw ⟹ norm rv ≤ 1 ⟹ norm rw ≤ 1 ⟹ v ≠ w ⟹ γ ≤ norm (U v - U w) | adding the two margin witnesses cancels the bias; Cauchy–Schwarz with ‖rv−rw‖≤2 gives the separation | — | (rule margin_pair_separation) | method |
+
+
+# theorem DecodeCapacitySeparated
+> The `γ`-decodable set is a `γ`-separated code: any two tokens that each win by margin `≥ γ` somewhere in the unit ball have frames at least `γ` apart, `γ ≤ dist(U v, U w)`. Cardinality is therefore bounded by the `γ`-packing number of the frame ball — the decision-side sibling of the Welch bound. Cites `decode_capacity_separated`.
+
+## imports
+| Theory         |
+|----------------|
+| DecodeCapacity |
+
+## goal
+| Statement |
+|-----------|
+| v ∈ gdecodable U b γ ⟹ w ∈ gdecodable U b γ ⟹ v ≠ w ⟹ γ ≤ dist (U v) (U w) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | v ∈ gdecodable U b γ ⟹ w ∈ gdecodable U b γ ⟹ v ≠ w ⟹ γ ≤ dist (U v) (U w) | each token supplies a unit-ball witness; apply the core separation pairwise | — | (rule decode_capacity_separated) | method |
+
+
+# theorem HeadCapacity
+> The certifiable HEAD is capacity-bounded. Any set `S` of `γ`-decodable tokens (in particular a HeadTail head that dominates its tail) is a `γ`-code: `∀ v,w ∈ S. v ≠ w ⟹ γ ≤ dist(U v, U w)`. So `|S|` ≤ the `γ`-packing number `(1 + 2ρ/γ)^d` — bounding the head bridges DecodeCapacity to HeadTail. Cites `head_capacity`.
+
+## imports
+| Theory         |
+|----------------|
+| DecodeCapacity |
+
+## goal
+| Statement |
+|-----------|
+| S ⊆ gdecodable U b γ ⟹ (∀v∈S. ∀w∈S. v ≠ w ⟶ γ ≤ dist (U v) (U w)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | S ⊆ gdecodable U b γ ⟹ (∀v∈S. ∀w∈S. v ≠ w ⟶ γ ≤ dist (U v) (U w)) | every pair in the head is γ-decodable, so the pairwise separation applies | — | (rule head_capacity) | method |
+
+
+<!-- ============================================================================
+     ROUTING RANK (RoutingRank.thy) — the generator-side dual of DecodeCapacity; a fieldrun contribution.
+     M trainable rules read out to logit space as M FIXED vectors a_k = U·Bdir_k, so any input-dependent
+     adjustment Σ_k h_k(z) a_k lies in span{a_k}, a subspace of dim ≤ M — independent of how many routing
+     decisions n there are. This is the structural reason SUPERPOSITION is forced when n > M (only ≤M dims of
+     adjustment exist). The RANK piece is provable linear algebra (here); the remaining INTERFERENCE piece —
+     how packing n features into the ≤M-dim subspace degrades the margin (a Welch DEGRADATION bound, not a
+     count floor) — is the open routing-side Welch conjecture, consistent with the measured sub-linear M.
+     ============================================================================ -->
+
+# theorem RoutingAdjustmentInSpan
+> The input-dependent rule adjustment `Σ_{i∈I} h i ·a i` is a linear combination of the fixed readout vectors `a i`, so it lies in `span(a ` I)`. Cites `routing_adjustment_in_span`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingRank  |
+
+## goal
+| Statement |
+|-----------|
+| (∑i∈I. h i *⇩R a i) ∈ span (a ` I) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (∑i∈I. h i *⇩R a i) ∈ span (a ` I) | each summand `h i ·a i` is a scaled member of `a ` I`, so the sum is in the span | — | (rule routing_adjustment_in_span) | method |
+
+
+# theorem RoutingRankLe
+> The adjustment span has dimension at most `M = card I`: M generators move logits only within an `≤M`-dimensional subspace, independent of the number of routing decisions. Cites `routing_rank_le`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingRank  |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ dim (span (a ` I)) ≤ card I |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ dim (span (a ` I)) ≤ card I | dim of a span = dim of the generating set ≤ its cardinality ≤ `card I` | — | (rule routing_rank_le) | method |
+
+
+# theorem RoutingSuperposition
+> GENERATOR-SIDE CAPACITY. Every rule adjustment lives in a fixed subspace of dimension `≤ M`; superposition is forced when the number of routing features exceeds `M`. The dual of DecodeCapacity's frame separation. Cites `routing_superposition`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingRank  |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ (∑i∈I. h i *⇩R a i) ∈ span (a ` I) ∧ dim (span (a ` I)) ≤ card I |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ (∑i∈I. h i *⇩R a i) ∈ span (a ` I) ∧ dim (span (a ` I)) ≤ card I | combine membership-in-span with the rank bound | — | (rule routing_superposition) | method |

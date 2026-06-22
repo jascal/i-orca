@@ -7,4 +7,6 @@ session "Tropical" = "HOL-Analysis" +
     MaxPlus
     Newton
     HeadTail
+    DecodeCapacity
+    RoutingRank
     Examples

@@ -3,4 +3,5 @@ session "Superposition" = "HOL-Analysis" +
   theories
     Superposition
     Welch
+    RoutingWelch
     Examples
