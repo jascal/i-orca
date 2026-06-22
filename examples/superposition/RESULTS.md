@@ -9,7 +9,7 @@ real kernel check (`isabelle build`).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/superposition/superposition.i.orca.md
-#   -> all 10 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
+#   -> all 13 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/superposition \
@@ -27,7 +27,7 @@ i-orca compile examples/superposition/superposition.i.orca.md --target isar \
 
 | Layer | Tool | Result |
 |-------|------|--------|
-| Skeleton | `i-orca verify` | 10/10 VALID, `formal_fraction_static = 1.000` |
+| Skeleton | `i-orca verify` | 13/13 VALID, `formal_fraction_static = 1.000` |
 | Substrate | `isabelle build` (`Superposition` session) | exit 0, **zero `sorry`** |
 | Surface | `isabelle build` (compiled `SuperpositionSurface` in-session) | exit 0 — every `(rule …)` non-vacuous |
 
@@ -46,6 +46,21 @@ is a concrete method the kernel accepts.
 - `OrthogonalCapacity` → `orth_capacity'`
 - `SuperpositionForcesInterference` → `superposition_forces_interference'`
 - `WelchBound` → `welch_offdiag'`
+
+**Routing-side Welch** (`RoutingWelch.thy`, a *PIL* contribution — the third leg of the two-sided packing story)
+
+The `n` realized **routing features** of a rule bank (`f_c = E[h|A] − E[h|B]`, the per-decision direction in
+rule-activation space `ℝ^M`) are `n` vectors in `m = M` rule-coordinates, so the proved Welch machinery applies
+verbatim — the generator-side dual of `tropical/DecodeCapacity`'s frame packing and the quantitative form of
+`tropical/RoutingRank`'s "superposition forced when `n > M`":
+
+- `RoutingCapacity` → `routing_capacity` (cross-talk-free routing needs `M ≥ n` rules)
+- `RoutingForcesInterference` → `routing_forces_interference` (`n > M` ⟹ some routing pair interferes)
+- `RoutingInterferenceWelch` → `routing_interference_welch` (total routing interference `≥ n(n−M)/M`)
+
+Honestly scoped to the count/interference statement; the further "coherence degrades the decode margin" step is
+empirically **mild** (trained rules pack near the Welch floor with margins still healthy — PIL
+`docs/notes/pil_learning_dynamics.md` §5f), so it is the measured consequence, not a kernel claim.
 
 **Worked example** (`Examples.thy`, the antipodal pair)
 - `AntipodalInterference` → `antipodal_interference`

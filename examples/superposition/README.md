@@ -23,9 +23,10 @@ unavoidable, quantifiable cost. See [`PROPOSAL.md`](PROPOSAL.md).
 |------|------|
 | [`Superposition.thy`](Superposition.thy) | inner product over a coordinate set; reconstruction error of a unit feature `=` its total interference; orthogonal features reconstruct perfectly |
 | [`Welch.thy`](Welch.thy) | the **Welch bound** `welch_sos` (proved from scratch), and its corollaries: orthogonal capacity `≤ m`, superposition forces interference, total interference `≥ n(n−m)/m` |
+| [`RoutingWelch.thy`](RoutingWelch.thy) | a **PIL** contribution: the routing-side instance — `n` routing features in `M` rule-coordinates, so `n > M` forces Welch interference; the generator-side dual of `tropical/DecodeCapacity` |
 | [`Examples.thy`](Examples.thy) | the antipodal pair — two features in one dimension — that achieves the Welch bound with equality |
 | [`ROOT`](ROOT) | Isabelle session `Superposition` (parent `HOL-Analysis`) |
-| [`superposition.i.orca.md`](superposition.i.orca.md) | the i-orca surface: 10 theorems, each `(rule <lemma>)` |
+| [`superposition.i.orca.md`](superposition.i.orca.md) | the i-orca surface: 13 theorems, each `(rule <lemma>)` |
 | [`PROPOSAL.md`](PROPOSAL.md) | the source, the formal-vs-meta table, honest reckonings, open targets |
 | [`RESULTS.md`](RESULTS.md) | verification status and commands |
 
@@ -34,7 +35,7 @@ unavoidable, quantifiable cost. See [`PROPOSAL.md`](PROPOSAL.md).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/superposition/superposition.i.orca.md
-#   -> all 10 theorems VALID, formal_fraction_static = 1.000
+#   -> all 13 theorems VALID, formal_fraction_static = 1.000
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/superposition \

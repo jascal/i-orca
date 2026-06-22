@@ -226,3 +226,69 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | (∑i∈{0,1::nat}. ∑j∈{0,1} - {i}. (ip {0::nat} (antipodal i) (antipodal j))\<^sup>2) = real (card {0,1::nat}) * (real (card {0,1::nat}) - real (card {0::nat})) / real (card {0::nat}) | the two interference terms sum to the Welch bound exactly | — | (rule antipodal_achieves_welch) | method |
+
+
+<!-- ============================================================================
+     ROUTING WELCH (RoutingWelch.thy) — the routing-side instance of the Welch bound; a PIL contribution.
+     The n realized ROUTING FEATURES of a rule bank (f_c = E[h|A] - E[h|B], the per-decision direction in
+     rule-activation space R^M) are n vectors in m = M rule-coordinates, so packing n > M of them forces
+     Welch interference. The generator-side dual of tropical/DecodeCapacity's frame packing, and the
+     quantitative form of tropical/RoutingRank's "superposition forced when n > M". Honestly scoped to the
+     count/interference statement; the "coherence degrades margin" step is empirically MILD (PIL §5f), not asserted.
+     ============================================================================ -->
+
+# theorem RoutingCapacity
+> Cross-talk-free routing needs `M ≥ n` rules: if the `n = card I` routing features are orthonormal in the `M = card K` rule coordinates, then `card I ≤ card K`. Cites `routing_capacity`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingWelch |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ finite K ⟹ (∀i∈I. ip K (f i) (f i) = 1) ⟹ (∀i∈I. ∀j∈I. i ≠ j ⟶ ip K (f i) (f j) = 0) ⟹ card I ≤ card K |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ finite K ⟹ (∀i∈I. ip K (f i) (f i) = 1) ⟹ (∀i∈I. ∀j∈I. i ≠ j ⟶ ip K (f i) (f j) = 0) ⟹ card I ≤ card K | orthonormal routing features are an orthonormal set, bounded by the rule-space dimension | — | (rule routing_capacity) | method |
+
+
+# theorem RoutingForcesInterference
+> More decisions than rules forces interference: if `card K < card I` then some pair of routing features has nonzero inner product — the qualitative origin of routing cross-talk. Cites `routing_forces_interference`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingWelch |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ finite K ⟹ (∀i∈I. ip K (f i) (f i) = 1) ⟹ card K < card I ⟹ (∃i∈I. ∃j∈I. i ≠ j ∧ ip K (f i) (f j) ≠ 0) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ finite K ⟹ (∀i∈I. ip K (f i) (f i) = 1) ⟹ card K < card I ⟹ (∃i∈I. ∃j∈I. i ≠ j ∧ ip K (f i) (f j) ≠ 0) | n > M routing features cannot be orthogonal, so some pair interferes | — | (rule routing_forces_interference) | method |
+
+
+# theorem RoutingInterferenceWelch
+> The quantitative routing Welch bound: total squared interference among the `n` routing features in `M` rule-dimensions is at least `n(n−M)/M` — positive exactly when `n > M`, growing as the rule bank overpacks. Cites `routing_interference_welch`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingWelch |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ finite K ⟹ 0 < card K ⟹ (∀i∈I. ip K (f i) (f i) = 1) ⟹ (∑i∈I. ∑j∈I - {i}. (ip K (f i) (f j))\<^sup>2) ≥ real (card I) * (real (card I) - real (card K)) / real (card K) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ finite K ⟹ 0 < card K ⟹ (∀i∈I. ip K (f i) (f i) = 1) ⟹ (∑i∈I. ∑j∈I - {i}. (ip K (f i) (f j))\<^sup>2) ≥ real (card I) * (real (card I) - real (card K)) / real (card K) | drop the diagonal from the Welch sum-of-squares inequality and rearrange | — | (rule routing_interference_welch) | method |
