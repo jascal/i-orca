@@ -8,4 +8,5 @@ session "Tropical" = "HOL-Analysis" +
     Newton
     HeadTail
     DecodeCapacity
+    RoutingRank
     Examples

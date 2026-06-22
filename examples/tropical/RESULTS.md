@@ -9,7 +9,7 @@ real kernel check (`isabelle build`).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/tropical/tropical.i.orca.md
-#   -> all 27 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
+#   -> all 30 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/tropical \
@@ -27,7 +27,7 @@ i-orca compile examples/tropical/tropical.i.orca.md --target isar \
 
 | Layer | Tool | Result |
 |-------|------|--------|
-| Skeleton | `i-orca verify` | 27/27 VALID, `formal_fraction_static = 1.000` |
+| Skeleton | `i-orca verify` | 30/30 VALID, `formal_fraction_static = 1.000` |
 | Substrate | `isabelle build` (`Tropical` session) | exit 0, **zero `sorry`** |
 | Surface | `isabelle build` (compiled `TropicalSurface` in-session) | exit 0 — every `(rule …)` non-vacuous |
 
@@ -100,6 +100,22 @@ bounded number of cleanly-separable decodes without raising the (effective) dime
 that the **Welch bound** governs from the coherence side, with `τ⋆ = min(e^H, d)` the effective dimension in the
 exponent. It **bounds the `HeadTail` head** (head ⊆ γ-code) and is the existence-over-`r` companion to PO-T3's
 fixed-`r` margin certificate.
+
+**Routing rank — the generator-side dual** (`RoutingRank.thy`, a *fieldrun* contribution)
+
+`M` trainable rules read out to logit space as `M` **fixed** vectors `a_k = U·Bdir_k`, so any input-dependent
+adjustment `Σ_k h_k(z) a_k` lies in `span{a_k}`, a subspace of dimension `≤ M` — independent of how many routing
+decisions `n` there are (all kernel-discharged, zero `sorry`):
+
+- `RoutingAdjustmentInSpan` → `routing_adjustment_in_span` (the adjustment lies in `span(a ` I)`)
+- `RoutingRankLe` → `routing_rank_le` (`dim (span (a ` I)) ≤ card I = M`)
+- `RoutingSuperposition` → `routing_superposition` (both at once: rule adjustments live in an `≤M`-dim subspace)
+
+This is the **structural reason superposition is forced** when the number of routing features `n` exceeds `M`
+(only `≤ min(M,d)` dimensions of adjustment exist), the generator-side dual of `DecodeCapacity`'s frame
+separation. The RANK piece is provable linear algebra; the remaining INTERFERENCE piece (how packing `n`
+features into the `≤M`-dim subspace degrades the margin — a Welch *degradation* bound, not a count floor) is the
+open routing-side Welch conjecture, consistent with the measured sub-linear `M` (PIL `experiments/routing_complexity.py`).
 
 ## Notes
 

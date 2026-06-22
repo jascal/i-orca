@@ -577,3 +577,70 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | S ⊆ gdecodable U b γ ⟹ (∀v∈S. ∀w∈S. v ≠ w ⟶ γ ≤ dist (U v) (U w)) | every pair in the head is γ-decodable, so the pairwise separation applies | — | (rule head_capacity) | method |
+
+
+<!-- ============================================================================
+     ROUTING RANK (RoutingRank.thy) — the generator-side dual of DecodeCapacity; a fieldrun contribution.
+     M trainable rules read out to logit space as M FIXED vectors a_k = U·Bdir_k, so any input-dependent
+     adjustment Σ_k h_k(z) a_k lies in span{a_k}, a subspace of dim ≤ M — independent of how many routing
+     decisions n there are. This is the structural reason SUPERPOSITION is forced when n > M (only ≤M dims of
+     adjustment exist). The RANK piece is provable linear algebra (here); the remaining INTERFERENCE piece —
+     how packing n features into the ≤M-dim subspace degrades the margin (a Welch DEGRADATION bound, not a
+     count floor) — is the open routing-side Welch conjecture, consistent with the measured sub-linear M.
+     ============================================================================ -->
+
+# theorem RoutingAdjustmentInSpan
+> The input-dependent rule adjustment `Σ_{i∈I} h i ·a i` is a linear combination of the fixed readout vectors `a i`, so it lies in `span(a ` I)`. Cites `routing_adjustment_in_span`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingRank  |
+
+## goal
+| Statement |
+|-----------|
+| (∑i∈I. h i *⇩R a i) ∈ span (a ` I) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (∑i∈I. h i *⇩R a i) ∈ span (a ` I) | each summand `h i ·a i` is a scaled member of `a ` I`, so the sum is in the span | — | (rule routing_adjustment_in_span) | method |
+
+
+# theorem RoutingRankLe
+> The adjustment span has dimension at most `M = card I`: M generators move logits only within an `≤M`-dimensional subspace, independent of the number of routing decisions. Cites `routing_rank_le`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingRank  |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ dim (span (a ` I)) ≤ card I |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ dim (span (a ` I)) ≤ card I | dim of a span = dim of the generating set ≤ its cardinality ≤ `card I` | — | (rule routing_rank_le) | method |
+
+
+# theorem RoutingSuperposition
+> GENERATOR-SIDE CAPACITY. Every rule adjustment lives in a fixed subspace of dimension `≤ M`; superposition is forced when the number of routing features exceeds `M`. The dual of DecodeCapacity's frame separation. Cites `routing_superposition`.
+
+## imports
+| Theory       |
+|--------------|
+| RoutingRank  |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ (∑i∈I. h i *⇩R a i) ∈ span (a ` I) ∧ dim (span (a ` I)) ≤ card I |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ (∑i∈I. h i *⇩R a i) ∈ span (a ` I) ∧ dim (span (a ` I)) ≤ card I | combine membership-in-span with the rank bound | — | (rule routing_superposition) | method |
