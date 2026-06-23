@@ -4,3 +4,4 @@ session "PIC_Core" = "HOL-Analysis" +
     PIC_Core
     PIC_Logic
     PIC_Forward
+    PIC_Interference
