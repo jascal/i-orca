@@ -186,4 +186,31 @@ qed
 lemma Aux_dropped: "Aux \<notin> lfp (restrict_op (Tp Pdec) Ddec)"
   using decode_magic_sets_lossless by (simp add: Ddec_def)
 
+section \<open>Decode robustness: how far a clause weight may drift (the margin certificate)\<close>
+
+text \<open>The other half of the language's metatheory: a bounded perturbation of the logits preserves the
+  query answer on every token whose margin exceeds @{text "2\<delta>"}. The bound is tight (a margin-@{text "2\<delta>"}
+  token can be tied), and it is exactly the LP statement "how far a clause weight may drift before
+  @{term decode} flips" -- the decision-side companion to demand-closure. (= ProvableOpt_Common PO-T3,
+  self-contained.)\<close>
+
+definition decodes_to :: "('a \<Rightarrow> real) \<Rightarrow> 'a set \<Rightarrow> 'a \<Rightarrow> bool" where
+  "decodes_to L V t \<longleftrightarrow> t \<in> V \<and> (\<forall>v\<in>V. v \<noteq> t \<longrightarrow> L v < L t)"
+
+theorem decode_margin_certified:
+  assumes pert: "\<And>v. v \<in> V \<Longrightarrow> \<bar>L' v - L v\<bar> \<le> \<delta>"
+      and tV:   "t \<in> V"
+      and marg: "\<And>v. v \<in> V \<Longrightarrow> v \<noteq> t \<Longrightarrow> L t - L v > 2 * \<delta>"
+  shows "decodes_to L' V t"
+  unfolding decodes_to_def
+proof (intro conjI ballI impI)
+  show "t \<in> V" by (rule tV)
+next
+  fix v assume v: "v \<in> V" and ne: "v \<noteq> t"
+  have b1: "L' t - L t \<le> \<delta> \<and> - \<delta> \<le> L' t - L t" using pert[OF tV] by (simp add: abs_le_iff)
+  have b2: "L' v - L v \<le> \<delta> \<and> - \<delta> \<le> L' v - L v" using pert[OF v] by (simp add: abs_le_iff)
+  have b3: "L t - L v > 2 * \<delta>" by (rule marg[OF v ne])
+  from b1 b2 b3 show "L' v < L' t" by linarith
+qed
+
 end

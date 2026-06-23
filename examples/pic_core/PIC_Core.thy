@@ -225,6 +225,20 @@ qed
 lemma routing_rank_dim: "dim (span (a ` K)) \<le> DIM('a)"
   by (simp add: dim_span dim_subset_UNIV)
 
+text \<open>SUPERPOSITION is forced on the WRITERS: more rules than the ambient dimension means the write
+  directions cannot be linearly independent -- the rule bank must reuse directions. This is the
+  generator-side packing (the qualitative Welch); the quantitative interference floor
+  @{text "\<Sum>\<^sub>i\<noteq>\<^sub>j\<langle>a\<^sub>i,a\<^sub>j\<rangle>\<^sup>2 \<ge> n(n-d)/d"} is @{text Welch.thy} (superposition corpus), and the step from
+  interference to a margin penalty stays empirical/open (the coherence\<Rightarrow>margin conjecture).\<close>
+lemma encoder_superposition:
+  assumes "DIM('a) < card (a ` K)"
+  shows "\<not> independent (a ` K)"
+proof
+  assume "independent (a ` K)"
+  hence "card (a ` K) \<le> DIM('a)" using independent_bound by blast
+  with assms show False by simp
+qed
+
 text \<open>BRIDGE: every input-slice of a PIC encoder is a PIC source-model, with sources the gated rules
   \<open>\<lambda>k. g k x *\<^sub>R a k\<close>. The interpretation below succeeds (so the encoder IS a family of @{locale pic}
   models, one per input), and the slice's logit is exactly the encoder logit \<open>Lx v x\<close>. The encoder
