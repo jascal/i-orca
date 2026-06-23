@@ -3,3 +3,4 @@ session "PIC_Core" = "HOL-Analysis" +
   theories
     PIC_Core
     PIC_Logic
+    PIC_Forward
