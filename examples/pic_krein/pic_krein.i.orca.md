@@ -39,6 +39,8 @@
                                           KreinPrecondNotReparam, KreinPsdPrecondDescends,
                                           KreinIndefinitePrecondNotDescent
     LEARNED J (adaptive signature)     -> KreinDescendsAllIffPsd, KreinJsInvolution
+    INSTABILITY of minima (isotropic)  -> KreinKstepGrowsOnTimelike, KreinKstepNormGrows,
+                                          KreinFlowUnstableOnTimelike
 -->
 
 # theorem KreinLogitDefinitize
@@ -499,3 +501,68 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | (⋀b. s b * s b = 1) ⟹ Js s (Js s x) = x | applying a ±1 signature twice is the identity, coordinatewise | — | (rule Js_involution) | method |
+
+
+<!-- ============================================================================
+     INSTABILITY OF MINIMA (KreinPrecond.thy). The isotropic (whitened, H=I) core of the saddle-seeking
+     dynamics, kernel-checked: the Scheme-A update kstep J η u = u − η·(J u) multiplies a timelike axis by
+     (1+η) > 1 each step (geometric divergence away from the minimum), and the flow Jacobian −J has
+     eigenvalue +1 on the whole timelike eigenspace. The general SPD-Hessian count (q positive eigenvalues
+     of −JH, a q-dim unstable manifold, by Sylvester) reduces to this via whitening — stated in the .thy.
+     ============================================================================ -->
+
+# theorem KreinKstepGrowsOnTimelike
+> INSTABILITY (discrete). At an isotropic minimum the Scheme-A update `kstep J η u = u − η·(J u)` multiplies a timelike axis (`J t = −t`) by `(1 + η)`: `kstep J η t = (1+η) ·⇩R t`. For `η > 0` the factor exceeds 1, so the iterate diverges geometrically away from the minimum — the kernel-checked core of "minima are repelled." Cites `kstep_grows_on_timelike`.
+
+## imports
+| Theory       |
+|--------------|
+| KreinPrecond |
+
+## goal
+| Statement |
+|-----------|
+| J t = - t ⟹ kstep J η t = (1 + η) *⇩R t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | J t = - t ⟹ kstep J η t = (1 + η) *⇩R t | one update subtracts η·(−t) = +η·t, scaling the axis by 1+η | — | (rule kstep_grows_on_timelike) | method |
+
+
+# theorem KreinKstepNormGrows
+> The norm grows by exactly the factor `1 + η`: `‖kstep J η t‖ = (1 + η)·‖t‖` (for `η ≥ 0` on a timelike axis). Geometric divergence made quantitative — the iterate's distance from the minimum multiplies by `1+η` per step. Cites `kstep_norm_grows`.
+
+## imports
+| Theory       |
+|--------------|
+| KreinPrecond |
+
+## goal
+| Statement |
+|-----------|
+| J t = - t ⟹ 0 ≤ η ⟹ norm (kstep J η t) = (1 + η) * norm t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | J t = - t ⟹ 0 ≤ η ⟹ norm (kstep J η t) = (1 + η) * norm t | norm of (1+η)·⇩R t is ¦1+η¦·‖t‖ = (1+η)·‖t‖ | — | (rule kstep_norm_grows) | method |
+
+
+# theorem KreinFlowUnstableOnTimelike
+> INSTABILITY (continuous). The flow Jacobian `−J` has eigenvalue `+1` on every timelike axis: `J x = −x ⟹ −(J x) = x`. So the whole timelike eigenspace `H₋` (dimension `q`) is the unstable manifold of the isotropic minimum — a positive eigenvalue ⇒ exponential growth `e^{s}` along it. Cites `flow_unstable_on_timelike`.
+
+## imports
+| Theory       |
+|--------------|
+| KreinPrecond |
+
+## goal
+| Statement |
+|-----------|
+| J x = - x ⟹ - (J x) = x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | J x = - x ⟹ - (J x) = x | a −1 eigenvector of J is a +1 eigenvector of the flow Jacobian −J | — | (rule flow_unstable_on_timelike) | method |

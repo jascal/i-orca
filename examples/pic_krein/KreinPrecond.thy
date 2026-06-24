@@ -118,14 +118,51 @@ lemma descends_all_iff_psd:
   shows "(\<forall>g. inner g (- (J g)) \<le> 0) \<longleftrightarrow> (\<forall>x. 0 \<le> inner x (J x))"
   by (auto simp: inner_minus_right)
 
-text \<open>CONSEQUENCE (stated, not formalized here -- needs Hessian/eigenvalue machinery): linearizing the
-  flow U' = -J grad L at a strict local minimum (Hessian H positive-definite) gives Jacobian -J H, which
-  by Sylvester's law of inertia (congruence H^{1/2}(JH)H^{-1/2} = H^{1/2} J H^{1/2}) has the inertia of
-  -J -- so q POSITIVE eigenvalues.  A loss minimum is therefore an UNSTABLE fixed point with a q-dim
-  unstable manifold: the flow is saddle-seeking, repelled from minima along the timelike subspace.  So
-  Scheme A is sound only (a) as a min-max -- route the maximize-objective (push features apart) into the
-  timelike subspace, the data-fit into the spacelike one -- or (b) transiently, annealing J -> I so the
-  final phase is genuine descent.  See SCHEME_A.md.\<close>
+text \<open>INSTABILITY OF MINIMA -- the isotropic core, kernel-checked.  Near a strict minimum the gradient is
+  grad L ~ H u (Hessian H positive-definite).  Whitening v = H^{1/2} u turns H into the identity, so it
+  suffices to analyse the ISOTROPIC minimum H = I, where the Scheme-A update with step eta and gradient u
+  is  kstep J eta u = u - eta *R J u.  On a timelike axis (J t = - t, i.e. t in the negative eigenspace
+  H_-) the update MULTIPLIES t by (1 + eta): the iterate diverges geometrically away from the minimum,
+  and in continuous time -J has eigenvalue +1 there.  So the whole timelike subspace is unstable.\<close>
+
+definition kstep :: "('a::real_inner \<Rightarrow> 'a) \<Rightarrow> real \<Rightarrow> 'a \<Rightarrow> 'a" where
+  "kstep J \<eta> u = u - \<eta> *\<^sub>R J u"
+
+text \<open>The Scheme-A update at an isotropic minimum multiplies a timelike axis by (1 + eta): the iterate
+  is repelled from the minimum, growing by the factor (1 + eta) > 1 each step.\<close>
+lemma kstep_grows_on_timelike:
+  assumes Jt: "J t = - t"
+  shows "kstep J \<eta> t = (1 + \<eta>) *\<^sub>R t"
+  unfolding kstep_def using Jt by (simp add: scaleR_add_left)
+
+corollary kstep_norm_grows:
+  assumes Jt: "J t = - t" and nn: "0 \<le> \<eta>"
+  shows "norm (kstep J \<eta> t) = (1 + \<eta>) * norm t"
+proof -
+  have nn1: "0 \<le> 1 + \<eta>" using nn by simp
+  have eq: "kstep J \<eta> t = (1 + \<eta>) *\<^sub>R t"
+    unfolding kstep_def using Jt by (simp add: scaleR_add_left)
+  have "norm (kstep J \<eta> t) = \<bar>1 + \<eta>\<bar> * norm t" by (simp add: eq norm_scaleR)
+  also have "\<dots> = (1 + \<eta>) * norm t" using nn1 by simp
+  finally show ?thesis .
+qed
+
+text \<open>Continuous-time form: the flow Jacobian -J has eigenvalue +1 on every timelike axis, so the whole
+  timelike eigenspace H_- (dimension q) is the unstable manifold of the isotropic minimum.\<close>
+lemma flow_unstable_on_timelike:
+  fixes J :: "'a::real_inner \<Rightarrow> 'a"
+  assumes "J x = - x"
+  shows "- (J x) = x"
+  using assms by simp
+
+text \<open>CONSEQUENCE -- the general (non-isotropic) Hessian (stated; the spectral count needs the spectral
+  theorem + Sylvester, beyond this HOL-Analysis session): linearizing U' = -J grad L at a strict min
+  gives Jacobian -J H, similar (via H^{1/2}) to the SYMMETRIC -H^{1/2} J H^{1/2}, which by Sylvester's
+  law of inertia (congruence by H^{1/2}) has the inertia of -J -- so q POSITIVE eigenvalues.  The minimum
+  is thus an unstable fixed point with a q-dim unstable manifold; the isotropic lemmas above are the
+  H = I instance, kernel-checked.  Hence Scheme A is sound only (a) as a min-max -- route the
+  maximize-objective (push features apart) into the timelike subspace, the data-fit into the spacelike
+  one -- or (b) transiently, annealing J -> I so the final phase is genuine descent.  See SCHEME_A.md.\<close>
 
 text \<open>OPEN: does an indefinite frame preconditioner actually HELP (reach better frames than plain SGD)?
   Untested -- no numbers exist for this knob; pil sec 6.1 found no theory-guided frame knob has yet beaten

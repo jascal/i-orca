@@ -14,11 +14,16 @@ metric** — and an indefinite metric is not Riemannian, so the descent guarante
 - **Not a descent flow.** `dL/dt = −⟨∇L, J ∇L⟩` is a sign-indefinite quadratic form. For a timelike
   gradient (`⟨g, J g⟩ < 0`) it is **positive** — the loss increases. (`indefinite_precond_not_descent`;
   contrast `psd_precond_descends` for the PSD/Euclidean case.)
-- **Minima are repelled.** At a strict local minimum (`H = ∇²L ≻ 0`), the linearization `−J H` has, by
-  Sylvester's law of inertia, the inertia of `−J` — i.e. `q` **positive** eigenvalues. The minimum is
-  an unstable fixed point with a `q`-dimensional unstable manifold. The flow is **saddle-seeking**, not
-  minimizing: same critical points as SGD, but it stabilizes critical points whose Morse index matches
-  the signature and destabilizes true minima.
+- **Minima are repelled.** *Isotropic core (kernel-checked):* at a whitened minimum (`H = I`) the actual
+  Scheme-A update multiplies a timelike axis by `1 + η` (`kstep_grows_on_timelike`, `kstep_norm_grows`)
+  — geometric divergence away from the minimum — and the flow Jacobian `−J` has eigenvalue `+1` on the
+  whole timelike eigenspace (`flow_unstable_on_timelike`), so `H₋` (dim `q`) is the unstable manifold.
+  *General SPD `H` (stated, reduces to the core):* the linearization `−J H` is similar (via `H^{1/2}`) to
+  the symmetric `−H^{1/2} J H^{1/2}`, which by Sylvester's law of inertia has the inertia of `−J` — `q`
+  **positive** eigenvalues, a `q`-dim unstable manifold. (The general eigenvalue count needs the spectral
+  theorem + Sylvester, beyond this HOL-Analysis session; the isotropic instance is the kernel-checked
+  part.) Either way the flow is **saddle-seeking**, not minimizing: same critical points as SGD, but it
+  destabilizes true minima and stabilizes critical points whose Morse index matches the signature.
 - **Consequence.** Run on the *full* loss, `U̇ = −J∇L` will not minimize it and will degrade the decode
   (NLL rises, frame norm can explode along timelike directions). This is why §6.1's "no frame knob beats
   plain SGD" is a *symptom*, not just "haven't found the right `J`": a pure indefinite flow cannot be a

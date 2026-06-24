@@ -9,7 +9,7 @@ bottom-K (min-plus) dual and the frame-only "Scheme A" preconditioner. Companion
 ```
 $ .venv/bin/i-orca verify examples/pic_krein/pic_krein.i.orca.md
 ```
-All **23** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
+All **26** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
 
 ## Layer 2 — kernel check of the substrate (the load-bearing math)
 
@@ -35,14 +35,18 @@ the thin i-orca surface, each theorem discharged by `(rule <lemma>)`.
 
 ## What is proved vs. what is open
 
-**Proved (kernel, 23 theorems):** decode definitization, form symmetry, majorant escape hatch,
+**Proved (kernel, 26 theorems):** decode definitization, form symmetry, majorant escape hatch,
 capacity-survives-in-majorant; the signature phenomena (timelike split, null token, trace = signature,
 Welch-driver vanishing, indefinite-ball unboundedness); the full bottom-K dual certificate (partition,
 co-head certifies, argmin-in-co-head, tail residue), the negation duality (`bottomk = −(top-k over −U)`);
-and Scheme A's non-triviality (Gram forms are PSD ⇒ an indefinite preconditioner is no reparametrized SGD)
-plus its dynamical companion (a PSD preconditioner descends, but an indefinite one has a strict ascent
-direction — the J-flow is not a descent flow; see [`SCHEME_A.md`](SCHEME_A.md) for the saddle-seeking
-analysis and the min–max / annealing recipe that make it usable).
+and Scheme A's non-triviality (Gram forms are PSD ⇒ an indefinite preconditioner is no reparametrized SGD),
+its dynamical companion (a PSD preconditioner descends, but an indefinite one has a strict ascent
+direction — the J-flow is not a descent flow), the **isotropic instability** (the Scheme-A update
+multiplies a timelike axis by `1+η` — geometric divergence — and `−J` has eigenvalue `+1` on the whole
+timelike eigenspace), the **learned-J dichotomy** (descends-for-all ⟺ PSD), and the **signature
+parametrization** (a rigid signature is an involution). See [`SCHEME_A.md`](SCHEME_A.md) and
+[`LEARNED_J.md`](LEARNED_J.md). The general SPD-Hessian eigenvalue count (`q` positive eigenvalues of
+`−JH` by Sylvester) reduces to the isotropic core and is stated, not formalized (needs spectral theory).
 
 **Open / not claimed:** achievability of sub-Welch coherence with `n>d` indefinite units; an
 indefinite-ball capacity bound; that an indefinite preconditioner *helps* (pil §6.1: no frame knob yet
