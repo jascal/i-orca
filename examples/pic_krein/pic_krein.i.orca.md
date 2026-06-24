@@ -47,6 +47,9 @@
        mis-tokenizes the Pi-E goal, a surface-parser limit, not a math gap)
     WITHIN-TOLERANCE LOSSLESS (any value system, PIC_Quant.thy) -> PicMarginCertified,
                                           PicFrameQuantBound, PicQuantDecodePreserved
+    PRUNING certificate (source-side, PIC_Prune.thy) -> PicPruneLogitDelta, PicPruneDroppedLeBudget,
+                                          PicPruneBudgetMono, PicPruneDecodePreserved,
+                                          PicPruneBudgetDecodePreserved
 -->
 
 # theorem KreinLogitDefinitize
@@ -746,4 +749,105 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | t ∈ V ⟹ norm r ≤ ρ ⟹ 0 ≤ ρ ⟹ (∀v∈V. norm (Ut v - U v) ≤ ε) ⟹ (∀v∈V. v ≠ t ⟶ (inner r (U v) + b v) + m ≤ (inner r (U t) + b t)) ⟹ 2 * (ρ * ε) < m ⟹ (∀v∈V. v ≠ t ⟶ (inner r (Ut v) + b v) < (inner r (Ut t) + b t)) | the ε-quantization perturbs logits by ≤ ρε; with margin > 2ρε the certificate preserves the decode | — | (rule quant_decode_preserved) | method |
+
+
+<!-- ============================================================================
+     PRUNING CERTIFICATE -- source-side (PIC_Prune.thy). Dropping sources whose summed incidence stays
+     under half the margin preserves the decode, exactly and certified. Source-side twin of
+     quant_decode_preserved; same margin certificate underneath. Budget form (Σβ) is what greedy uses.
+     ============================================================================ -->
+
+# theorem PicPruneLogitDelta
+> Pruning a source set `P ⊆ S` perturbs the logit by exactly the dropped incidence: `L_S(v) − L_{S−P}(v) = Σ_{j∈P} c_j(v)`. The basis of every prune certificate. Cites `prune_logit_delta`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Prune |
+
+## goal
+| Statement |
+|-----------|
+| finite S ⟹ P ⊆ S ⟹ ((∑j∈S. c j v) + b v) - ((∑j∈S-P. c j v) + b v) = (∑j∈P. c j v) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite S ⟹ P ⊆ S ⟹ ((∑j∈S. c j v) + b v) - ((∑j∈S-P. c j v) + b v) = (∑j∈P. c j v) | the sum over S splits as (sum over S−P) + (sum over P) | — | (rule prune_logit_delta) | method |
+
+
+# theorem PicPruneDroppedLeBudget
+> TRIANGLE BUDGET. The dropped incidence is bounded by the sum of per-source bounds: `¦Σ_{j∈P} c_j(v)¦ ≤ Σ_{j∈P} β_j` when `¦c_j(v)¦ ≤ β_j`. This `β`-budget is what the greedy prune fills. Cites `prune_dropped_le_budget`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Prune |
+
+## goal
+| Statement |
+|-----------|
+| (⋀j. j ∈ P ⟹ ¦c j v¦ ≤ β j) ⟹ ¦∑j∈P. c j v¦ ≤ (∑j∈P. β j) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (⋀j. j ∈ P ⟹ ¦c j v¦ ≤ β j) ⟹ ¦∑j∈P. c j v¦ ≤ (∑j∈P. β j) | triangle inequality then termwise bound | — | (rule prune_dropped_le_budget) | method |
+
+
+# theorem PicPruneBudgetMono
+> The budget `Σ_{j∈P} β_j` is monotone in `P` (non-negative `β`), so the certifiable prune sets are downward-closed — a greedy prune is well-founded. Cites `prune_budget_mono`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Prune |
+
+## goal
+| Statement |
+|-----------|
+| finite P ⟹ Q ⊆ P ⟹ (⋀j. j ∈ P ⟹ 0 ≤ β j) ⟹ (∑j∈Q. β j) ≤ (∑j∈P. β j) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite P ⟹ Q ⊆ P ⟹ (⋀j. j ∈ P ⟹ 0 ≤ β j) ⟹ (∑j∈Q. β j) ≤ (∑j∈P. β j) | sum over a subset ≤ sum over the superset for non-negative terms | — | (rule prune_budget_mono) | method |
+
+
+# theorem PicPruneDecodePreserved
+> THE PRUNING CERTIFICATE. Drop the sources in `P ⊆ S`; if the dropped incidence is `≤ δ` for every candidate and the original margin exceeds `2δ`, the pruned decode equals the original — exactly and certified. Source-side twin of `quant_decode_preserved`. Cites `prune_decode_preserved`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Prune |
+
+## goal
+| Statement |
+|-----------|
+| finite S ⟹ P ⊆ S ⟹ t ∈ V ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S. c j v) + b v) + m ≤ ((∑j∈S. c j t) + b t)) ⟹ (∀v∈V. ¦∑j∈P. c j v¦ ≤ δ) ⟹ 2 * δ < m ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S-P. c j v) + b v) < ((∑j∈S-P. c j t) + b t)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite S ⟹ P ⊆ S ⟹ t ∈ V ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S. c j v) + b v) + m ≤ ((∑j∈S. c j t) + b t)) ⟹ (∀v∈V. ¦∑j∈P. c j v¦ ≤ δ) ⟹ 2 * δ < m ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S-P. c j v) + b v) < ((∑j∈S-P. c j t) + b t)) | pruning perturbs each logit by the dropped incidence ≤ δ; margin > 2δ ⇒ decode preserved | — | (rule prune_decode_preserved) | method |
+
+
+# theorem PicPruneBudgetDecodePreserved
+> BUDGET FORM (what greedy uses). If `2·Σ_{j∈P} β_j < margin` and each pruned source obeys `¦c_j(v)¦ ≤ β_j` on `V`, pruning `P` preserves the decode. The certificate the pruning algorithms gate on. Cites `prune_budget_decode_preserved`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Prune |
+
+## goal
+| Statement |
+|-----------|
+| finite S ⟹ P ⊆ S ⟹ t ∈ V ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S. c j v) + b v) + m ≤ ((∑j∈S. c j t) + b t)) ⟹ (⋀j v. j ∈ P ⟹ v ∈ V ⟹ ¦c j v¦ ≤ β j) ⟹ 2 * (∑j∈P. β j) < m ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S-P. c j v) + b v) < ((∑j∈S-P. c j t) + b t)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite S ⟹ P ⊆ S ⟹ t ∈ V ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S. c j v) + b v) + m ≤ ((∑j∈S. c j t) + b t)) ⟹ (⋀j v. j ∈ P ⟹ v ∈ V ⟹ ¦c j v¦ ≤ β j) ⟹ 2 * (∑j∈P. β j) < m ⟹ (∀v∈V. v ≠ t ⟶ ((∑j∈S-P. c j v) + b v) < ((∑j∈S-P. c j t) + b t)) | the per-source budget bounds the dropped incidence; apply the pruning certificate | — | (rule prune_budget_decode_preserved) | method |
 
