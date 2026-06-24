@@ -105,6 +105,19 @@ proof (rule exI[of _ t])
   show "0 < inner t (- (J t))" using tl by (simp add: inner_minus_right)
 qed
 
+text \<open>THE LEARNED-J DICHOTOMY.  Suppose we make J adaptive (learned, or computed from curvature) and
+  ask it to keep DESCENDING for every gradient.  Then it must be PSD: "descends for all g" is exactly
+  "J is positive-semidefinite".  Equivalently (contrapositive, via precond_not_reparam): a genuinely
+  indefinite learned J is neither always-descent NOR a reparametrization.  So an adaptive J cannot be
+  both genuinely Krein AND a reliable minimizer -- adaptivity that preserves descent collapses it to the
+  PSD / reparametrization class (ordinary second-order preconditioning, e.g. the |H| of saddle-free
+  Newton); keeping it indefinite keeps it saddle-seeking.  The indefiniteness is only a resource when
+  minimization is NOT the goal (min-max spread, basin escape).  See LEARNED_J.md.\<close>
+lemma descends_all_iff_psd:
+  fixes J :: "'a::real_inner \<Rightarrow> 'a"
+  shows "(\<forall>g. inner g (- (J g)) \<le> 0) \<longleftrightarrow> (\<forall>x. 0 \<le> inner x (J x))"
+  by (auto simp: inner_minus_right)
+
 text \<open>CONSEQUENCE (stated, not formalized here -- needs Hessian/eigenvalue machinery): linearizing the
   flow U' = -J grad L at a strict local minimum (Hessian H positive-definite) gives Jacobian -J H, which
   by Sylvester's law of inertia (congruence H^{1/2}(JH)H^{-1/2} = H^{1/2} J H^{1/2}) has the inertia of

@@ -38,6 +38,7 @@
     SCHEME A (Krein in frame-update)   -> KreinGramFormNonneg, KreinIndefiniteNotGramForm,
                                           KreinPrecondNotReparam, KreinPsdPrecondDescends,
                                           KreinIndefinitePrecondNotDescent
+    LEARNED J (adaptive signature)     -> KreinDescendsAllIffPsd, KreinJsInvolution
 -->
 
 # theorem KreinLogitDefinitize
@@ -453,3 +454,48 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | inner t (J t) < 0 ⟹ (∃g. 0 < inner g (- (J g))) | the timelike vector itself is a gradient at which the preconditioned step ascends the loss | — | (rule indefinite_precond_not_descent) | method |
+
+
+<!-- ============================================================================
+     LEARNED / ADAPTIVE J (LEARNED_J.md). Making the fundamental symmetry J optimizable. The dichotomy
+     below is the governing constraint: a learned preconditioner that keeps descending must be PSD, so a
+     genuinely indefinite learned J is never a reliable minimizer (the saddle-free-Newton tension). The
+     smooth parametrization is the (relaxable) coordinate signature s; a rigid signature is an involution.
+     ============================================================================ -->
+
+# theorem KreinDescendsAllIffPsd
+> THE LEARNED-J DICHOTOMY. A preconditioner descends for *every* gradient `g` (`⟨g, −(J g)⟩ ≤ 0`) if and only if `J` is PSD (`⟨x, J x⟩ ≥ 0`). With `precond_not_reparam`, a genuinely indefinite learned `J` is therefore neither always-descent nor a reparametrization — adaptivity that preserves descent collapses `J` to the PSD / ordinary-second-order class (the `|H|` of saddle-free Newton); keeping it indefinite keeps it saddle-seeking. Cites `descends_all_iff_psd`.
+
+## imports
+| Theory       |
+|--------------|
+| KreinPrecond |
+
+## goal
+| Statement |
+|-----------|
+| (∀g. inner g (- (J g)) ≤ 0) ⟷ (∀x. 0 ≤ inner x (J x)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (∀g. inner g (- (J g)) ≤ 0) ⟷ (∀x. 0 ≤ inner x (J x)) | descent-for-all-gradients is exactly nonnegativity of the quadratic form J | — | (rule descends_all_iff_psd) | method |
+
+
+# theorem KreinJsInvolution
+> LEARNABLE SIGNATURE. In coordinates the fundamental symmetry is the signature `s` (applied by `Js`), so learning `J` = learning `s`. A rigid signature (`s b · s b = 1`, i.e. `s b ∈ {±1}`) makes `Js` a genuine involution `Js s (Js s x) = x` — the smooth chart for adaptive `J`, with `s = tanh θ` the soft relaxation (involution exact only in the rigid limit). Cites `Js_involution`.
+
+## imports
+| Theory     |
+|------------|
+| KreinWelch |
+
+## goal
+| Statement |
+|-----------|
+| (⋀b. s b * s b = 1) ⟹ Js s (Js s x) = x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (⋀b. s b * s b = 1) ⟹ Js s (Js s x) = x | applying a ±1 signature twice is the identity, coordinatewise | — | (rule Js_involution) | method |

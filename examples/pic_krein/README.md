@@ -42,9 +42,10 @@ metric-dependent*. See [`PROPOSAL.md`](PROPOSAL.md).
 | [`KreinBottomK.thy`](KreinBottomK.thy) | the bottom-K (min-plus) decode certificate — dual of `tropical/HeadTail.thy` — and bottom-K = top-K of the negated frame |
 | [`KreinPrecond.thy`](KreinPrecond.thy) | Scheme A: an indefinite frame-update preconditioner is no reparametrization of SGD, and the flow `U̇ = −J∇L` is not a descent flow |
 | [`ROOT`](ROOT) | Isabelle session `KreinPIC` (parent `HOL-Analysis`) |
-| [`pic_krein.i.orca.md`](pic_krein.i.orca.md) | the i-orca surface: 21 theorems, each `(rule <lemma>)` |
+| [`pic_krein.i.orca.md`](pic_krein.i.orca.md) | the i-orca surface: 23 theorems, each `(rule <lemma>)` |
 | [`PROPOSAL.md`](PROPOSAL.md) | the motivation, the honest tag ledger, the QK / quantum-informational connections (flagged speculative), open targets |
 | [`SCHEME_A.md`](SCHEME_A.md) | Scheme A dynamics (saddle-seeking, not descent) and the verification-intact min–max / annealing training recipe |
+| [`LEARNED_J.md`](LEARNED_J.md) | adaptive / learned `J`: parametrizations (signature `s`, Grassmannian), the descent-iff-PSD dichotomy (saddle-free-Newton tension), and the two well-posed regimes |
 | [`RESULTS.md`](RESULTS.md) | verification status and commands |
 
 ## Verify
@@ -52,7 +53,7 @@ metric-dependent*. See [`PROPOSAL.md`](PROPOSAL.md).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 .venv/bin/i-orca verify examples/pic_krein/pic_krein.i.orca.md
-#   -> all 9 theorems VALID, formal_fraction_static = 1.000
+#   -> all 23 theorems VALID, formal_fraction_static = 1.000
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 isabelle build -d examples/pic_krein -o quick_and_dirty KreinPIC

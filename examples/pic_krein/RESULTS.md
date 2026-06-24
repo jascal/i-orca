@@ -9,7 +9,7 @@ bottom-K (min-plus) dual and the frame-only "Scheme A" preconditioner. Companion
 ```
 $ .venv/bin/i-orca verify examples/pic_krein/pic_krein.i.orca.md
 ```
-All **21** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
+All **23** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
 
 ## Layer 2 — kernel check of the substrate (the load-bearing math)
 
@@ -35,7 +35,7 @@ the thin i-orca surface, each theorem discharged by `(rule <lemma>)`.
 
 ## What is proved vs. what is open
 
-**Proved (kernel, 21 theorems):** decode definitization, form symmetry, majorant escape hatch,
+**Proved (kernel, 23 theorems):** decode definitization, form symmetry, majorant escape hatch,
 capacity-survives-in-majorant; the signature phenomena (timelike split, null token, trace = signature,
 Welch-driver vanishing, indefinite-ball unboundedness); the full bottom-K dual certificate (partition,
 co-head certifies, argmin-in-co-head, tail residue), the negation duality (`bottomk = −(top-k over −U)`);

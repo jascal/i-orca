@@ -69,6 +69,24 @@ text \<open>Coordinate definitization: the Krein form is the majorant of the J-t
 lemma kip_definitize: "kip s K x y = ipK K (Js s x) y"
   by (simp add: kip_def ipK_def Js_def mult.assoc)
 
+text \<open>LEARNABLE SIGNATURE.  In coordinates the fundamental symmetry is exactly the signature
+  s : 'k => real (Js applies it), so "learning J" = learning s.  A RIGID signature (s b in {+1,-1},
+  i.e. s b * s b = 1) makes Js a genuine fundamental symmetry: an INVOLUTION, Js s (Js s x) = x.  The
+  practical relaxation is a SOFT signature s b in [-1,1] (e.g. s b = tanh theta_b), smooth and
+  unconstrained, with the exact involution (J^2 = I) recovered only in the rigid limit |s b| = 1; for
+  |s b| < 1 the b-direction is "partially timelike" (Js s (Js s x) b = (s b)^2 x b, a contraction).
+  This is the smooth chart for the adaptive-J direction; see LEARNED_J.md.\<close>
+lemma Js_involution:
+  assumes s2: "\<And>b. s b * s b = 1"
+  shows "Js s (Js s x) = x"
+proof (rule ext)
+  fix b
+  have "Js s (Js s x) b = s b * (s b * x b)" by (simp add: Js_def)
+  also have "\<dots> = (s b * s b) * x b" by (simp add: mult.assoc)
+  also have "\<dots> = x b" using s2 by simp
+  finally show "Js s (Js s x) b = x b" .
+qed
+
 text \<open>The Krein form is symmetric.\<close>
 lemma kip_sym: "kip s K x y = kip s K y x"
   unfolding kip_def by (intro sum.cong refl) (simp add: ac_simps)
