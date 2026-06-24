@@ -110,4 +110,12 @@ proof -
   from key cs b2 show ?thesis by linarith
 qed
 
+text \<open>OPEN: a usable capacity bound in the genuinely INDEFINITE ball {r. [r,r] <= 1} (not the majorant
+  ball) for a Pontryagin frame -- presumably a bound in the spacelike dimension p plus a q-dependent
+  count of unbounded (timelike) escape directions.  margin_pair_separation_k only covers the majorant
+  ball; the indefinite-ball case collapses (KreinWelch.indefinite_ball_unbounded).\<close>
+
+text \<open>OPEN/empirical: whether a real transformer pairing (e.g. the QK form, whose symmetric part is
+  generically indefinite) carries non-trivial signature -- a fieldrun measurement, not a theorem here.\<close>
+
 end

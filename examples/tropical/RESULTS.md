@@ -9,7 +9,7 @@ real kernel check (`isabelle build`).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 i-orca verify examples/tropical/tropical.i.orca.md
-#   -> all 30 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
+#   -> all 34 theorems VALID, formal_fraction_static = 1.000, 0 frontier holes
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 ISABELLE_HOME=/path/to/Isabelle isabelle build -D examples/tropical \
@@ -27,7 +27,7 @@ i-orca compile examples/tropical/tropical.i.orca.md --target isar \
 
 | Layer | Tool | Result |
 |-------|------|--------|
-| Skeleton | `i-orca verify` | 30/30 VALID, `formal_fraction_static = 1.000` |
+| Skeleton | `i-orca verify` | 34/34 VALID, `formal_fraction_static = 1.000` |
 | Substrate | `isabelle build` (`Tropical` session) | exit 0, **zero `sorry`** |
 | Surface | `isabelle build` (compiled `TropicalSurface` in-session) | exit 0 — every `(rule …)` non-vacuous |
 

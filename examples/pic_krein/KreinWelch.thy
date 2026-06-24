@@ -23,20 +23,34 @@
                               margin (it sits on the light cone).
     kip_trace_eq_signature  : the Gram trace SUM_i kip(v_i,v_i) is the signature imbalance s = p - q,
                               not the count n -- the quantity that drives the Welch floor.
-    krein_welch_driver_vanishes : the welch_sos lower bound (trace^2 / |K|) -- the floor that forces
-                              interference SUM_{i!=j} <f_i,f_j>^2 >= n(n-d)/d in the Euclidean case --
-                              DEGRADES to s^2/|K| and is VACUOUS (= 0) for a balanced signature s = 0.
-                              The Welch obstruction is a positive-definiteness phenomenon.
+    krein_welch_driver_vanishes : the DRIVER of the welch_sos lower bound -- the term trace^2 / |K|,
+                              which in the Euclidean case forces interference SUM_{i!=j} <f_i,f_j>^2
+                              >= n(n-d)/d -- degrades to s^2/|K| and is VACUOUS (= 0) at balanced
+                              signature s = p - q = 0.  Note carefully: it is the TRACE-DRIVER of the
+                              bound that vanishes, NOT the interference (see HONESTY).  The Welch
+                              *guarantee* is a positive-definiteness phenomenon.
     indefinite_ball_unbounded : the indefinite pseudo-ball {x : kip x x <= 1} is UNBOUNDED in the
                               majorant whenever a timelike coordinate exists -- so the packing/covering
                               argument behind DecodeCapacity has no compact domain and the capacity
                               bound COLLAPSES (timelike escape).
 
-  HONESTY (pic tag discipline).  krein_welch_driver_vanishes shows the LOWER BOUND degenerates -- the
-  *guarantee* of forced interference is gone.  It does NOT show small total coherence is ACHIEVABLE
-  with n > d features (indefinite J-orthonormal sets are still linearly independent, hence still capped
-  at d); that achievability is [open].  Likewise the claim that a real transformer's QK pairing has
-  non-trivial signature is [open/empirical] (a fieldrun measurement, not a theorem here).
+  HONESTY (pic tag discipline).
+  (1) krein_welch_driver_vanishes kills the *guarantee* (the trace-driven LOWER BOUND), not the
+      interference.  The true floor does NOT vanish: a Krein-orthonormal set ([f_i,f_j] = +-delta) is
+      still linearly independent, so zero off-diagonal still forces n <= d (Eckart-Young keeps a rank-<=d
+      Gram bounded away from diag(+-1) for n > d).  So for n > d the interference floor is POSITIVE but
+      SIGNATURE-DEPENDENT -- it moves off trace^2/|K| to an inertia-dependent expression we do NOT derive
+      here.  "Can interference be made arbitrarily small with n > d?" -- NO; "is the sharp signature floor
+      below n(n-d)/d?" -- [open].
+  (2) The non-compactness in indefinite_ball_unbounded is INTRINSIC to any genuinely indefinite form
+      (signature with q >= 1), basis- and J-independent: a timelike ray sits in every sublevel set.  It
+      is NOT an artifact of the majorant (the majorant is only the yardstick) and cannot be repaired by
+      restricting to a timelike cone (a ray is in the cone) or by changing J (any q >= 1 is non-compact;
+      q = 0 is just Euclidean).  Compactness returns ONLY by re-imposing a majorant bound -- which is
+      exactly margin_pair_separation_k (KreinDecode).
+  (3) That a real transformer's QK pairing has non-trivial signature is [open/empirical] (a fieldrun
+      measurement, not a theorem here); timelike units / null tokens have NO correspondent in a standard
+      (positive-definite) model -- they exist only if an indefinite readout is imposed.
 *)
 theory KreinWelch
   imports "HOL-Analysis.Analysis"
@@ -107,11 +121,15 @@ lemma kip_trace_eq_signature:
   shows "(\<Sum>i\<in>I. kip s K (v i) (v i)) = (\<Sum>i\<in>I. eps i)"
   by (rule sum.cong[OF refl]) (simp add: diag)
 
-text \<open>WELCH DEGRADATION.  The welch_sos lower bound on total squared coherence is
+text \<open>WELCH DEGRADATION.  The DRIVER of the welch_sos lower bound on total squared coherence is
   @{term "(\<Sum>i\<in>I. kip s K (v i) (v i))\<^sup>2 / real (card K)"} -- the trace squared over the dimension.
-  For a BALANCED signature (@{term "(\<Sum>i\<in>I. eps i) = 0"}) it is exactly 0: the Welch floor that, in
-  the positive-definite case, forces interference @{term "n*(n-d)/d > 0"} when @{term "n > d"} becomes
-  VACUOUS.  Indefiniteness lets the Gram eigenvalues cancel, so the obstruction is signature-dependent.\<close>
+  For a BALANCED signature (@{term "(\<Sum>i\<in>I. eps i) = 0"}) it is exactly 0: the term that, in the
+  positive-definite case, forces interference @{term "n*(n-d)/d > 0"} when @{term "n > d"} becomes
+  VACUOUS.  Read precisely: it is the TRACE-DRIVER of the bound that vanishes, NOT the interference --
+  the *guarantee* of forced interference is what indefiniteness removes (the eigenvalues can cancel).
+  The true floor stays positive for @{term "n > d"} (linear independence still caps a Krein-orthonormal
+  set at d), only it moves off trace^2 / card K to a signature-dependent expression not
+  derived here.\<close>
 lemma krein_welch_driver_vanishes:
   assumes diag: "\<And>i. i \<in> I \<Longrightarrow> kip s K (v i) (v i) = eps i"
       and bal: "(\<Sum>i\<in>I. eps i) = 0"
@@ -123,11 +141,18 @@ proof -
   finally show ?thesis by simp
 qed
 
+text \<open>OPEN: the sharp signature-dependent interference floor for n > d (the positive replacement for
+  the vacuous trace-driver bound), and whether it can fall below the Euclidean n(n-d)/d.  This lemma
+  only kills the trace-driven guarantee; achievability of sub-Welch coherence is unresolved.\<close>
+
 text \<open>CAPACITY COLLAPSE.  If any coordinate is timelike (s b0 < 0) the indefinite pseudo-ball
   {x. kip s K x x <= 1} is unbounded in the majorant: for every radius R there is a point inside the
   pseudo-ball with majorant norm-squared >= R (a timelike ray escapes to infinity at no Krein-norm
   cost).  So the packing/covering number behind DecodeCapacity.head_capacity has no compact domain --
-  the cell-capacity bound is a theorem about the MAJORANT, vacuous in the indefinite metric of record.\<close>
+  the cell-capacity bound is a theorem about the MAJORANT, vacuous in the indefinite metric of record.
+  This non-compactness is INTRINSIC to any genuinely indefinite form (q >= 1), basis- and J-independent;
+  it is not an artifact of the majorant and is not repaired by a timelike-cone restriction or a change
+  of J.  Compactness returns only by re-imposing a majorant bound (margin_pair_separation_k).\<close>
 lemma indefinite_ball_unbounded:
   assumes finK: "finite K" and b0: "b0 \<in> K" and tl: "s b0 < 0"
   shows "\<forall>R. \<exists>x. kip s K x x \<le> 1 \<and> ipK K x x \<ge> R"

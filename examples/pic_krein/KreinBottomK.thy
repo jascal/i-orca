@@ -174,4 +174,10 @@ proof -
   finally show ?thesis .
 qed
 
+text \<open>OPEN (design, not math): bottomk_eq_topk_neg_frame says a SHARED readout makes bottom-K the exact
+  mirror of top-K, carrying no new information.  A meaningful "active exclusion" channel therefore needs
+  an INDEPENDENTLY-parameterised, independently-trained negative readout (Scheme B), supervised by
+  negative-evidence data (preference / correction / negation), not standard next-token cross-entropy.
+  Diagnostic: U-plus vs U-minus anti-alignment detects mirror-collapse.  All [open/empirical].\<close>
+
 end

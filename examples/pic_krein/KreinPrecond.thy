@@ -84,4 +84,14 @@ proof
   qed
 qed
 
+text \<open>OPEN: does an indefinite frame preconditioner actually HELP (reach better frames than plain SGD)?
+  Untested -- no numbers exist for this knob; pil sec 6.1 found no theory-guided frame knob has yet beaten
+  plain SGD on the synthetic benchmarks, so the prior is cautious.  The non-triviality above is a theorem;
+  the benefit is a hypothesis.\<close>
+
+text \<open>OPEN: extending the indefinite preconditioner to the encoder WRITE directions a_k (not just the
+  frame U) moves off the movable-frame side into the encode/generator regime, where the O(p,q)
+  non-compactness bites harder (unconstrained writes) and a damping constraint is needed.  Scheme A as
+  scoped here leaves the encoder and the forward pass Euclidean.\<close>
+
 end
