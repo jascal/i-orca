@@ -9,7 +9,7 @@ bottom-K (min-plus) dual and the frame-only "Scheme A" preconditioner. Companion
 ```
 $ .venv/bin/i-orca verify examples/pic_krein/pic_krein.i.orca.md
 ```
-All **19** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
+All **21** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
 
 ## Layer 2 — kernel check of the substrate (the load-bearing math)
 
@@ -31,15 +31,18 @@ the thin i-orca surface, each theorem discharged by `(rule <lemma>)`.
 | `KreinDecode` | decode side is metric-free (definitization); capacity survives in the majorant |
 | `KreinWelch`  | frame side feels the signature: timelike units, null token, trace = signature, Welch driver vanishes, indefinite ball unbounded |
 | `KreinBottomK`| the bottom-K (min-plus) head/tail certificate — dual of `tropical/HeadTail.thy` — and bottom-K = top-K of the negated frame |
-| `KreinPrecond`| Scheme A: an indefinite frame-update preconditioner is no real reparametrization of SGD (genuinely new dynamics, no loss/data change) |
+| `KreinPrecond`| Scheme A: an indefinite frame-update preconditioner is no real reparametrization of SGD, and the flow `U̇ = −J∇L` is *not* a descent flow (genuinely new, saddle-seeking dynamics). Training recipe in [`SCHEME_A.md`](SCHEME_A.md) |
 
 ## What is proved vs. what is open
 
-**Proved (kernel, 19 theorems):** decode definitization, form symmetry, majorant escape hatch,
+**Proved (kernel, 21 theorems):** decode definitization, form symmetry, majorant escape hatch,
 capacity-survives-in-majorant; the signature phenomena (timelike split, null token, trace = signature,
 Welch-driver vanishing, indefinite-ball unboundedness); the full bottom-K dual certificate (partition,
 co-head certifies, argmin-in-co-head, tail residue), the negation duality (`bottomk = −(top-k over −U)`);
-and Scheme A's non-triviality (Gram forms are PSD ⇒ an indefinite preconditioner is no reparametrized SGD).
+and Scheme A's non-triviality (Gram forms are PSD ⇒ an indefinite preconditioner is no reparametrized SGD)
+plus its dynamical companion (a PSD preconditioner descends, but an indefinite one has a strict ascent
+direction — the J-flow is not a descent flow; see [`SCHEME_A.md`](SCHEME_A.md) for the saddle-seeking
+analysis and the min–max / annealing recipe that make it usable).
 
 **Open / not claimed:** achievability of sub-Welch coherence with `n>d` indefinite units; an
 indefinite-ball capacity bound; that an indefinite preconditioner *helps* (pil §6.1: no frame knob yet

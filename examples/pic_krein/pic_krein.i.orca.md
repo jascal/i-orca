@@ -36,7 +36,8 @@
                                           KreinCotailIsResidue
     BOTTOM-K = TOP-K of negated frame  -> KreinIncidenceNegFrame, KreinBottomKIsTopKNegFrame
     SCHEME A (Krein in frame-update)   -> KreinGramFormNonneg, KreinIndefiniteNotGramForm,
-                                          KreinPrecondNotReparam
+                                          KreinPrecondNotReparam, KreinPsdPrecondDescends,
+                                          KreinIndefinitePrecondNotDescent
 -->
 
 # theorem KreinLogitDefinitize
@@ -414,3 +415,41 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | inner t (J t) < 0 ⟹ ∄M. ∀x. inner x (J x) = inner (M x) (M x) | an indefinite preconditioner is not the PSD MᵀM any reparametrization would induce | — | (rule precond_not_reparam) | method |
+
+
+# theorem KreinPsdPrecondDescends
+> A PSD preconditioner always descends. Treating the gradient as a free vector `g`, the first-order loss change along the preconditioned step `−(J g)` is `⟨g, −(J g)⟩ = −⟨g, J g⟩ ≤ 0` whenever `J` is PSD. So Euclidean (or any PSD) preconditioning never increases the loss. Cites `psd_precond_descends`.
+
+## imports
+| Theory       |
+|--------------|
+| KreinPrecond |
+
+## goal
+| Statement |
+|-----------|
+| (⋀x. 0 ≤ inner x (J x)) ⟹ inner g (- (J g)) ≤ 0 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (⋀x. 0 ≤ inner x (J x)) ⟹ inner g (- (J g)) ≤ 0 | the directional derivative along −(J g) is −⟨g, J g⟩, nonpositive for PSD J | — | (rule psd_precond_descends) | method |
+
+
+# theorem KreinIndefinitePrecondNotDescent
+> THE J-FLOW IS NOT A DESCENT FLOW. If `J` has a timelike vector `t` (`⟨t, J t⟩ < 0`), then at gradient `g = t` the preconditioned step `−(J t)` is a strict ASCENT direction: `⟨t, −(J t)⟩ = −⟨t, J t⟩ > 0`. So the indefinite-preconditioned flow `U̇ = −J∇L` can increase the loss — the dynamical companion to `precond_not_reparam` (it is genuinely new dynamics, and specifically *not* descent). Cites `indefinite_precond_not_descent`.
+
+## imports
+| Theory       |
+|--------------|
+| KreinPrecond |
+
+## goal
+| Statement |
+|-----------|
+| inner t (J t) < 0 ⟹ (∃g. 0 < inner g (- (J g))) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | inner t (J t) < 0 ⟹ (∃g. 0 < inner g (- (J g))) | the timelike vector itself is a gradient at which the preconditioned step ascends the loss | — | (rule indefinite_precond_not_descent) | method |

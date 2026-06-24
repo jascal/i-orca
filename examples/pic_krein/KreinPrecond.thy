@@ -84,6 +84,36 @@ proof
   qed
 qed
 
+text \<open>DYNAMICAL READING -- the J-flow is NOT a descent flow.  Treat the Euclidean loss gradient as a
+  free vector g = grad_U L.  The J-preconditioned update direction is -(J g), and the first-order change
+  in L along it is  inner g (-(J g)) = - inner g (J g)  -- this is dL/dt for the flow U' = -J grad L.
+  A DESCENT step needs inner g (-(J g)) <= 0, i.e. inner g (J g) >= 0.  So a PSD J always descends, but
+  an INDEFINITE J has a gradient (any timelike vector) at which the update is a strict ASCENT: the flow
+  can increase the loss.  Dynamical companion to precond_not_reparam.\<close>
+
+lemma psd_precond_descends:
+  fixes J :: "'a::real_inner \<Rightarrow> 'a"
+  assumes psd: "\<And>x. 0 \<le> inner x (J x)"
+  shows "inner g (- (J g)) \<le> 0"
+  using psd[of g] by (simp add: inner_minus_right)
+
+theorem indefinite_precond_not_descent:
+  fixes J :: "'a::real_inner \<Rightarrow> 'a"
+  assumes tl: "inner t (J t) < 0"
+  shows "\<exists>g. 0 < inner g (- (J g))"
+proof (rule exI[of _ t])
+  show "0 < inner t (- (J t))" using tl by (simp add: inner_minus_right)
+qed
+
+text \<open>CONSEQUENCE (stated, not formalized here -- needs Hessian/eigenvalue machinery): linearizing the
+  flow U' = -J grad L at a strict local minimum (Hessian H positive-definite) gives Jacobian -J H, which
+  by Sylvester's law of inertia (congruence H^{1/2}(JH)H^{-1/2} = H^{1/2} J H^{1/2}) has the inertia of
+  -J -- so q POSITIVE eigenvalues.  A loss minimum is therefore an UNSTABLE fixed point with a q-dim
+  unstable manifold: the flow is saddle-seeking, repelled from minima along the timelike subspace.  So
+  Scheme A is sound only (a) as a min-max -- route the maximize-objective (push features apart) into the
+  timelike subspace, the data-fit into the spacelike one -- or (b) transiently, annealing J -> I so the
+  final phase is genuine descent.  See SCHEME_A.md.\<close>
+
 text \<open>OPEN: does an indefinite frame preconditioner actually HELP (reach better frames than plain SGD)?
   Untested -- no numbers exist for this knob; pil sec 6.1 found no theory-guided frame knob has yet beaten
   plain SGD on the synthetic benchmarks, so the prior is cautious.  The non-triviality above is a theorem;
