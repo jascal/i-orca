@@ -6,3 +6,4 @@ session "KreinPIC" = "HOL-Analysis" +
     KreinBottomK
     KreinPrecond
     KreinTernary
+    PIC_Quant

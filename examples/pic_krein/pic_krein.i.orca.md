@@ -45,6 +45,8 @@
                                           KreinTernaryWidenLossless, KreinTernaryBytePacking
       (card_ternary_frame is kernel-proved in KreinTernary.thy; not surfaced -- i-orca verify
        mis-tokenizes the Pi-E goal, a surface-parser limit, not a math gap)
+    WITHIN-TOLERANCE LOSSLESS (any value system, PIC_Quant.thy) -> PicMarginCertified,
+                                          PicFrameQuantBound, PicQuantDecodePreserved
 -->
 
 # theorem KreinLogitDefinitize
@@ -679,4 +681,69 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | (3::nat) ^ 5 ≤ 2 ^ 8 | 243 ≤ 256, so five trits pack losslessly into one byte | — | (rule ternary_byte_packing) | method |
+
+
+<!-- ============================================================================
+     WITHIN-TOLERANCE LOSSLESS COMPRESSION (PIC_Quant.thy) -- value-system- and metric-agnostic.
+     "Within-tolerance lossless" = DECODE-lossless: the argmax is preserved exactly and certified under
+     a quantized frame, even though the weights are lossy at the bit level. The margin certificate + a
+     Cauchy-Schwarz quantization bound compose into: quantize the frame to eps-cells (float/int/ternary),
+     keep 2*rho*eps < margin, and the decode is unchanged. The geometry (eps-covering number) sets the rate.
+     ============================================================================ -->
+
+# theorem PicMarginCertified
+> THE MARGIN CERTIFICATE (PIC_SPEC §5.5), self-contained. If `t` beats every competitor by margin `≥ m`, every logit moves by `≤ δ`, and `2δ < m`, then `t` is still the strict winner. This is what "within-tolerance lossless" means: a `δ`-perturbation cannot flip a `>2δ` margin. Cites `margin_certified`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Quant |
+
+## goal
+| Statement |
+|-----------|
+| (∀v∈V. v ≠ t ⟶ L v + m ≤ L t) ⟹ (∀v∈V. ¦L' v - L v¦ ≤ δ) ⟹ t ∈ V ⟹ 2 * δ < m ⟹ (∀v∈V. v ≠ t ⟶ L' v < L' t) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (∀v∈V. v ≠ t ⟶ L v + m ≤ L t) ⟹ (∀v∈V. ¦L' v - L v¦ ≤ δ) ⟹ t ∈ V ⟹ 2 * δ < m ⟹ (∀v∈V. v ≠ t ⟶ L' v < L' t) | the winner's margin m exceeds the total 2δ wobble, so it stays on top | — | (rule margin_certified) | method |
+
+
+# theorem PicFrameQuantBound
+> QUANTIZATION → LOGIT PERTURBATION (Cauchy–Schwarz). Replacing a frame vector `U` by a quantized `Ut` moves the logit `⟨r,U⟩` by at most `‖r‖·‖Ut−U‖`. So a frame quantized to cell size `ε` (any grid) with residual `‖r‖≤ρ` perturbs every logit by `≤ ρε`. Cites `frame_quant_logit_bound`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Quant |
+
+## goal
+| Statement |
+|-----------|
+| ¦inner r Ut - inner r U¦ ≤ norm r * norm (Ut - U) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ¦inner r Ut - inner r U¦ ≤ norm r * norm (Ut - U) | the logit gap is `⟨r, Ut−U⟩`, bounded by Cauchy–Schwarz | — | (rule frame_quant_logit_bound) | method |
+
+
+# theorem PicQuantDecodePreserved
+> WITHIN-TOLERANCE LOSSLESS COMPRESSION (any value system, any metric). Quantize the frame to per-token cell size `‖Ut_v−U_v‖ ≤ ε` (float round / int / ternary grid), residual `‖r‖≤ρ`; if the original margin exceeds `2ρε`, the quantized decode equals the original — the decision is preserved exactly and certified. The number system is just the cell alphabet; the geometry (`ε`-covering) sets the bit rate. Cites `quant_decode_preserved`.
+
+## imports
+| Theory    |
+|-----------|
+| PIC_Quant |
+
+## goal
+| Statement |
+|-----------|
+| t ∈ V ⟹ norm r ≤ ρ ⟹ 0 ≤ ρ ⟹ (∀v∈V. norm (Ut v - U v) ≤ ε) ⟹ (∀v∈V. v ≠ t ⟶ (inner r (U v) + b v) + m ≤ (inner r (U t) + b t)) ⟹ 2 * (ρ * ε) < m ⟹ (∀v∈V. v ≠ t ⟶ (inner r (Ut v) + b v) < (inner r (Ut t) + b t)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | t ∈ V ⟹ norm r ≤ ρ ⟹ 0 ≤ ρ ⟹ (∀v∈V. norm (Ut v - U v) ≤ ε) ⟹ (∀v∈V. v ≠ t ⟶ (inner r (U v) + b v) + m ≤ (inner r (U t) + b t)) ⟹ 2 * (ρ * ε) < m ⟹ (∀v∈V. v ≠ t ⟶ (inner r (Ut v) + b v) < (inner r (Ut t) + b t)) | the ε-quantization perturbs logits by ≤ ρε; with margin > 2ρε the certificate preserves the decode | — | (rule quant_decode_preserved) | method |
 
