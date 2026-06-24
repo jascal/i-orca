@@ -155,6 +155,33 @@ compression-and-speed win needs the *lossy* native-ternary path, or genuine mode
 ternary → skip-zero kernels and entropy coding; low rank → factor first). Ternary *surfaces* redundancy;
 it doesn't manufacture a free lunch.
 
+### Worked sizing example (reusable formulas)
+
+Two numbers decide everything for single-batch (batch-1) CPU decode of a **dense** model:
+
+> **footprint** = `bits_per_weight · params / 8`         **decode tok/s** ≈ `sustained_RAM_BW / footprint`
+
+(decode streams every weight once per token, so it is RAM-bandwidth-bound; cores only need to be enough
+to saturate the bus and run the signed-sum). `bits_per_weight`: fp16 `16`, int8 `8`, int4 `4`, **native
+(lossy) ternary `1.58`**, and **lossless ternary ≈ the source's bit-width** (bit-neutral, often worse).
+
+**Instance: 300B dense model, 96 cores, 251 GB RAM** (assume ~250–450 GB/s sustained, ~350 central):
+
+| representation | bits/wt | footprint | fits 251 GB? | decode tok/s (~350 GB/s) |
+|---|---|---|---|---|
+| fp16 (source) | 16 | 600 GB | no | (0.6) |
+| int8 | 8 | 300 GB | no | (1.2) |
+| **lossless ternary** (from fp16) | ~16–25 | ~600–940 GB | **no** | — |
+| **lossless ternary** (from int8) | ~9.5 | ~356 GB | **no** | — |
+| native ternary (**lossy**) | 1.58 | **~59 GB** | **yes** (+~190 GB for KV/acts) | **~4–8** (≈6) |
+| int4 (lossy) | 4 | 150 GB | yes | ~2–3 |
+
+Read-off: **lossless ternary does not fit** — it inherits the fp16 size (the proved bit-neutrality), and
+would run *slower* than fp16 even if it fit. The only thing that fits-and-goes-fast is the **lossy**
+native-ternary path (~59 GB, ~6 tok/s decode; prefill is compute-bound and faster). For a *lossless*
+300B you need ≥~640 GB of RAM (or SSD offload → <0.1 tok/s, impractical). The 96 cores are not the
+limit at any precision here — RAM bandwidth is.
+
 ## Honest status
 
 `Js_tripotent`, `Js_sq`, `int_strict_winner_robust`, `card_ternary_frame` are **[proved]** here; the
