@@ -120,6 +120,41 @@ So: **lossless compression of a ternary frame exists and is provable at the bit 
 beyond that it is bounded by the frame's entropy (storage) and its rank (decode), and ternary conversion
 itself is bit-neutral — the compression is the model's redundancy, surfaced by ternary, not created.**
 
+## 7. Resource requirements & likely CPU runtime  `[engineering estimates]`
+
+These are order-of-magnitude estimates (assumptions stated), not kernel results.
+
+**Conversion (one-time, offline).** Balanced-ternary expansion is `O(n·K)` integer div/mods (`K` trits
+per weight), `K = ⌈log₃(range)⌉`. For a 7B model that's `~7e9·K` cheap integer ops — seconds to a few
+minutes on one CPU core; negligible. `K` itself: int8 → `K≈6`; fp16 → `K≈16` once you clear the
+*exponent spread* to a common integer scale (the exponent range, not just the 11-bit mantissa, sets `K`).
+
+**Storage.** Native ternary packs at ≈1.58 bits/weight (`ternary_byte_packing`): a 7B model is ~1.4 GB
+vs 14 GB (fp16) — **~10× compression**. But a *losslessly converted* model is the `K` trit-planes:
+`K·1.58` bits/orig-weight ≈ the original bit-width (the proved **bit-neutrality**), and with the `⌈·⌉`
+waste it can be *larger* (int8→ternary ≈ 9.5 bits > 8; fp16→ternary ≈ 25 bits > 16). So **lossless
+conversion of a dense int/fp model does not save storage** — the ~10× win is for *natively-ternary*
+(BitNet-trained, lossy) models.
+
+**CPU inference runtime.** Single-batch LLM decode on CPU is **memory-bandwidth-bound** (weights streamed
+from RAM each token). The ternary matmul is *multiplication-free* (`Ternary.ternary_dot_signed_sum`: a
+signed sum), so the win is bandwidth, not FLOPs (integer add ≈ multiply ≈ 1 cycle on modern cores):
+- *Native ternary*: ~10× less weight traffic → up to ~10× throughput at the bandwidth limit; real
+  LUT/SIMD kernels (e.g. `bitnet.cpp`) land ~**5–6×** after kernel overhead. (e.g. 7B: ~280 ms/token
+  fp16 → ~30–50 ms/token ternary at ~50 GB/s.)
+- *Lossless-converted*: **no speedup.** Bit-neutrality applies to bandwidth too (`K` planes ≈ original
+  bits streamed), *plus* `K`-plane accumulation overhead (the `3^k` shifts/adds) and worse cache
+  locality — so it is *slower* than the int/fp original. Useful only if you specifically need ternary
+  kernels with exact outputs (niche).
+- *Decompression* (unpack 5-trits/byte) is a few ops/weight, fused into the GEMV or done once at load —
+  negligible.
+
+**The tension (= the proved bit-neutrality, operationally).** From a dense fp model you get **lossless
+*or* compressed/fast, not both.** Lossless conversion preserves bits → no storage/runtime win; the
+compression-and-speed win needs the *lossy* native-ternary path, or genuine model redundancy (sparse
+ternary → skip-zero kernels and entropy coding; low rank → factor first). Ternary *surfaces* redundancy;
+it doesn't manufacture a free lunch.
+
 ## Honest status
 
 `Js_tripotent`, `Js_sq`, `int_strict_winner_robust`, `card_ternary_frame` are **[proved]** here; the
