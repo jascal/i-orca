@@ -75,6 +75,18 @@ U  ←  U  −  η · J_γ(t) ∇_U L
 The preconditioner is genuinely indefinite only while `γ < 0`; once `γ ≥ 0` it is PSD, so the closing
 phase is a real descent that lands in a minimum. Anneal on a schedule or trigger on a plateau.
 
+## The two recipes at a glance
+
+| | Recipe 1 — signature min–max | Recipe 2 — transient escape + anneal |
+|---|---|---|
+| **use case** | grow a *persistent* push-apart structure in `K₋` while fitting | *escape* a poor initial basin, then converge normally |
+| **`J` over training** | fixed indefinite signature throughout | annealed `J_γ = P₊ + γP₋`, `γ: −1 → +1` |
+| **what's optimized** | a genuine saddle of `L_fit − L_push` (min–max equilibrium) | the ordinary minimum of `L_fit` (once `γ ≥ 0`) |
+| **convergence** | GDA — may **cycle**; needs extragradient / optimistic GDA / `η_push ≪ η_fit` | plain descent in the closing phase; converges as usual |
+| **monitoring** | certified-margin mass **S2** (ascent can lower it); GDA gap | S2 only during the `γ < 0` phase |
+| **when safer** | when you *want* the spread structure kept at the optimum | when you only want better minima (no persistent indefinite structure) |
+| **both need** | majorant-norm guard (`O(p,q)` non-compactness) + best-fit checkpoint | majorant-norm guard during escape |
+
 ## Keeping PIC verification intact
 
 The forward pass never sees `J`, so **every decode-side theorem applies to the current frame at every

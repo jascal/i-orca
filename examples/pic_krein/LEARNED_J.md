@@ -69,6 +69,25 @@ min–max equilibrium, not raw loss.
   so margins / head-tail / capacity-in-the-majorant (`margin_pair_separation_k`) still apply to the
   `J`-frame.
 
+## Minimal viable first step (before any Grassmannian / bilevel machinery)
+
+Skip the Riemannian / bilevel apparatus entirely for a first experiment:
+
+1. **Fix `q`** (a small suppression budget; pick from inertia or just try `q ∈ {1,…,8}`).
+2. **Diagonal soft signature.** Parametrize `J = diag(tanh θ)` with `θ ∈ ℝ^d` learnable — this is exactly
+   the coordinate `Js` of `KreinWelch` (kernel-anchored by `Js_involution`), relaxed. No projector, no
+   Grassmannian, no orthonormalization; plain unconstrained SGD on `θ`. The rigid involution is the
+   `|θ| → ∞` limit; mid-training `tanh θ_b ∈ (−1,1)` gives partially-timelike directions.
+3. **Choose the regime.** Easiest is **Scheme B** (`J` in the forward read-out, *tied* across the relevant
+   block so it can't be absorbed), trained by ordinary cross-entropy — no min–max, no bilevel. If you want
+   Scheme A instead, start with **fixed** `H₋` (= the coordinates with `θ_b < 0`) and the `SCHEME_A.md`
+   min–max, deferring learning `H₋` itself.
+4. **Measure** against an AdamW baseline at equal NLL: certified-margin mass, `FP/Welch`, off-diagonal
+   Gram. Only escalate to a learned/Grassmannian `H₋` if the diagonal soft signature already shows signal.
+
+This stays inside the kernel-checked parametrization (`Js_involution`) and the verification-intact story,
+and needs no code beyond a `tanh`-gated diagonal applied where you'd otherwise put the identity metric.
+
 ## Honest status
 
 - **[proved]** parametrization validity (`Js_involution`) and the dichotomy (`descends_all_iff_psd`).

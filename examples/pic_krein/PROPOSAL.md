@@ -99,3 +99,15 @@ make precise (e.g. an `η`/`J`-construction that is the literal frame-learning s
   negative-subspace dimension of unembedding frames.
 - **`η = J` as the pil step** (`[speculative]`): formalize the pseudo-Hermitian metric construction as
   the frame-learning move and see whether it predicts anything `pil` measures.
+
+## Feedback into the core PIC corpus
+
+What from here is a candidate to graduate into the proved corpus, and when. The **decode-side metric
+independence** is the one piece ready now and worth landing regardless of Krein: tag each `PIC_SPEC.md`
+§5 theorem *metric-free vs metric-dependent* (the third axis alongside §4 frame/decode and §5.0
+monomial/variable) — a small, non-speculative spec edit the whole tree justifies. The **bottom-K min-plus
+dual** has already fed back (now in `tropical/HeadTail.thy`, Euclidean). The **`descends_all_iff_psd`
+dichotomy** and the **Scheme A recipes** stay here as a thought experiment until an empirical signal
+exists (`pil` §6.1: no frame knob yet beats SGD) — they would graduate only if a measured win, or a
+`fieldrun` non-trivial QK signature, turns "could help" into "does." Until then they are a kernel-checked
+*map* of where indefinite structure is and isn't a resource, not a recommendation to the core.
