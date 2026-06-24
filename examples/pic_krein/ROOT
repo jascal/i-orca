@@ -1,0 +1,7 @@
+session "KreinPIC" = "HOL-Analysis" +
+  options [quick_and_dirty]
+  theories
+    KreinDecode
+    KreinWelch
+    KreinBottomK
+    KreinPrecond

@@ -513,6 +513,90 @@
 
 
 <!-- ============================================================================
+     MIN-PLUS (BOTTOM-K) DUAL of the head/tail certificate (HeadTail.thy) — a fieldrun contribution.
+     The top-K decode argmax_v L v has a dual bottom-K decode argmin_v L v (codecode L S = Min (L ` S)) —
+     the most-SUPPRESSED token, the negative-temperature / min-plus reading of the same monomials. Each is
+     the exact Min-mirror of the Max results above, metric-free. (The Krein companion — bottom-K = top-K of
+     the NEGATED FRAME — lives in examples/pic_krein/KreinBottomK.thy.)
+     ============================================================================ -->
+
+# theorem CodecodePartition
+> The bottom-K decode splits over the head/tail partition with the min-plus sum: `codecode L (H ∪ T) = min (codecode L H) (codecode L T)`. The Min-dual of `DecodePartition`. Cites `codecode_partition`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L (H ∪ T) = min (codecode L H) (codecode L T) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L (H ∪ T) = min (codecode L H) (codecode L T) | Min over a union of finite nonempty sets is the min of the two Mins | — | (rule codecode_partition) | method |
+
+
+# theorem CoheadCertifiesDecode
+> CO-HEAD CERTIFICATE (bottom-K). When the co-head's minimum is at or below the tail's, the full bottom-K decode equals the co-head's — the co-head contains the most-suppressed token. The Min-dual of `HeadCertifiesDecode`. Cites `cohead_certifies_decode`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L H ≤ codecode L T ⟹ codecode L (H ∪ T) = codecode L H |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L H ≤ codecode L T ⟹ codecode L (H ∪ T) = codecode L H | the min over the union collapses to the co-head when it dominates from below | — | (rule cohead_certifies_decode) | method |
+
+
+# theorem CoheadArgminInCohead
+> Under the same domination, the bottom-K argMIN lies in the CO-HEAD: a co-head token attains the bottom-K decode and is `≤` every candidate. The Min-dual of `HeadArgmaxInHead`. Cites `cohead_argmin_in_cohead`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L H ≤ codecode L T ⟹ (∃h∈H. L h = codecode L (H ∪ T) ∧ (∀v∈H ∪ T. L h ≤ L v)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L H ≤ codecode L T ⟹ (∃h∈H. L h = codecode L (H ∪ T) ∧ (∀v∈H ∪ T. L h ≤ L v)) | a co-head token attaining the co-head Min attains the full Min and is below every candidate | — | (rule cohead_argmin_in_cohead) | method |
+
+
+# theorem CotailIsResidue
+> BOTTOM-K RESIDUE. When the co-head does NOT dominate from below (`codecode L T < codecode L H`), the most-suppressed token lies in the open-class tail — the explicit bottom-K residue. The Min-dual of `TailIsResidue`. Cites `cotail_is_residue`.
+
+## imports
+| Theory   |
+|----------|
+| HeadTail |
+
+## goal
+| Statement |
+|-----------|
+| finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L T < codecode L H ⟹ (∃t∈T. L t = codecode L (H ∪ T) ∧ (∀h∈H. L t < L h)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite H ⟹ finite T ⟹ H ≠ {} ⟹ T ≠ {} ⟹ codecode L T < codecode L H ⟹ (∃t∈T. L t = codecode L (H ∪ T) ∧ (∀h∈H. L t < L h)) | a tail token attaining the tail Min attains the full Min and is strictly below every co-head token | — | (rule cotail_is_residue) | method |
+
+
+<!-- ============================================================================
      DECODE CAPACITY (DecodeCapacity.thy) — the decision-side Welch sibling; a fieldrun contribution.
      Confident decoding forces separated frames: if tokens v and w are each gamma-margin-decodable somewhere
      in the unit ball, then ||U_v - U_w|| >= gamma (bias-free — it cancels across the two witnesses). Hence the

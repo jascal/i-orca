@@ -86,4 +86,79 @@ proof -
   with t eq show ?thesis by auto
 qed
 
+text \<open>====================================================================================
+  MIN-PLUS (BOTTOM-K) DUAL of the head/tail certificate.
+
+  The top-K decode argmax_v L v has a dual bottom-K decode argmin_v L v -- the most-SUPPRESSED token,
+  the negative-temperature / min-plus reading of the same monomials. Everything below is metric-free
+  (pure min-plus over the scalar logits), the exact Min-mirror of the Max results above, and is the
+  optional dual view a min-plus / shortest-path analysis wants. (The Krein-flavoured companion -- that
+  bottom-K equals top-K of the NEGATED FRAME -- lives in examples/pic_krein/KreinBottomK.thy.)
+  ==================================================================================== \<close>
+
+abbreviation codecode :: "('a \<Rightarrow> real) \<Rightarrow> 'a set \<Rightarrow> real" where
+  "codecode L S \<equiv> Min (L ` S)"
+
+text \<open>(1) The bottom-decode splits over the partition, with oplus realised as min (the min-plus sum).\<close>
+lemma codecode_partition:
+  assumes "finite H" "finite T" "H \<noteq> {}" "T \<noteq> {}"
+  shows "codecode L (H \<union> T) = min (codecode L H) (codecode L T)"
+proof -
+  have "finite (L ` H)" "finite (L ` T)" "L ` H \<noteq> {}" "L ` T \<noteq> {}" using assms by auto
+  hence "Min (L ` H \<union> L ` T) = min (codecode L H) (codecode L T)" by (simp add: Min_Un)
+  thus ?thesis by (simp add: image_Un)
+qed
+
+text \<open>(2) CO-HEAD CERTIFICATE: when the co-head's minimum is at or below the tail's, the full bottom-K
+  decode equals the co-head's -- the co-head contains the most-suppressed token.\<close>
+theorem cohead_certifies_decode:
+  assumes f: "finite H" "finite T" and ne: "H \<noteq> {}" "T \<noteq> {}"
+      and dom: "codecode L H \<le> codecode L T"
+  shows "codecode L (H \<union> T) = codecode L H"
+  using codecode_partition[OF f ne, of L] dom by (simp add: min.absorb1)
+
+text \<open>... and the argMIN then lies in the CO-HEAD.\<close>
+theorem cohead_argmin_in_cohead:
+  assumes f: "finite H" "finite T" and ne: "H \<noteq> {}" "T \<noteq> {}"
+      and dom: "codecode L H \<le> codecode L T"
+  shows "\<exists>h\<in>H. L h = codecode L (H \<union> T) \<and> (\<forall>v\<in>H \<union> T. L h \<le> L v)"
+proof -
+  have eq: "codecode L (H \<union> T) = codecode L H" using f ne dom cohead_certifies_decode by blast
+  have "finite (L ` H)" "L ` H \<noteq> {}" using f(1) ne(1) by auto
+  hence "codecode L H \<in> L ` H" by (rule Min_in)
+  then obtain h where h: "h \<in> H" "L h = codecode L H" by auto
+  have "\<forall>v\<in>H \<union> T. L h \<le> L v"
+  proof
+    fix v assume v: "v \<in> H \<union> T"
+    have "finite (L ` (H \<union> T))" using f by auto
+    moreover have "L v \<in> L ` (H \<union> T)" using v by auto
+    ultimately have "codecode L (H \<union> T) \<le> L v" by (rule Min_le)
+    thus "L h \<le> L v" using eq h(2) by simp
+  qed
+  with h eq show ?thesis by auto
+qed
+
+text \<open>(3) BOTTOM-K RESIDUE: when the co-head does NOT dominate from below, the most-suppressed token is
+  in the open-class tail -- the explicit bottom-K residue, dual to tail_is_residue.\<close>
+theorem cotail_is_residue:
+  assumes f: "finite H" "finite T" and ne: "H \<noteq> {}" "T \<noteq> {}"
+      and notdom: "codecode L T < codecode L H"
+  shows "\<exists>t\<in>T. L t = codecode L (H \<union> T) \<and> (\<forall>h\<in>H. L t < L h)"
+proof -
+  have part: "codecode L (H \<union> T) = min (codecode L H) (codecode L T)"
+    using codecode_partition[OF f ne, of L] .
+  have "finite (L ` T)" "L ` T \<noteq> {}" using f(2) ne(2) by auto
+  hence "codecode L T \<in> L ` T" by (rule Min_in)
+  then obtain t where t: "t \<in> T" "L t = codecode L T" by auto
+  have eq: "codecode L (H \<union> T) = L t" using part notdom t(2) by simp
+  have "\<forall>h\<in>H. L t < L h"
+  proof
+    fix h assume hH: "h \<in> H"
+    have "codecode L T < codecode L H" using notdom by simp
+    also have "codecode L H \<le> L h" using hH f(1) by (simp add: Min_le)
+    finally show "L t < L h" using t(2) by simp
+  qed
+  with t eq show ?thesis by auto
+qed
+
 end
