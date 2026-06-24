@@ -43,13 +43,15 @@ metric-dependent*. See [`PROPOSAL.md`](PROPOSAL.md).
 | [`KreinPrecond.thy`](KreinPrecond.thy) | Scheme A: an indefinite frame-update preconditioner is no reparametrization of SGD, the flow `U̇ = −J∇L` is not a descent flow, and the isotropic instability of minima |
 | [`KreinTernary.thy`](KreinTernary.thy) | bridge to the `bitnet` corpus: ternary signature = tripotent degenerate fundamental symmetry (`Js³=Js`); value-system differences (integer/ternary robustness floor, finite `3^d` frame space) |
 | [`PIC_Quant.thy`](PIC_Quant.thy) | within-tolerance lossless compression for any value system / metric: margin certificate + Cauchy–Schwarz quantization bound ⇒ quantize the frame to `ε`-cells with `2ρε < margin`, decode preserved |
+| [`PIC_Prune.thy`](PIC_Prune.thy) | source-side pruning certificate: dropping sources with summed incidence (or `β`-budget) under half the margin preserves the decode — the certificate the pruning algorithms gate on |
 | [`ROOT`](ROOT) | Isabelle session `KreinPIC` (parent `HOL-Analysis`) |
-| [`pic_krein.i.orca.md`](pic_krein.i.orca.md) | the i-orca surface: 34 theorems, each `(rule <lemma>)` |
+| [`pic_krein.i.orca.md`](pic_krein.i.orca.md) | the i-orca surface: 39 theorems, each `(rule <lemma>)` |
 | [`PROPOSAL.md`](PROPOSAL.md) | the motivation, the honest tag ledger, the QK / quantum-informational connections (flagged speculative), open targets |
 | [`SCHEME_A.md`](SCHEME_A.md) | Scheme A dynamics (saddle-seeking, not descent) and the verification-intact min–max / annealing training recipe |
 | [`LEARNED_J.md`](LEARNED_J.md) | adaptive / learned `J`: parametrizations (signature `s`, Grassmannian), the descent-iff-PSD dichotomy (saddle-free-Newton tension), and the two well-posed regimes |
 | [`TERNARY.md`](TERNARY.md) | ternary ↔ `bitnet` ↔ PIC ↔ Krein-PIC: ternary-as-data (standard PIC) vs ternary-as-metric (degenerate Krein), and the provable ternary/integer/float value-system differences |
 | [`QUANT.md`](QUANT.md) | within-tolerance lossless compression = margin-certified decode-invariance; geometry/packing → bit rate; value-system- and metric-agnostic (float/int/ternary, PIC/Krein) |
+| [`PRUNE.md`](PRUNE.md) | certificate-gated pruning algorithms (greedy magnitude, head/tail, knapsack, iterative, unified budget) with provable within-tolerance outcomes |
 | [`RESULTS.md`](RESULTS.md) | verification status and commands |
 
 ## Verify
@@ -57,7 +59,7 @@ metric-dependent*. See [`PROPOSAL.md`](PROPOSAL.md).
 ```bash
 # Layer 1 — structural skeleton (zero Isabelle)
 .venv/bin/i-orca verify examples/pic_krein/pic_krein.i.orca.md
-#   -> all 34 theorems VALID, formal_fraction_static = 1.000
+#   -> all 39 theorems VALID, formal_fraction_static = 1.000
 
 # Layer 2 — kernel check of the substrate (the load-bearing math)
 isabelle build -d examples/pic_krein -o quick_and_dirty KreinPIC
