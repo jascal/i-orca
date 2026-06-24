@@ -41,6 +41,10 @@
     LEARNED J (adaptive signature)     -> KreinDescendsAllIffPsd, KreinJsInvolution
     INSTABILITY of minima (isotropic)  -> KreinKstepGrowsOnTimelike, KreinKstepNormGrows,
                                           KreinFlowUnstableOnTimelike
+    TERNARY <-> bitnet / value systems -> KreinJsTripotent, KreinJsSq, KreinIntStrictWinnerRobust,
+                                          KreinTernaryWidenLossless, KreinTernaryBytePacking
+      (card_ternary_frame is kernel-proved in KreinTernary.thy; not surfaced -- i-orca verify
+       mis-tokenizes the Pi-E goal, a surface-parser limit, not a math gap)
 -->
 
 # theorem KreinLogitDefinitize
@@ -566,3 +570,113 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | J x = - x ⟹ - (J x) = x | a −1 eigenvector of J is a +1 eigenvector of the flow Jacobian −J | — | (rule flow_unstable_on_timelike) | method |
+
+
+<!-- ============================================================================
+     TERNARY <-> BITNET / VALUE SYSTEMS (KreinTernary.thy). Bridge between the bitnet (BitNet b1.58)
+     corpus, PIC, and Krein-PIC: a ternary signature is a TRIPOTENT degenerate fundamental symmetry
+     (Js^3 = Js, roots {-1,0,1}), the same {-1,0,1}^d object as a bitnet ternary weight. Plus the
+     provable VALUE-SYSTEM differences: integer/ternary logits have a robustness floor float lacks, and
+     the ternary frame space is finite (3^d). See TERNARY.md.
+     ============================================================================ -->
+
+# theorem KreinJsTripotent
+> TERNARY SIGNATURE = TRIPOTENT. A ternary signature (`s b · s b · s b = s b`, i.e. `s b ∈ {−1,0,1}`) makes the coordinate symmetry `Js` a tripotent: `Js∘Js∘Js = Js` — the ternary analogue of the Krein involution `Js∘Js = id` (`Js_involution`), and the algebraic bridge to bitnet's ternary weights (a degenerate fundamental symmetry, radical = the zeros). Cites `Js_tripotent`.
+
+## imports
+| Theory      |
+|-------------|
+| KreinTernary |
+
+## goal
+| Statement |
+|-----------|
+| (⋀b. s b * s b * s b = s b) ⟹ Js s (Js s (Js s x)) = Js s x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (⋀b. s b * s b * s b = s b) ⟹ Js s (Js s (Js s x)) = Js s x | applying a tripotent signature (s³=s) thrice equals applying it once, coordinatewise | — | (rule Js_tripotent) | method |
+
+
+# theorem KreinJsSq
+> `Js∘Js` is multiply-by-`s²`; for a ternary signature `s² ∈ {0,1}` is the support indicator, so `Js∘Js` is the projection onto `{b : s b ≠ 0}` and the radical is `{b : s b = 0}`. Cites `Js_sq`.
+
+## imports
+| Theory      |
+|-------------|
+| KreinTernary |
+
+## goal
+| Statement |
+|-----------|
+| Js s (Js s x) = Js (λb. s b * s b) x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | Js s (Js s x) = Js (λb. s b * s b) x | applying the signature twice multiplies each coordinate by s² | — | (rule Js_sq) | method |
+
+
+# theorem KreinIntStrictWinnerRobust
+> THE DISCRETE ROBUSTNESS FLOOR (value-system difference). Integer-valued logits (e.g. ternary-incidence logits) have a margin gap: a strict winner survives EVERY real perturbation below `1/2`, regardless of how close the runner-up is. Float has no such floor (a strict win by `ε` is not robust to `ε` noise) — so the proved margin certificate's `2δ` band is empty above ties for exact systems, a continuum for float. Cites `int_strict_winner_robust`.
+
+## imports
+| Theory      |
+|-------------|
+| KreinTernary |
+
+## goal
+| Statement |
+|-----------|
+| (∀v∈V. v ≠ t ⟶ L v < L t) ⟹ (∀v∈V. ¦L' v - real_of_int (L v)¦ < 1/2) ⟹ t ∈ V ⟹ (∀v∈V. v ≠ t ⟶ L' v < L' t) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (∀v∈V. v ≠ t ⟶ L v < L t) ⟹ (∀v∈V. ¦L' v - real_of_int (L v)¦ < 1/2) ⟹ t ∈ V ⟹ (∀v∈V. v ≠ t ⟶ L' v < L' t) | an integer strict win is a gap of ≥1, so a sub-½ perturbation cannot tie it | — | (rule int_strict_winner_robust) | method |
+
+
+<!-- card_ternary_frame (the finite-frame-space value-system difference, |ternary frame| = 3^d) is
+     kernel-proved in KreinTernary.thy but intentionally NOT surfaced here: i-orca verify mis-tokenizes
+     the Pi-E goal (reads the bound variable K as a citation), a surface-parser limit, not a math gap.
+     The lemma is covered by the KreinPIC kernel build (0 sorry). -->
+
+
+# theorem KreinTernaryWidenLossless
+> LOSSLESS CONVERSION BY ADDING DIMENSIONS. Per-weight ternarization (rounding) is lossy, but with dimension expansion it is EXACT: if each integer weight is its `K`-trit balanced-ternary expansion `w_j = Σ_{k<K} t_{jk} 3^k`, the incidence rearranges as `⟨w,x⟩ = Σ_k 3^k ⟨t_{·k}, x⟩` — a fixed power-of-3 combination of `K` ternary incidences (the `K` "trit-plane" hidden dimensions). The only non-ternary part is the fixed `3^k` read-out. So integer (and finite-precision fp, = integers × a common scale) models convert to ternary losslessly at a `K`-fold width blow-up. Cites `ternary_widen_lossless`.
+
+## imports
+| Theory      |
+|-------------|
+| KreinTernary |
+
+## goal
+| Statement |
+|-----------|
+| finite J ⟹ (⋀j. j ∈ J ⟹ w j = (∑k<K. t j k * 3 ^ k)) ⟹ (∑j∈J. of_int (w j) * x j) = (∑k<K. (3::'a::comm_ring_1) ^ k * (∑j∈J. of_int (t j k) * x j)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite J ⟹ (⋀j. j ∈ J ⟹ w j = (∑k<K. t j k * 3 ^ k)) ⟹ (∑j∈J. of_int (w j) * x j) = (∑k<K. (3::'a::comm_ring_1) ^ k * (∑j∈J. of_int (t j k) * x j)) | substitute the trit expansion, distribute, swap the j/k sums, factor out 3^k | — | (rule ternary_widen_lossless) | method |
+
+
+# theorem KreinTernaryBytePacking
+> LOSSLESS COMPRESSION (storage). A natively-ternary frame packs losslessly: five ternary weights fit in one byte (`3^5 = 243 ≤ 256 = 2^8`), ≈1.58 bits/weight — a ~10–20× lossless storage compression over fp16/fp32 (mirrors bitnet's `five_trits_per_byte`). Caveat (in the .thy): fp→ternary *conversion* is bit-neutral, so the compression is the model's redundancy; below ~1.58 bits needs sparsity (entropy coding) or low rank (the Θ(d) decode floor). Cites `ternary_byte_packing`.
+
+## imports
+| Theory      |
+|-------------|
+| KreinTernary |
+
+## goal
+| Statement |
+|-----------|
+| (3::nat) ^ 5 ≤ 2 ^ 8 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (3::nat) ^ 5 ≤ 2 ^ 8 | 243 ≤ 256, so five trits pack losslessly into one byte | — | (rule ternary_byte_packing) | method |
+

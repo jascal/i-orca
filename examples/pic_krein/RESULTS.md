@@ -9,7 +9,7 @@ bottom-K (min-plus) dual and the frame-only "Scheme A" preconditioner. Companion
 ```
 $ .venv/bin/i-orca verify examples/pic_krein/pic_krein.i.orca.md
 ```
-All **26** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
+All **31** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
 
 ## Layer 2 — kernel check of the substrate (the load-bearing math)
 
@@ -19,23 +19,24 @@ Running KreinPIC ...
 Finished KreinPIC (0:00:02 elapsed time)
 ```
 
-`Finished KreinPIC`, exit 0, **zero `sorry`** across all four theories
-(`KreinDecode.thy`, `KreinWelch.thy`, `KreinBottomK.thy`, `KreinPrecond.thy`; Isabelle2025-2, parent
-`HOL-Analysis`). The `.thy` files are the hand-authored, kernel-checked substrate; the `.i.orca.md` is
+`Finished KreinPIC`, exit 0, **zero `sorry`** across all five theories
+(`KreinDecode.thy`, `KreinWelch.thy`, `KreinBottomK.thy`, `KreinPrecond.thy`, `KreinTernary.thy`;
+Isabelle2025-2, parent `HOL-Analysis`). The `.thy` files are the hand-authored, kernel-checked substrate; the `.i.orca.md` is
 the thin i-orca surface, each theorem discharged by `(rule <lemma>)`.
 
-## The four theories
+## The five theories
 
 | theory | what it establishes |
 |--------|---------------------|
 | `KreinDecode` | decode side is metric-free (definitization); capacity survives in the majorant |
 | `KreinWelch`  | frame side feels the signature: timelike units, null token, trace = signature, Welch driver vanishes, indefinite ball unbounded |
 | `KreinBottomK`| the bottom-K (min-plus) head/tail certificate — dual of `tropical/HeadTail.thy` — and bottom-K = top-K of the negated frame |
-| `KreinPrecond`| Scheme A: an indefinite frame-update preconditioner is no real reparametrization of SGD, and the flow `U̇ = −J∇L` is *not* a descent flow (genuinely new, saddle-seeking dynamics). Training recipe in [`SCHEME_A.md`](SCHEME_A.md) |
+| `KreinPrecond`| Scheme A: an indefinite frame-update preconditioner is no real reparametrization of SGD, and the flow `U̇ = −J∇L` is *not* a descent flow (genuinely new, saddle-seeking dynamics). Recipes in [`SCHEME_A.md`](SCHEME_A.md); learned `J` in [`LEARNED_J.md`](LEARNED_J.md) |
+| `KreinTernary`| bridge to the `bitnet` corpus: a ternary signature is a tripotent degenerate fundamental symmetry (`Js³=Js`), and the provable value-system differences (integer/ternary robustness floor vs float; finite `3^d` frame space). See [`TERNARY.md`](TERNARY.md) |
 
 ## What is proved vs. what is open
 
-**Proved (kernel, 26 theorems):** decode definitization, form symmetry, majorant escape hatch,
+**Proved (kernel, 32 theorems):** decode definitization, form symmetry, majorant escape hatch,
 capacity-survives-in-majorant; the signature phenomena (timelike split, null token, trace = signature,
 Welch-driver vanishing, indefinite-ball unboundedness); the full bottom-K dual certificate (partition,
 co-head certifies, argmin-in-co-head, tail residue), the negation duality (`bottomk = −(top-k over −U)`);
@@ -47,6 +48,14 @@ timelike eigenspace), the **learned-J dichotomy** (descends-for-all ⟺ PSD), an
 parametrization** (a rigid signature is an involution). See [`SCHEME_A.md`](SCHEME_A.md) and
 [`LEARNED_J.md`](LEARNED_J.md). The general SPD-Hessian eigenvalue count (`q` positive eigenvalues of
 `−JH` by Sylvester) reduces to the isotropic core and is stated, not formalized (needs spectral theory).
+The **ternary / bitnet bridge** adds the tripotent law (`s³=s ⟹ Js³=Js`), `Js² = `support-projection,
+and the **value-system differences**: the discrete robustness floor (integer/ternary strict win survives
+any `δ<½`; float has no floor), the finite ternary frame space (`3^d`), the **lossless conversion by
+adding dimensions** (`⟨w,x⟩ = Σ_k 3^k ⟨t_{·k},x⟩` — int/fp → ternary at a `K`-fold width blow-up,
+`ternary_widen_lossless`), and the **lossless storage compression** (5 trits/byte, `3^5 ≤ 2^8`,
+`ternary_byte_packing`). See [`TERNARY.md`](TERNARY.md). (Kernel count 32 = 31 surfaced +
+`card_ternary_frame`, proved in `KreinTernary.thy` but not surfaced — i-orca verify mis-tokenizes its
+`Pi⇩E` goal, a surface-parser limit, not a math gap.)
 
 **Open / not claimed:** achievability of sub-Welch coherence with `n>d` indefinite units; an
 indefinite-ball capacity bound; that an indefinite preconditioner *helps* (pil §6.1: no frame knob yet
