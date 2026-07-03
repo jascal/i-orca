@@ -13,6 +13,8 @@ Everything here is `proved` over its stated domain; session is strict
 | `margin_transfer` | a δ-bounded logit perturbation degrades a uniform margin `m` to `m − 2δ`; **no sign condition**, so it iterates unconditionally |
 | `step_margin_survives` | one joint step degrades the uniform margin to at least `m − 2(ρε + β)` — the quantity to log each iteration, not just threshold |
 | `step_decode_preserved` | per-step runtime engine: current margin `> 2(ρε + β)` ⟹ the step preserves the strict argmax. β = 0 recovers `PIC_Quant.quant_decode_preserved` — the β term is what a **trained bias** adds (pil trains `bias`; a frame-only certificate is a silent-divergence trap) |
+| `margin_transfer_aniso` | per-competitor transfer: pairwise gap `M_v` degrades to `M_v − D_v − D_t` under per-logit perturbation bounds `D` |
+| `step_decode_preserved_aniso` | **T-aniso**, the per-row engine: with per-row budgets `ε_v, β_v`, the decision survives whenever `(ρε_t + β_t) + (ρε_v + β_v) <` the pairwise gap, for every rival `v`. Far-behind rows move freely; only near-competitors need clipping — the certificate a **directional** trust region re-arms per step (a global scalar clip pins at real ρ: pil PR #6 measured ρ ≈ 35 → α ≈ 0.005) |
 | `traj_decode_margin` | telescoping: after τ steps the surviving uniform margin is `≥ m − 2·Σ_{s<τ}(ρ·ε_s + β_s)` (induction on τ) |
 | `traj_decode_preserved` | **T-traj**, the a-priori certificate: total budget `2·Σ_{s<T}(ρ·ε_s + β_s) < m` ⟹ every visited decision is preserved at **every** point of the trajectory |
 
