@@ -78,10 +78,34 @@ proof (intro ballI impI)
   from wv pv pt show "L' v + (m - 2 * \<delta>) \<le> L' t" unfolding abs_le_iff by linarith
 qed
 
+text \<open>SURVIVING MARGIN, ONE STEP.  After one joint (U, b) learning step the uniform margin
+  degrades by at most twice the drift budget: m survives as m - 2*(\<rho>*\<epsilon> + \<beta>).  Needs no sign
+  condition, and is useful on its own even when only positivity is ultimately wanted (it is the
+  quantity a P3 loop should LOG each iteration, not just threshold).\<close>
+theorem step_margin_survives:
+  fixes U U' :: "'v \<Rightarrow> 'a::real_inner" and b b' :: "'v \<Rightarrow> real" and r :: 'a
+  assumes tV:     "t \<in> V"
+      and rbound: "norm r \<le> \<rho>" and rho0: "0 \<le> \<rho>"
+      and ubound: "\<forall>v\<in>V. norm (U' v - U v) \<le> \<epsilon>"
+      and bbound: "\<forall>v\<in>V. \<bar>b' v - b v\<bar> \<le> \<beta>"
+      and margin: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U v) + b v) + m \<le> (inner r (U t) + b t)"
+  shows "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+           (inner r (U' v) + b' v) + (m - 2 * (\<rho> * \<epsilon> + \<beta>)) \<le> (inner r (U' t) + b' t)"
+proof -
+  have pert: "\<forall>v\<in>V. \<bar>(inner r (U' v) + b' v) - (inner r (U v) + b v)\<bar> \<le> \<rho> * \<epsilon> + \<beta>"
+  proof (intro ballI)
+    fix v assume vV: "v \<in> V"
+    show "\<bar>(inner r (U' v) + b' v) - (inner r (U v) + b v)\<bar> \<le> \<rho> * \<epsilon> + \<beta>"
+      by (rule step_logit_drift[OF rbound rho0 ubound[rule_format, OF vV]
+                                   bbound[rule_format, OF vV]])
+  qed
+  show ?thesis by (rule margin_transfer[OF margin pert tV])
+qed
+
 text \<open>PER-STEP RUNTIME ENGINE.  One joint (U, b) learning step preserves the decision whenever the
   current margin exceeds twice the step's drift budget \<rho>*\<epsilon> + \<beta>.  With \<beta> = 0 this is
   PIC_Quant.quant_decode_preserved; the \<beta> term is what a TRAINED bias adds.  This is the
-  inequality a picard P3 loop checks (and logs) at every iteration.\<close>
+  inequality a picard P3 loop checks at every iteration.\<close>
 theorem step_decode_preserved:
   fixes U U' :: "'v \<Rightarrow> 'a::real_inner" and b b' :: "'v \<Rightarrow> real" and r :: 'a
   assumes tV:     "t \<in> V"
@@ -91,22 +115,10 @@ theorem step_decode_preserved:
       and margin: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U v) + b v) + m \<le> (inner r (U t) + b t)"
       and tol:    "2 * (\<rho> * \<epsilon> + \<beta>) < m"
   shows "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U' v) + b' v) < (inner r (U' t) + b' t)"
-proof -
-  have pert: "\<forall>v\<in>V. \<bar>(inner r (U' v) + b' v) - (inner r (U v) + b v)\<bar> \<le> \<rho> * \<epsilon> + \<beta>"
-  proof (intro ballI)
-    fix v assume vV: "v \<in> V"
-    show "\<bar>(inner r (U' v) + b' v) - (inner r (U v) + b v)\<bar> \<le> \<rho> * \<epsilon> + \<beta>"
-      by (rule step_logit_drift[OF rbound rho0 ubound[rule_format, OF vV]
-                                   bbound[rule_format, OF vV]])
-  qed
-  have surv: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
-                (inner r (U' v) + b' v) + (m - 2 * (\<rho> * \<epsilon> + \<beta>)) \<le> (inner r (U' t) + b' t)"
-    by (rule margin_transfer[OF margin pert tV])
-  show ?thesis
-  proof (intro ballI impI)
-    fix v assume vV: "v \<in> V" and vt: "v \<noteq> t"
-    from surv vV vt tol show "(inner r (U' v) + b' v) < (inner r (U' t) + b' t)" by fastforce
-  qed
+proof (intro ballI impI)
+  fix v assume vV: "v \<in> V" and vt: "v \<noteq> t"
+  from step_margin_survives[OF tV rbound rho0 ubound bbound margin] vV vt tol
+  show "(inner r (U' v) + b' v) < (inner r (U' t) + b' t)" by fastforce
 qed
 
 text \<open>TELESCOPING MARGIN SURVIVAL.  Along a trajectory (U^s, b^s), s = 0..T, with per-step drift
