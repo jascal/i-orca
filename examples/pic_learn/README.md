@@ -15,6 +15,7 @@ Everything here is `proved` over its stated domain; session is strict
 | `step_decode_preserved` | per-step runtime engine: current margin `> 2(ρε + β)` ⟹ the step preserves the strict argmax. β = 0 recovers `PIC_Quant.quant_decode_preserved` — the β term is what a **trained bias** adds (pil trains `bias`; a frame-only certificate is a silent-divergence trap) |
 | `margin_transfer_aniso` | per-competitor transfer: pairwise gap `M_v` degrades to `M_v − D_v − D_t` under per-logit perturbation bounds `D` |
 | `step_decode_preserved_aniso` | **T-aniso**, the per-row engine: with per-row budgets `ε_v, β_v`, the decision survives whenever `(ρε_t + β_t) + (ρε_v + β_v) <` the pairwise gap, for every rival `v`. Far-behind rows move freely; only near-competitors need clipping — the certificate a **directional** trust region re-arms per step (a global scalar clip pins at real ρ: pil PR #6 measured ρ ≈ 35 → α ≈ 0.005) |
+| `gap_from_uniform_margin` | the special-case bridge: uniform margin `> 2(ρε + β)` implies the pairwise gap condition at constant budgets — the isotropic engine is kernel-provably a special case of T-aniso |
 | `traj_decode_margin` | telescoping: after τ steps the surviving uniform margin is `≥ m − 2·Σ_{s<τ}(ρ·ε_s + β_s)` (induction on τ) |
 | `traj_decode_preserved` | **T-traj**, the a-priori certificate: total budget `2·Σ_{s<T}(ρ·ε_s + β_s) < m` ⟹ every visited decision is preserved at **every** point of the trajectory |
 
@@ -36,6 +37,28 @@ Known limitation (deliberate, future work): the visited set is fixed per theorem
 each context `r` carries its own certificate from its own initial margin. A growing visited set
 (P2 adds contexts mid-trajectory) composes by instantiating the theorem at each context's
 arrival step; the loop-level statement belongs to T-fix (teacher-anchored constraints), not here.
+
+## Using T-aniso: the directional clip rule
+
+The theorem only requires the *chosen* per-row budgets to satisfy each pairwise inequality —
+there is no hidden global coupling — so the budget assignment is a choice, not part of the
+certificate. The practical rule (vetted in the PR #22 review):
+
+1. Per step, fix small target budgets `ε_t` for protected targets.
+2. Clip each rival row to `ε_v = min` over the protected targets `t` it rivals of
+   `(gap(t,v) − (ρε_t + β_t) − β_v)/ρ`, headroom-scaled.
+3. Rows that are both rival and target take the tightest of their constraints (per-row min).
+   Degenerate tight coupling reduces to a small LP, but real logit landscapes are sparse —
+   most rows sit far behind most targets.
+
+Tightness: `ρ` may be instantiated per context as the actual `‖r_x‖` (the theorem takes any
+`ρ ≥ ‖r‖`), giving sharper clips at re-arm time. The remaining looseness is the triangle
+inequality treating `ΔL_t` and `ΔL_v` as independent worst cases; a joint bound on
+`‖ΔU_t − ΔU_v‖` would tighten further — open refinement, soundness unaffected.
+
+A per-row *trajectory* form is deliberately absent: the active competitor sets change across
+steps, so a telescoped per-row budget degenerates toward the isotropic sum. The directional
+trust region re-arms per step; isotropic T-traj remains the (looser) a-priori fallback.
 
 ## Build
 

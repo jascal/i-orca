@@ -231,6 +231,37 @@ proof -
   qed
 qed
 
+text \<open>ISOTROPIC \<Rightarrow> ANISOTROPIC (the special-case bridge, kernel-backed).  A uniform margin
+  m > 2(\<rho>\<epsilon> + \<beta>) implies the pairwise gap condition with constant per-row budgets -- so
+  step_decode_preserved is literally step_decode_preserved_aniso at \<epsilon> v \<equiv> \<epsilon>, \<beta> v \<equiv> \<beta>,
+  and the anisotropic premise is never harder to satisfy than the isotropic one.
+
+  USAGE NOTE (the directional clip rule; not formalized -- it is a budget CHOICE, the theorem
+  only requires the chosen budgets to satisfy each pairwise inequality, with no hidden global
+  coupling): per step, fix small target budgets \<epsilon> t for protected targets, then clip each
+  rival row to \<epsilon> v = min over protected targets t of (gap(t,v) - (\<rho>\<epsilon> t + \<beta> t) - \<beta> v)/\<rho>
+  (with headroom); rows that are both rival and target take the tightest of their constraints
+  (per-row min; degenerate tight coupling = a small LP, but real logit landscapes are sparse).
+  TIGHTNESS: \<rho> may be instantiated per context as the actual \<parallel>r_x\<parallel> (the theorem takes any
+  \<rho> \<ge> \<parallel>r\<parallel>) -- sharper clips at re-arm time.  Remaining looseness is the triangle inequality
+  treating \<Delta>L_t and \<Delta>L_v as independent; a joint bound on \<parallel>\<Delta>U_t - \<Delta>U_v\<parallel> would tighten
+  further -- open refinement, does not affect soundness.\<close>
+lemma gap_from_uniform_margin:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner" and b :: "'v \<Rightarrow> real" and r :: 'a
+  assumes margin: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U v) + b v) + m \<le> (inner r (U t) + b t)"
+      and tol:    "2 * (\<rho> * \<epsilon> + \<beta>) < m"
+  shows "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+           (\<rho> * \<epsilon> + \<beta>) + (\<rho> * \<epsilon> + \<beta>) < (inner r (U t) + b t) - (inner r (U v) + b v)"
+proof (intro ballI impI)
+  fix v assume vV: "v \<in> V" and vt: "v \<noteq> t"
+  define d where "d = \<rho> * \<epsilon> + \<beta>"
+  have lv: "(inner r (U v) + b v) + m \<le> (inner r (U t) + b t)" using margin vV vt by blast
+  have t2: "2 * d < m" unfolding d_def by (rule tol)
+  have dd: "d + d < (inner r (U t) + b t) - (inner r (U v) + b v)" using t2 lv by linarith
+  show "(\<rho> * \<epsilon> + \<beta>) + (\<rho> * \<epsilon> + \<beta>)
+          < (inner r (U t) + b t) - (inner r (U v) + b v)" using dd unfolding d_def .
+qed
+
 text \<open>THE A-PRIORI TRAJECTORY CERTIFICATE (T-traj).  If the TOTAL drift budget of the whole
   trajectory is below half the initial margin, then at EVERY point of the trajectory every
   visited decision is preserved (strict argmax) -- the frame-learning loop's invariant S1 as a
