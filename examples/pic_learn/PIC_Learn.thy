@@ -167,6 +167,101 @@ next
   show ?case unfolding msum by (rule step)
 qed
 
+text \<open>ANISOTROPIC MARGIN TRANSFER (T-aniso).  The isotropic engine above forces a GLOBAL step
+  clip: its \<epsilon> = max_v drift makes every row pay for the most-moved row, which pins a scalar
+  trust region at real residual scales (measured: pil PR #6, \<rho> \<approx> 35 pins \<alpha> \<approx> 0.005).  The
+  anisotropic form is per-competitor: token v only needs the TARGET row's drift plus ITS OWN
+  row's drift to fit inside the PAIRWISE gap L t - L v.  Far-behind rows may move freely; only
+  near-competitors need clipping -- the certificate a DIRECTIONAL trust region re-arms per step.\<close>
+lemma margin_transfer_aniso:
+  fixes L L' :: "'v \<Rightarrow> real" and M D :: "'v \<Rightarrow> real"
+  assumes win:  "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> L v + M v \<le> L t"
+      and pert: "\<forall>v\<in>V. \<bar>L' v - L v\<bar> \<le> D v"
+      and tV:   "t \<in> V"
+  shows "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> L' v + (M v - D v - D t) \<le> L' t"
+proof (intro ballI impI)
+  fix v assume vV: "v \<in> V" and vt: "v \<noteq> t"
+  have wv: "L v + M v \<le> L t" using win vV vt by blast
+  have pv: "\<bar>L' v - L v\<bar> \<le> D v" using pert vV by blast
+  have pt: "\<bar>L' t - L t\<bar> \<le> D t" using pert tV by blast
+  from wv pv pt show "L' v + (M v - D v - D t) \<le> L' t" unfolding abs_le_iff by linarith
+qed
+
+text \<open>PER-ROW RUNTIME ENGINE.  One joint (U, b) step with PER-ROW budgets \<epsilon> v, \<beta> v preserves
+  the decision whenever, for every rival v, the target row's drift bound plus v's own row's
+  drift bound fits strictly inside the pairwise logit gap.  The isotropic engine is the
+  special case \<epsilon> v = \<epsilon>, \<beta> v = \<beta> (then the condition is implied by margin > 2(\<rho>\<epsilon> + \<beta>)).
+  This is what certifies clipping row v's step to (gap_v - target-drift)/\<rho> instead of
+  clipping every row to the worst case.\<close>
+theorem step_decode_preserved_aniso:
+  fixes U U' :: "'v \<Rightarrow> 'a::real_inner" and b b' :: "'v \<Rightarrow> real" and r :: 'a
+    and \<epsilon> \<beta> :: "'v \<Rightarrow> real"
+  assumes tV:     "t \<in> V"
+      and rbound: "norm r \<le> \<rho>" and rho0: "0 \<le> \<rho>"
+      and ubound: "\<forall>v\<in>V. norm (U' v - U v) \<le> \<epsilon> v"
+      and bbound: "\<forall>v\<in>V. \<bar>b' v - b v\<bar> \<le> \<beta> v"
+      and gap:    "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+                     (\<rho> * \<epsilon> t + \<beta> t) + (\<rho> * \<epsilon> v + \<beta> v)
+                       < (inner r (U t) + b t) - (inner r (U v) + b v)"
+  shows "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U' v) + b' v) < (inner r (U' t) + b' t)"
+proof -
+  have pert: "\<forall>v\<in>V. \<bar>(inner r (U' v) + b' v) - (inner r (U v) + b v)\<bar> \<le> \<rho> * \<epsilon> v + \<beta> v"
+  proof (intro ballI)
+    fix v assume vV: "v \<in> V"
+    show "\<bar>(inner r (U' v) + b' v) - (inner r (U v) + b v)\<bar> \<le> \<rho> * \<epsilon> v + \<beta> v"
+      by (rule step_logit_drift[OF rbound rho0 ubound[rule_format, OF vV]
+                                   bbound[rule_format, OF vV]])
+  qed
+  define G where "G v = (inner r (U t) + b t) - (inner r (U v) + b v)" for v
+  have win: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U v) + b v) + G v \<le> (inner r (U t) + b t)"
+    by (simp add: G_def)
+  have surv: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+                (inner r (U' v) + b' v) + (G v - (\<rho> * \<epsilon> v + \<beta> v) - (\<rho> * \<epsilon> t + \<beta> t))
+                \<le> (inner r (U' t) + b' t)"
+    by (rule margin_transfer_aniso[OF win pert tV])
+  show ?thesis
+  proof (intro ballI impI)
+    fix v assume vV: "v \<in> V" and vt: "v \<noteq> t"
+    have gv: "(\<rho> * \<epsilon> t + \<beta> t) + (\<rho> * \<epsilon> v + \<beta> v)
+                < (inner r (U t) + b t) - (inner r (U v) + b v)"
+      using gap vV vt by blast
+    have pos: "0 < G v - (\<rho> * \<epsilon> v + \<beta> v) - (\<rho> * \<epsilon> t + \<beta> t)"
+      using gv unfolding G_def by linarith
+    from surv vV vt pos show "(inner r (U' v) + b' v) < (inner r (U' t) + b' t)" by fastforce
+  qed
+qed
+
+text \<open>ISOTROPIC \<Rightarrow> ANISOTROPIC (the special-case bridge, kernel-backed).  A uniform margin
+  m > 2(\<rho>\<epsilon> + \<beta>) implies the pairwise gap condition with constant per-row budgets -- so
+  step_decode_preserved is literally step_decode_preserved_aniso at \<epsilon> v \<equiv> \<epsilon>, \<beta> v \<equiv> \<beta>,
+  and the anisotropic premise is never harder to satisfy than the isotropic one.
+
+  USAGE NOTE (the directional clip rule; not formalized -- it is a budget CHOICE, the theorem
+  only requires the chosen budgets to satisfy each pairwise inequality, with no hidden global
+  coupling): per step, fix small target budgets \<epsilon> t for protected targets, then clip each
+  rival row to \<epsilon> v = min over protected targets t of (gap(t,v) - (\<rho>\<epsilon> t + \<beta> t) - \<beta> v)/\<rho>
+  (with headroom); rows that are both rival and target take the tightest of their constraints
+  (per-row min; degenerate tight coupling = a small LP, but real logit landscapes are sparse).
+  TIGHTNESS: \<rho> may be instantiated per context as the actual \<parallel>r_x\<parallel> (the theorem takes any
+  \<rho> \<ge> \<parallel>r\<parallel>) -- sharper clips at re-arm time.  Remaining looseness is the triangle inequality
+  treating \<Delta>L_t and \<Delta>L_v as independent; a joint bound on \<parallel>\<Delta>U_t - \<Delta>U_v\<parallel> would tighten
+  further -- open refinement, does not affect soundness.\<close>
+lemma gap_from_uniform_margin:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner" and b :: "'v \<Rightarrow> real" and r :: 'a
+  assumes margin: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U v) + b v) + m \<le> (inner r (U t) + b t)"
+      and tol:    "2 * (\<rho> * \<epsilon> + \<beta>) < m"
+  shows "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+           (\<rho> * \<epsilon> + \<beta>) + (\<rho> * \<epsilon> + \<beta>) < (inner r (U t) + b t) - (inner r (U v) + b v)"
+proof (intro ballI impI)
+  fix v assume vV: "v \<in> V" and vt: "v \<noteq> t"
+  define d where "d = \<rho> * \<epsilon> + \<beta>"
+  have lv: "(inner r (U v) + b v) + m \<le> (inner r (U t) + b t)" using margin vV vt by blast
+  have t2: "2 * d < m" unfolding d_def by (rule tol)
+  have dd: "d + d < (inner r (U t) + b t) - (inner r (U v) + b v)" using t2 lv by linarith
+  show "(\<rho> * \<epsilon> + \<beta>) + (\<rho> * \<epsilon> + \<beta>)
+          < (inner r (U t) + b t) - (inner r (U v) + b v)" using dd unfolding d_def .
+qed
+
 text \<open>THE A-PRIORI TRAJECTORY CERTIFICATE (T-traj).  If the TOTAL drift budget of the whole
   trajectory is below half the initial margin, then at EVERY point of the trajectory every
   visited decision is preserved (strict argmax) -- the frame-learning loop's invariant S1 as a
