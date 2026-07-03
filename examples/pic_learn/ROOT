@@ -1,0 +1,4 @@
+session "PIC_Learn" = "HOL-Analysis" +
+  options [quick_and_dirty = false]
+  theories
+    PIC_Learn
