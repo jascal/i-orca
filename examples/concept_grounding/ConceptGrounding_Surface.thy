@@ -1,5 +1,5 @@
 theory ConceptGrounding_Surface
-  imports Consolidation ConceptCells ComputedRank Compositional Crystallization Gauge CrossToken GradedConsolidation
+  imports Consolidation ConceptCells ComputedRank Compositional Crystallization Gauge CrossToken GradedConsolidation Lifecycle
 begin
 
 text \<open>C4(i), one step: a masked update leaves every frozen concept's membership function identical. Cites `frozen_membership_invariant`.\<close>
@@ -476,6 +476,41 @@ theorem plainupdatescales:
   shows "\<bar>((p::real) - eta * (c * g)) - p\<bar> = \<bar>c\<bar> * \<bar>eta * g\<bar>"
 proof -
   show "\<bar>((p::real) - eta * (c * g)) - p\<bar> = \<bar>c\<bar> * \<bar>eta * g\<bar>" by (rule plain_update_scales)
+qed
+
+text \<open>The inner-product decoder is the abstract argmax over per-class scores -- the bridge from the corpus's amax to the per-unit score model. Cites `amax_is_argmax_set`.\<close>
+theorem amaxisargmaxset:
+  shows "amax V U r = argmax_set V (\<lambda>v. U v \<bullet> r)"
+proof -
+  show "amax V U r = argmax_set V (\<lambda>v. U v \<bullet> r)" by (rule amax_is_argmax_set)
+qed
+
+text \<open>A strict winner is the unique abstract argmax. Cites `argmax_strict_winner`.\<close>
+theorem argmaxstrictwinner:
+  shows "v0 \<in> V \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> s w < s v0) \<Longrightarrow> argmax_set V s = {v0}"
+proof -
+  show "v0 \<in> V \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> s w < s v0) \<Longrightarrow> argmax_set V s = {v0}" by (rule argmax_strict_winner)
+qed
+
+text \<open>One triangle budget for the whole lifecycle step: dropping the units in D while the kept units drift perturbs every class score by at most the kept drift budgets plus the dropped contribution majorants. Cites `lifecycle_perturbation`.\<close>
+theorem lifecycleperturbation:
+  shows "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> \<bar>c' k v - c k v\<bar> \<le> \<delta> k) \<Longrightarrow> (\<And>k. k \<in> D \<Longrightarrow> \<bar>c k v\<bar> \<le> \<beta> k) \<Longrightarrow> \<bar>score (K - D) c' v - score K c v\<bar> \<le> (\<Sum>k\<in>K - D. \<delta> k) + (\<Sum>k\<in>D. \<beta> k)"
+proof -
+  show "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> \<bar>c' k v - c k v\<bar> \<le> \<delta> k) \<Longrightarrow> (\<And>k. k \<in> D \<Longrightarrow> \<bar>c k v\<bar> \<le> \<beta> k) \<Longrightarrow> \<bar>score (K - D) c' v - score K c v\<bar> \<le> (\<Sum>k\<in>K - D. \<delta> k) + (\<Sum>k\<in>D. \<beta> k)" by (rule lifecycle_perturbation)
+qed
+
+text \<open>The lifecycle decode certificate: winner margin beyond twice the combined budget means the argmax decision is IDENTICAL before and after dropping D and drifting the rest -- exact, per input; any D passing the check is certified, whatever heuristic proposed it. Cites `lifecycle_decode_preserved`.\<close>
+theorem lifecycledecodepreserved:
+  shows "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>k v. k \<in> K - D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>c' k v - c k v\<bar> \<le> \<delta> k) \<Longrightarrow> (\<And>k v. k \<in> D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>c k v\<bar> \<le> \<beta> k) \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> score K c w + 2 * ((\<Sum>k\<in>K - D. \<delta> k) + (\<Sum>k\<in>D. \<beta> k)) < score K c v0) \<Longrightarrow> argmax_set V (score (K - D) c') = {v0} \<and> argmax_set V (score K c) = {v0}"
+proof -
+  show "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>k v. k \<in> K - D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>c' k v - c k v\<bar> \<le> \<delta> k) \<Longrightarrow> (\<And>k v. k \<in> D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>c k v\<bar> \<le> \<beta> k) \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> score K c w + 2 * ((\<Sum>k\<in>K - D. \<delta> k) + (\<Sum>k\<in>D. \<beta> k)) < score K c v0) \<Longrightarrow> argmax_set V (score (K - D) c') = {v0} \<and> argmax_set V (score K c) = {v0}" by (rule lifecycle_decode_preserved)
+qed
+
+text \<open>The omega-instrumented form an implementation gates on: kept units at stationarity of their lam*omega_k anchors drift-perturb by at most G_k/(2*lam*omega_k)*R; dropped units forfeit at most their tracked majorant beta_k; margin beyond twice the total preserves the decode through the whole lifecycle step. Consolidation (raising omega) buys stability at rate 1/omega; the theta-drop is sound for ANY dropped set whose beta-sum fits the budget. Cites `omega_lifecycle_certificate`.\<close>
+theorem omegalifecyclecertificate:
+  shows "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> gL k + (2 * lam * om k) *\<^sub>R (p' k - p k) = 0) \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> norm (gL k) \<le> G k) \<Longrightarrow> 0 < lam \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> 0 < om k) \<Longrightarrow> (\<And>k v. k \<in> K - D \<Longrightarrow> v \<in> V \<Longrightarrow> norm (reader k v) \<le> R) \<Longrightarrow> (\<And>k v. k \<in> D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>p k \<bullet> reader k v\<bar> \<le> \<beta> k) \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> score K (\<lambda>k v. p k \<bullet> reader k v) w + 2 * ((\<Sum>k\<in>K - D. G k / (2 * lam * om k) * R) + (\<Sum>k\<in>D. \<beta> k)) < score K (\<lambda>k v. p k \<bullet> reader k v) v0) \<Longrightarrow> argmax_set V (score (K - D) (\<lambda>k v. p' k \<bullet> reader k v)) = {v0} \<and> argmax_set V (score K (\<lambda>k v. p k \<bullet> reader k v)) = {v0}"
+proof -
+  show "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> gL k + (2 * lam * om k) *\<^sub>R (p' k - p k) = 0) \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> norm (gL k) \<le> G k) \<Longrightarrow> 0 < lam \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> 0 < om k) \<Longrightarrow> (\<And>k v. k \<in> K - D \<Longrightarrow> v \<in> V \<Longrightarrow> norm (reader k v) \<le> R) \<Longrightarrow> (\<And>k v. k \<in> D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>p k \<bullet> reader k v\<bar> \<le> \<beta> k) \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> score K (\<lambda>k v. p k \<bullet> reader k v) w + 2 * ((\<Sum>k\<in>K - D. G k / (2 * lam * om k) * R) + (\<Sum>k\<in>D. \<beta> k)) < score K (\<lambda>k v. p k \<bullet> reader k v) v0) \<Longrightarrow> argmax_set V (score (K - D) (\<lambda>k v. p' k \<bullet> reader k v)) = {v0} \<and> argmax_set V (score K (\<lambda>k v. p k \<bullet> reader k v)) = {v0}" by (rule omega_lifecycle_certificate)
 qed
 
 end

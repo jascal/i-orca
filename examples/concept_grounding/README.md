@@ -19,6 +19,7 @@ status and the premise-strengthening report).
 | `Gauge.thy` | **C6** gauge reduction | all of O(d) preserves decisions (and is provably infinite for d ≥ 2, explicit Householder family); exact frame alignment ⇒ gauge trivial; sign alignment ⇒ finite involutive gauge |
 | `CrossToken.thy` | **C7** equality separation *(from the Wyly review, pil PR #10)* | cross-token equality is linear-impossible (no additive reader at any dimension) yet bilinear-easy (orthonormal features, threshold ½); conjunctive per-position rules need ≥ card V where one eq_atom suffices — the kernel-checked case for the unified substrate |
 | `GradedConsolidation.thy` | **C8** graded stability *(from the Wyly review, pil PR #10)* | anchored drift ≤ G/(2λω) at stationarity, explicit freeze schedule; drift-vs-margin membership/decode certificates (PIC_Prune triangle shape); composed graded stability recovering C4 as ω→∞; sign-normalized updates provably ignore gradient scaling (the Adam finding) |
+| `Lifecycle.thy` | **ω-lifecycle** certificate *(closes the θ/γ-turnstile correspondence)* | drop + drift under ONE margin budget: dropping D while the kept units drift perturbs every class score by ≤ Σ_kept G_k/(2λω_k)·R + Σ_dropped β_k, and winner margin > 2× that preserves the argmax decision exactly — the certificate-gated θ-drop; implementation contract in [`WYLY_OMEGA_BUDGET_SPEC.md`](WYLY_OMEGA_BUDGET_SPEC.md) |
 
 `concept_grounding.i.orca.md` is the i-orca surface: every theorem stated in the DSL and
 discharged by `(rule <lemma>)` against the substrate. Its compiled form

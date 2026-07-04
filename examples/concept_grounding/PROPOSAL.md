@@ -63,6 +63,8 @@ retrieved/computed frontier, and the graded-incidence stability certificate behi
 | C8 composed graded stability: stationarity + gradient bound + margin ⇒ zero forgetting at finite ω | `proved` | `graded_membership_stability` |
 | C8 sign-normalized updates provably ignore gradient scaling; plain steps scale linearly | `proved` | `sign_updates_ignore_scaling`, `plain_update_scales` (signSGD idealization of Adam — stated domain) |
 | C8 convergence to stationarity; Adam's moment estimates beyond the sign idealization; global (all-input) stability | `open`/`empirical` | margins are per-input, as in PIC_Prune |
+| ω-lifecycle: drop + drift composed under one budget; decode preserved when margin > 2·(Σ G_k/(2λω_k)·R + Σ β_k) | `proved` | `Lifecycle.thy` `lifecycle_perturbation`, `lifecycle_decode_preserved`, `omega_lifecycle_certificate` |
+| ω-lifecycle: β_k majorants actually tracked/maintained by an implementation; soft-AND middle layer | hypothesis / `empirical` | the implementation contract — `WYLY_OMEGA_BUDGET_SPEC.md` |
 | C1–C8 bridge to real-LLM measurements (pythia/qwen ceilings, tiny_math rank, wake_sleep band, is_repeat wall) | `open`/`empirical` | by design — see Discipline |
 
 ## Empirical anchors (NOT proofs; the `empirical` facts the theorems formalize)

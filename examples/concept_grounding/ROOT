@@ -9,4 +9,5 @@ session "ConceptGrounding" = "HOL-Analysis" +
     Gauge
     CrossToken
     GradedConsolidation
+    Lifecycle
     ConceptGrounding_Surface

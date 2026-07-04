@@ -1380,3 +1380,104 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | ¦((p::real) - eta * (c * g)) - p¦ = ¦c¦ * ¦eta * g¦ | the step is literally the scaled gradient | — | (rule plain_update_scales) | method |
+
+
+<!-- ============================================================================
+     LIFECYCLE (Lifecycle.thy) -- the certificate-gated omega lifecycle: drop + drift
+     under ONE margin budget. Closes the theta/gamma-turnstile correspondence:
+     drop = PIC_Prune, freeze = C4, middle = C8, composed = here.
+     ============================================================================ -->
+
+# theorem AmaxIsArgmaxSet
+> The inner-product decoder is the abstract argmax over per-class scores -- the bridge from the corpus's amax to the per-unit score model. Cites `amax_is_argmax_set`.
+
+## imports
+| Theory    |
+|-----------|
+| Lifecycle |
+
+## goal
+| Statement |
+|-----------|
+| amax V U r = argmax_set V (λv. U v ∙ r) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | amax V U r = argmax_set V (λv. U v ∙ r) | both comprehensions state per-class score maximality | — | (rule amax_is_argmax_set) | method |
+
+
+# theorem ArgmaxStrictWinner
+> A strict winner is the unique abstract argmax. Cites `argmax_strict_winner`.
+
+## imports
+| Theory    |
+|-----------|
+| Lifecycle |
+
+## goal
+| Statement |
+|-----------|
+| v0 ∈ V ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ s w < s v0) ⟹ argmax_set V s = {v0} |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | v0 ∈ V ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ s w < s v0) ⟹ argmax_set V s = {v0} | beating every rival strictly is unique maximality | — | (rule argmax_strict_winner) | method |
+
+
+# theorem LifecyclePerturbation
+> One triangle budget for the whole lifecycle step: dropping the units in D while the kept units drift perturbs every class score by at most the kept drift budgets plus the dropped contribution majorants. Cites `lifecycle_perturbation`.
+
+## imports
+| Theory    |
+|-----------|
+| Lifecycle |
+
+## goal
+| Statement |
+|-----------|
+| finite K ⟹ D ⊆ K ⟹ (⋀k. k ∈ K - D ⟹ ¦c' k v - c k v¦ ≤ δ k) ⟹ (⋀k. k ∈ D ⟹ ¦c k v¦ ≤ β k) ⟹ ¦score (K - D) c' v - score K c v¦ ≤ (∑k∈K - D. δ k) + (∑k∈D. β k) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite K ⟹ D ⊆ K ⟹ (⋀k. k ∈ K - D ⟹ ¦c' k v - c k v¦ ≤ δ k) ⟹ (⋀k. k ∈ D ⟹ ¦c k v¦ ≤ β k) ⟹ ¦score (K - D) c' v - score K c v¦ ≤ (∑k∈K - D. δ k) + (∑k∈D. β k) | split the score over kept and dropped, triangle both parts | — | (rule lifecycle_perturbation) | method |
+
+
+# theorem LifecycleDecodePreserved
+> The lifecycle decode certificate: winner margin beyond twice the combined budget means the argmax decision is IDENTICAL before and after dropping D and drifting the rest -- exact, per input; any D passing the check is certified, whatever heuristic proposed it. Cites `lifecycle_decode_preserved`.
+
+## imports
+| Theory    |
+|-----------|
+| Lifecycle |
+
+## goal
+| Statement |
+|-----------|
+| finite K ⟹ D ⊆ K ⟹ v0 ∈ V ⟹ (⋀k v. k ∈ K - D ⟹ v ∈ V ⟹ ¦c' k v - c k v¦ ≤ δ k) ⟹ (⋀k v. k ∈ D ⟹ v ∈ V ⟹ ¦c k v¦ ≤ β k) ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ score K c w + 2 * ((∑k∈K - D. δ k) + (∑k∈D. β k)) < score K c v0) ⟹ argmax_set V (score (K - D) c') = {v0} ∧ argmax_set V (score K c) = {v0} |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite K ⟹ D ⊆ K ⟹ v0 ∈ V ⟹ (⋀k v. k ∈ K - D ⟹ v ∈ V ⟹ ¦c' k v - c k v¦ ≤ δ k) ⟹ (⋀k v. k ∈ D ⟹ v ∈ V ⟹ ¦c k v¦ ≤ β k) ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ score K c w + 2 * ((∑k∈K - D. δ k) + (∑k∈D. β k)) < score K c v0) ⟹ argmax_set V (score (K - D) c') = {v0} ∧ argmax_set V (score K c) = {v0} | every class score moves at most one budget, the winner led by two | — | (rule lifecycle_decode_preserved) | method |
+
+
+# theorem OmegaLifecycleCertificate
+> The omega-instrumented form an implementation gates on: kept units at stationarity of their lam*omega_k anchors drift-perturb by at most G_k/(2*lam*omega_k)*R; dropped units forfeit at most their tracked majorant beta_k; margin beyond twice the total preserves the decode through the whole lifecycle step. Consolidation (raising omega) buys stability at rate 1/omega; the theta-drop is sound for ANY dropped set whose beta-sum fits the budget. Cites `omega_lifecycle_certificate`.
+
+## imports
+| Theory    |
+|-----------|
+| Lifecycle |
+
+## goal
+| Statement |
+|-----------|
+| finite K ⟹ D ⊆ K ⟹ v0 ∈ V ⟹ (⋀k. k ∈ K - D ⟹ gL k + (2 * lam * om k) *\<^sub>R (p' k - p k) = 0) ⟹ (⋀k. k ∈ K - D ⟹ norm (gL k) ≤ G k) ⟹ 0 < lam ⟹ (⋀k. k ∈ K - D ⟹ 0 < om k) ⟹ (⋀k v. k ∈ K - D ⟹ v ∈ V ⟹ norm (reader k v) ≤ R) ⟹ (⋀k v. k ∈ D ⟹ v ∈ V ⟹ ¦p k ∙ reader k v¦ ≤ β k) ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ score K (λk v. p k ∙ reader k v) w + 2 * ((∑k∈K - D. G k / (2 * lam * om k) * R) + (∑k∈D. β k)) < score K (λk v. p k ∙ reader k v) v0) ⟹ argmax_set V (score (K - D) (λk v. p' k ∙ reader k v)) = {v0} ∧ argmax_set V (score K (λk v. p k ∙ reader k v)) = {v0} |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite K ⟹ D ⊆ K ⟹ v0 ∈ V ⟹ (⋀k. k ∈ K - D ⟹ gL k + (2 * lam * om k) *\<^sub>R (p' k - p k) = 0) ⟹ (⋀k. k ∈ K - D ⟹ norm (gL k) ≤ G k) ⟹ 0 < lam ⟹ (⋀k. k ∈ K - D ⟹ 0 < om k) ⟹ (⋀k v. k ∈ K - D ⟹ v ∈ V ⟹ norm (reader k v) ≤ R) ⟹ (⋀k v. k ∈ D ⟹ v ∈ V ⟹ ¦p k ∙ reader k v¦ ≤ β k) ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ score K (λk v. p k ∙ reader k v) w + 2 * ((∑k∈K - D. G k / (2 * lam * om k) * R) + (∑k∈D. β k)) < score K (λk v. p k ∙ reader k v) v0) ⟹ argmax_set V (score (K - D) (λk v. p' k ∙ reader k v)) = {v0} ∧ argmax_set V (score K (λk v. p k ∙ reader k v)) = {v0} | chain the anchored drift bounds and the beta majorants into the lifecycle certificate | — | (rule omega_lifecycle_certificate) | method |

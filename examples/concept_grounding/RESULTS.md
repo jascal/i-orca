@@ -9,7 +9,7 @@ tag ledger and [`README.md`](README.md) for the map.
 ```
 $ .venv/bin/i-orca verify examples/concept_grounding/concept_grounding.i.orca.md
 ```
-All **68** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
+All **73** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
 
 ## Layer 2 — kernel check of the substrate (the load-bearing math)
 
@@ -17,10 +17,11 @@ All **68** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier 
 $ isabelle build -d examples/concept_grounding -o quick_and_dirty ConceptGrounding
 ```
 
-`Finished ConceptGrounding`, exit 0, **zero `sorry`** across all eight substrate theories
+`Finished ConceptGrounding`, exit 0, **zero `sorry`** across all nine substrate theories
 (`Consolidation.thy`, `ConceptCells.thy`, `ComputedRank.thy`, `Compositional.thy`,
-`Crystallization.thy`, `Gauge.thy`, and the Wyly-review follow-ons `CrossToken.thy`,
-`GradedConsolidation.thy`; Isabelle2025-2, parent `HOL-Analysis`). The `.thy` files are the
+`Crystallization.thy`, `Gauge.thy`, the Wyly-review follow-ons `CrossToken.thy`,
+`GradedConsolidation.thy`, and the composed `Lifecycle.thy`; Isabelle2025-2, parent
+`HOL-Analysis`). The `.thy` files are the
 hand-authored, kernel-checked substrate; the `.i.orca.md` is the thin i-orca surface, each theorem
 discharged by `(rule <lemma>)`.
 
@@ -29,7 +30,7 @@ discharged by `(rule <lemma>)`.
 The session also builds `ConceptGrounding_Surface.thy` — the i-orca surface compiled by
 `i-orca compile --target isar --document` — so all **68** surface theorems are re-derived inside the
 kernel against the substrate (the `provable_opt` pattern): the surface is certified end-to-end, not
-just structurally.
+just structurally. (**73** after the ω-lifecycle addition.)
 
 Toolchain note: closing this layer surfaced four missing entries in the Isar compiler's
 Unicode→escape table (`∙` → `\<bullet>`, `∘` → `\<circ>`, `∄` → `\<nexists>`, `¦` → `\<bar>`), now
@@ -52,6 +53,7 @@ the same `'a`.
 | `Gauge` | C6 | every orthogonal gauge preserves memberships + decodes; that group is INFINITE for DIM ≥ 2 (explicit injective Householder family); exact alignment to a spanning frame forces R = id; sign-only alignment leaves an involutive gauge of finitely many (≤ 2^d) elements |
 | `CrossToken` | C7 *(Wyly review)* | no additive reader — hence no linear head over any per-position features, residuals or concept memberships, at any dimension — decides cross-token equality (4-point argument); one bilinear feature with orthonormal token features decides it exactly (threshold ½), and such features exist iff the vocabulary fits the dimension; conjunctive per-position rules only carve product sets and equality needs exactly card V of them where one eq_atom suffices |
 | `GradedConsolidation` | C8 *(Wyly review)* | at stationarity of task-loss + quadratic incidence anchor the drift is ≤ G/(2λω) with the explicit freeze schedule ω ≥ G/(2λε); memberships with margin > D·‖r‖ and decodes with margin > 2D·‖r‖ survive drift D exactly; composed: finite-ω stability, margin-gated, recovering C4 as ω→∞; signSGD provably ignores multiplicative gradient protection while plain SGD scales linearly — the anchor, not scaling, is the mechanism |
+| `Lifecycle` | ω-lifecycle *(composition)* | drop + drift under ONE budget: per-unit score model (the PIC incidence sum); dropping D while kept units drift perturbs each class score by ≤ Σ_kept δ_k + Σ_dropped β_k (`lifecycle_perturbation`); winner margin > 2× that ⇒ the argmax decision survives the whole lifecycle step exactly (`lifecycle_decode_preserved`); ω-instrumented form with δ_k = G_k/(2λω_k)·R and tracked β majorants (`omega_lifecycle_certificate`) — the certificate a θ-drop implementation gates on (`WYLY_OMEGA_BUDGET_SPEC.md`) |
 
 ## Premise-strengthening report (what had to change to close each proof)
 
@@ -107,10 +109,14 @@ reality."* The ledger:
 - **C8 — stationarity as the stated regime.** The drift bound is a property of stationary points of
   the anchored objective (force balance), not of any optimizer trajectory: convergence, rates, and
   Adam beyond the signSGD idealization stay `open`. Margins are per-input (global stability needs
-  the sup over inputs, exactly as in pic_krein's PIC_Prune). The θ/γ-turnstile correspondence from
-  the Wyly PR is now theorem-backed at both ends — drop (PIC_Prune) and freeze (C4) — with this
-  corpus supplying the middle (finite ω); only the dynamics between stationary points remain
-  unproven.
+  the sup over inputs, exactly as in pic_krein's PIC_Prune).
+- **ω-lifecycle — the majorant is a maintained hypothesis.** `Lifecycle.thy` composes drop and
+  drift under one budget, making the θ/γ-turnstile correspondence theorem-backed end to end (drop =
+  PIC_Prune, freeze = C4, middle = C8, composed = `omega_lifecycle_certificate`). The honest
+  boundary moved INTO the implementation: β_k must actually majorize the dropped unit's
+  contribution — usage-derived ω does not do this automatically, so the certificate is only as
+  sound as the tracking (`WYLY_OMEGA_BUDGET_SPEC.md` states the contract). The per-unit score
+  model is exact for linear decode layers; the soft-AND middle layer stays `empirical`.
 
 **Open / not claimed:** the polyhedral face-lattice order (C1); witnesses from bare essentialness +
 non-parallelism, and the margin-deficit magnitude (C2); any statement about argmax-decoder rank
