@@ -1,0 +1,10 @@
+session "ConceptGrounding" = "HOL-Analysis" +
+  options [quick_and_dirty]
+  theories
+    Consolidation
+    ConceptCells
+    ComputedRank
+    Compositional
+    Crystallization
+    Gauge
+    ConceptGrounding_Surface

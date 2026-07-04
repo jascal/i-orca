@@ -43,6 +43,7 @@ _TERM_SYMBOLS = {
     "∧": r"\<and>", "∨": r"\<or>", "¬": r"\<not>",
     "∀": r"\<forall>", "∃": r"\<exists>", "λ": r"\<lambda>",
     "‖": r"\<parallel>", "√": r"\<surd>", "·": r"\<cdot>", "×": r"\<times>",
+    "∙": r"\<bullet>", "∘": r"\<circ>", "∄": r"\<nexists>",
     "⊗": r"\<otimes>", "⊕": r"\<oplus>", "∞": r"\<infinity>", "⊥": r"\<bottom>",
     "⟨": r"\<langle>", "⟩": r"\<rangle>", "∂": r"\<partial>",
     "α": r"\<alpha>", "β": r"\<beta>", "γ": r"\<gamma>", "δ": r"\<delta>",
