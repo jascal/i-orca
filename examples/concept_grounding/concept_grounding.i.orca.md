@@ -24,12 +24,25 @@
                                (Householder family, DIM >= 2); exact alignment to a spanning frame kills
                                it (R = id); sign alignment leaves a finite involutive gauge.
 
+  Two follow-on conjectures from the Wyly review (pil PR #10, feat/concept-rule-learner):
+
+    C7  CrossToken.thy      -- cross-token equality is LINEAR-IMPOSSIBLE (no additive reader at any
+                               dimension; the 4-point argument) but BILINEAR-EASY (orthonormal features,
+                               threshold 1/2); conjunctive per-position rules only carve product sets and
+                               need >= card V of them (tight) where one symbolic eq_atom suffices -- the
+                               kernel-checked case for Wyly's unified substrate.
+    C8  GradedConsolidation.thy -- the graded stability-plasticity certificate: anchored drift bound
+                               norm(p - pbar) <= G/(2*lam*omega) at stationarity, freeze limit, drift-vs-
+                               margin membership/decode preservation (PIC_Prune triangle shape), composed
+                               graded stability; and the Adam finding as a theorem: sign-normalized
+                               updates provably IGNORE gradient scaling while plain steps scale linearly.
+
   As in the sibling corpora, the heavy content lives in the kernel-checked substrate theories; each
   theorem below is STATED in i-orca form and discharged by `(rule <lemma>)`. Cited lemmas are NOT
   listed in `## context` (context rows lower to local assumes, which would make the cite vacuous).
 
   Verification:
-    - `i-orca verify` (structural, zero Isabelle): all 50 theorems VALID.
+    - `i-orca verify` (structural, zero Isabelle): all 68 theorems VALID.
     - Kernel: this file is compiled (`i-orca compile --target isar --document`) to
       ConceptGrounding_Surface.thy, which the ConceptGrounding session BUILDS -- the surface is
       re-derived by the kernel against the substrate end-to-end (the provable_opt pattern):
@@ -1015,3 +1028,355 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite {R::'a::euclidean_space ⇒ 'a. linear R ∧ (∀v∈Basis. R v = v ∨ R v = - v)} | a linear map is determined by its basis values, of which there are at most 2^d sign patterns | — | (rule sign_gauge_finite) | method |
+
+
+<!-- ============================================================================
+     C7 -- CROSS-TOKEN EQUALITY (CrossToken.thy): linear-impossible, bilinear-easy.
+     Follow-on from the Wyly review (pil PR #10); grounds ground_multipos / ground_relational.
+     ============================================================================ -->
+
+# theorem EqualityNotAdditive
+> C7(i), the 4-point core: an additive score g(t1) + h(t2) that clears theta exactly on the diagonal is contradictory on the four pairs from two distinct tokens -- matched and mismatched pairs have the same total. Dimension-free. Cites `equality_not_additive`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ (⋀t1 t2. t1 ∈ V ⟹ t2 ∈ V ⟹ ((theta::real) ≤ g t1 + h t2) ⟷ (t1 = t2)) ⟹ False |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ (⋀t1 t2. t1 ∈ V ⟹ t2 ∈ V ⟹ ((theta::real) ≤ g t1 + h t2) ⟷ (t1 = t2)) ⟹ False | the two matched sums and the two mismatched sums total the same yet straddle 2*theta | — | (rule equality_not_additive[where V = V and x = x and y = y and theta = theta and g = g and h = h]) | method |
+
+
+# theorem EqualityNotLinear
+> C7(i) packaged: over any vocabulary with two tokens there is NO additive equality decider at all -- which subsumes every linear head over concatenated per-position features in any dimension. Cites `equality_not_linear`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ ¬ (∃g h theta. ∀t1∈V. ∀t2∈V. ((theta::real) ≤ g t1 + h t2) ⟷ (t1 = t2)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ ¬ (∃g h theta. ∀t1∈V. ∀t2∈V. ((theta::real) ≤ g t1 + h t2) ⟷ (t1 = t2)) | any such decider instantiates the 4-point contradiction | — | (rule equality_not_linear) | method |
+
+
+# theorem EqualityNotResidualLinear
+> C7(ii): a linear readout over concatenated per-position RESIDUALS is an additive reader, hence cannot decide cross-token equality -- the grounded reader ground_multipos trained, ruled out at every dimension. Cites `equality_not_residual_linear`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ ¬ (∃theta. ∀t1∈V. ∀t2∈V. ((theta::real) ≤ (W1::'a::real_inner) ∙ r1 t1 + (W2::'a) ∙ r2 t2) ⟷ (t1 = t2)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ ¬ (∃theta. ∀t1∈V. ∀t2∈V. ((theta::real) ≤ (W1::'a::real_inner) ∙ r1 t1 + (W2::'a) ∙ r2 t2) ⟷ (t1 = t2)) | the per-position inner products are the g and h of the additive impossibility | — | (rule equality_not_residual_linear) | method |
+
+
+# theorem EqualityNotMembershipLinear
+> C7(ii): neither can any bank of hyperplane concepts read per-position and combined linearly -- concept memberships are still additive across positions. The wall is structural, not a capacity limit. Cites `equality_not_membership_linear`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ ¬ (∃theta. ∀t1∈V. ∀t2∈V. ((theta::real) ≤ (∑c∈C. w1 c * (if fires u bb c (r1 t1) then 1 else 0)) + (∑c∈C. w2 c * (if fires u bb c (r2 t2) then 1 else 0))) ⟷ (t1 = t2)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | x ∈ V ⟹ y ∈ V ⟹ x ≠ y ⟹ ¬ (∃theta. ∀t1∈V. ∀t2∈V. ((theta::real) ≤ (∑c∈C. w1 c * (if fires u bb c (r1 t1) then 1 else 0)) + (∑c∈C. w2 c * (if fires u bb c (r2 t2) then 1 else 0))) ⟷ (t1 = t2)) | the two membership sums are again additive per-position scores | — | (rule equality_not_membership_linear) | method |
+
+
+# theorem EqualityBilinear
+> C7(iii): with orthonormal per-token features the bilinear score IS the equality indicator -- threshold one half, margin one half. The PR's soft-eq match and the QK-attention primitive. Cites `equality_bilinear`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| (⋀t1 t2. t1 ∈ V ⟹ t2 ∈ V ⟹ phi t1 ∙ phi t2 = (if t1 = t2 then 1 else 0)) ⟹ t1 ∈ V ⟹ t2 ∈ V ⟹ (1 / 2 ≤ phi t1 ∙ phi t2) ⟷ (t1 = t2) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (⋀t1 t2. t1 ∈ V ⟹ t2 ∈ V ⟹ phi t1 ∙ phi t2 = (if t1 = t2 then 1 else 0)) ⟹ t1 ∈ V ⟹ t2 ∈ V ⟹ (1 / 2 ≤ phi t1 ∙ phi t2) ⟷ (t1 = t2) | the score is 1 on the diagonal and 0 off it | — | (rule equality_bilinear) | method |
+
+
+# theorem BilinearReaderExists
+> C7(iii) existence: orthonormal token features -- hence an exact bilinear equality reader -- exist whenever card V fits the dimension. Paired with the impossibility, the separation theorem for the retrieved/computed frontier. Cites `bilinear_reader_exists`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| finite V ⟹ card V ≤ DIM('a::euclidean_space) ⟹ ∃phi::'t ⇒ 'a. ∀t1∈V. ∀t2∈V. (1 / 2 ≤ phi t1 ∙ phi t2) ⟷ (t1 = t2) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite V ⟹ card V ≤ DIM('a::euclidean_space) ⟹ ∃phi::'t ⇒ 'a. ∀t1∈V. ∀t2∈V. (1 / 2 ≤ phi t1 ∙ phi t2) ⟷ (t1 = t2) | inject the vocabulary into the orthonormal basis | — | (rule bilinear_reader_exists) | method |
+
+
+# theorem ConjunctionRuleIsProduct
+> C7(iv): a conjunction of per-position concepts fires on a PRODUCT set -- the extents of its two position groups. Conjunctive rules over per-position memberships can only carve products. Cites `conjunction_rule_is_product`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| {(r1, r2). (∀c∈S1. r1 ∈ Hspace u bb c) ∧ (∀c∈S2. r2 ∈ Hspace u bb c)} = extent u bb S1 × extent u bb S2 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | {(r1, r2). (∀c∈S1. r1 ∈ Hspace u bb c) ∧ (∀c∈S2. r2 ∈ Hspace u bb c)} = extent u bb S1 × extent u bb S2 | the two conjunct groups constrain the two coordinates independently | — | (rule conjunction_rule_is_product) | method |
+
+
+# theorem EqualityNeedsCardRules
+> C7(iv) counting: any family of product rules covering the diagonal without firing off-diagonal needs at least card V rules -- each sound rule pins one token. One symbolic eq_atom replaces card V geometric rules: the case for the unified substrate. Cites `equality_needs_card_rules`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ (⋀t. t ∈ V ⟹ ∃i∈I. t ∈ A i ∧ t ∈ B i) ⟹ (⋀i t1 t2. i ∈ I ⟹ t1 ∈ V ⟹ t2 ∈ V ⟹ t1 ∈ A i ⟹ t2 ∈ B i ⟹ t1 = t2) ⟹ card V ≤ card I |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ (⋀t. t ∈ V ⟹ ∃i∈I. t ∈ A i ∧ t ∈ B i) ⟹ (⋀i t1 t2. i ∈ I ⟹ t1 ∈ V ⟹ t2 ∈ V ⟹ t1 ∈ A i ⟹ t2 ∈ B i ⟹ t1 = t2) ⟹ card V ≤ card I | picking each token's covering rule is injective: a sound rule cannot serve two tokens | — | (rule equality_needs_card_rules) | method |
+
+
+# theorem EqualityCardRulesSuffice
+> C7(iv) tightness: the card V singleton rules cover the diagonal soundly -- the product-rule cost of equality is exactly card V. Cites `equality_card_rules_suffice`.
+
+## imports
+| Theory     |
+|------------|
+| CrossToken |
+
+## goal
+| Statement |
+|-----------|
+| (∀t∈V. ∃i∈V. t ∈ {i} ∧ t ∈ {i}) ∧ (∀i∈V. ∀t1∈V. ∀t2∈V. t1 ∈ {i} ⟶ t2 ∈ {i} ⟶ t1 = t2) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (∀t∈V. ∃i∈V. t ∈ {i} ∧ t ∈ {i}) ∧ (∀i∈V. ∀t1∈V. ∀t2∈V. t1 ∈ {i} ⟶ t2 ∈ {i} ⟶ t1 = t2) | one singleton rule per token covers its diagonal pair and nothing else | — | (rule equality_card_rules_suffice) | method |
+
+
+<!-- ============================================================================
+     C8 -- GRADED CONSOLIDATION (GradedConsolidation.thy): the middle of the omega axis.
+     Follow-on from the Wyly review (pil PR #10); grounds wyly_incidence + the Adam finding.
+     ============================================================================ -->
+
+# theorem InnerDriftBound
+> Drift perturbs scores by at most D * norm r: the Cauchy-Schwarz step every certificate below rests on. Cites `inner_drift_bound`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| norm (v' - v) ≤ D ⟹ ¦v' ∙ r - v ∙ r¦ ≤ D * norm r |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | norm (v' - v) ≤ D ⟹ ¦v' ∙ r - v ∙ r¦ ≤ D * norm r | the score difference is the drift vector read against r | — | (rule inner_drift_bound) | method |
+
+
+# theorem AnchoredDriftBound
+> C8 core: at a stationary point of task-loss + quadratic incidence anchor, the drift obeys norm (p - pbar) ≤ G / (2*lam*omega) -- protection scales as one over the incidence importance. Cites `anchored_drift_bound`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 ⟹ norm gL ≤ G ⟹ 0 < lam ⟹ 0 < om ⟹ norm (p - pbar) ≤ G / (2 * lam * om) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 ⟹ norm gL ≤ G ⟹ 0 < lam ⟹ 0 < om ⟹ norm (p - pbar) ≤ G / (2 * lam * om) | the anchor force balances the bounded task force | — | (rule anchored_drift_bound) | method |
+
+
+# theorem FreezeLimit
+> The explicit freeze schedule: incidence omega ≥ G/(2*lam*eps) caps the drift at eps -- the binary freeze of C4 is the omega -> infinity limit, quantitatively. Cites `freeze_limit`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 ⟹ norm gL ≤ G ⟹ 0 < lam ⟹ 0 < om ⟹ 0 < eps ⟹ G / (2 * lam * eps) ≤ om ⟹ norm (p - pbar) ≤ eps |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 ⟹ norm gL ≤ G ⟹ 0 < lam ⟹ 0 < om ⟹ 0 < eps ⟹ G / (2 * lam * eps) ≤ om ⟹ norm (p - pbar) ≤ eps | plug the omega threshold into the drift bound | — | (rule freeze_limit) | method |
+
+
+# theorem DriftedMembershipPreserved
+> The membership certificate: a concept whose direction drifted at most D keeps every membership whose margin beats D * norm r -- exactly, per input. Cites `drifted_membership_preserved`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| norm (u' c - u c) ≤ D ⟹ D * norm r < ¦u c ∙ r - b c¦ ⟹ fires u' b c r = fires u b c r |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | norm (u' c - u c) ≤ D ⟹ D * norm r < ¦u c ∙ r - b c¦ ⟹ fires u' b c r = fires u b c r | the score moves less than the margin, so the half-space test cannot flip | — | (rule drifted_membership_preserved) | method |
+
+
+# theorem AmaxStrictWinner
+> A strict winner is the unique argmax -- the decode-side helper. Cites `amax_strict_winner`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| v0 ∈ V ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ U w ∙ r < U v0 ∙ r) ⟹ amax V U r = {v0} |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | v0 ∈ V ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ U w ∙ r < U v0 ∙ r) ⟹ amax V U r = {v0} | beating every rival strictly is exactly unique maximality | — | (rule amax_strict_winner) | method |
+
+
+# theorem DriftedDecodePreserved
+> The decode certificate: if every readout direction drifted at most D and the winner's margin beats 2 * D * norm r, the argmax decision is identical before and after -- the PIC_Prune / PIC_Quant triangle shape with drift as the perturbation. Cites `drifted_decode_preserved`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| (⋀v. v ∈ V ⟹ norm (U' v - U v) ≤ D) ⟹ v0 ∈ V ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ U w ∙ r + 2 * (D * norm r) < U v0 ∙ r) ⟹ amax V U' r = {v0} ∧ amax V U r = {v0} |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (⋀v. v ∈ V ⟹ norm (U' v - U v) ≤ D) ⟹ v0 ∈ V ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ U w ∙ r + 2 * (D * norm r) < U v0 ∙ r) ⟹ amax V U' r = {v0} ∧ amax V U r = {v0} | winner loses at most one drift budget, rivals gain at most one | — | (rule drifted_decode_preserved) | method |
+
+
+# theorem GradedMembershipStability
+> C8 composed: stationarity of the omega-anchored objective + gradient bound + membership margin give EXACT per-input stability at finite omega -- C4's zero forgetting, margin-gated; the required margin shrinks to zero as omega grows. Cites `graded_membership_stability`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| gL + (2 * lam * om) *\<^sub>R (u' c - u c) = 0 ⟹ norm gL ≤ G ⟹ 0 < lam ⟹ 0 < om ⟹ G / (2 * lam * om) * norm r < ¦u c ∙ r - b c¦ ⟹ fires u' b c r = fires u b c r |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | gL + (2 * lam * om) *\<^sub>R (u' c - u c) = 0 ⟹ norm gL ≤ G ⟹ 0 < lam ⟹ 0 < om ⟹ G / (2 * lam * om) * norm r < ¦u c ∙ r - b c¦ ⟹ fires u' b c r = fires u b c r | chain the anchored drift bound into the membership certificate | — | (rule graded_membership_stability) | method |
+
+
+# theorem SignUpdatesIgnoreScaling
+> The Adam finding as a theorem (signSGD idealization): an arbitrary positive per-step protection factor on the gradient leaves the ENTIRE trajectory unchanged -- multiplicative protection is a provable no-op under sign-normalized updates. Cites `sign_updates_ignore_scaling`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| (q::nat ⇒ real) 0 = p 0 ⟹ (⋀n. 0 < c n) ⟹ (⋀n. p (Suc n) = p n - eta * sgn (grad n (p n))) ⟹ (⋀n. q (Suc n) = q n - eta * sgn (c n * grad n (q n))) ⟹ q n = p n |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (q::nat ⇒ real) 0 = p 0 ⟹ (⋀n. 0 < c n) ⟹ (⋀n. p (Suc n) = p n - eta * sgn (grad n (p n))) ⟹ (⋀n. q (Suc n) = q n - eta * sgn (c n * grad n (q n))) ⟹ q n = p n | positive scaling never changes the sign, so every step coincides by induction | — | (rule sign_updates_ignore_scaling) | method |
+
+
+# theorem PlainUpdateScales
+> The contrast: a plain gradient step shrinks linearly with the protection factor -- the mechanism scaling was wrongly expected to provide under Adam. Protection must enter the loss (the anchor), not the gradient magnitude. Cites `plain_update_scales`.
+
+## imports
+| Theory              |
+|---------------------|
+| GradedConsolidation |
+
+## goal
+| Statement |
+|-----------|
+| ¦((p::real) - eta * (c * g)) - p¦ = ¦c¦ * ¦eta * g¦ |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ¦((p::real) - eta * (c * g)) - p¦ = ¦c¦ * ¦eta * g¦ | the step is literally the scaled gradient | — | (rule plain_update_scales) | method |

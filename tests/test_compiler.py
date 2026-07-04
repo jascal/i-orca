@@ -63,21 +63,22 @@ INNER_PRODUCT_SRC = """\
 ## goal
 | Statement |
 |-----------|
-| n ∙ n = 1 ⟹ (f ∘ f) n = n ∧ ¬ (∄w. w ∙ n = 0) |
+| n ∙ n = 1 ⟹ (f ∘ f) n = n ∧ ¬ (∄w. ¦w ∙ n¦ = 0) |
 ## proof
 | Id | Claim | By | Using | Method | Status |
 |----|-------|----|-------|--------|--------|
-| s0 | n ∙ n = 1 ⟹ (f ∘ f) n = n ∧ ¬ (∄w. w ∙ n = 0) | cite | — | (rule foo) | method |
+| s0 | n ∙ n = 1 ⟹ (f ∘ f) n = n ∧ ¬ (∄w. ¦w ∙ n¦ = 0) | cite | — | (rule foo) | method |
 """
 
 
 def test_isar_translates_inner_product_compose_nexists():
-    # ∙ (inner product), ∘ (composition) and ∄ appear throughout the geometry
-    # corpora (concept_grounding); the batch lexer rejects them raw.
+    # ∙ (inner product), ∘ (composition), ∄ and ¦abs bars¦ appear throughout the
+    # geometry corpora (concept_grounding); the batch lexer rejects them raw.
     out = compile_isar(_thm(INNER_PRODUCT_SRC))
     assert r"\<bullet>" in out and "∙" not in out
     assert r"\<circ>" in out and "∘" not in out
     assert r"\<nexists>" in out and "∄" not in out
+    assert r"\<bar>" in out and "¦" not in out
 
 
 def test_isar_structure():

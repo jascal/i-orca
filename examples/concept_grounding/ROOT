@@ -7,4 +7,6 @@ session "ConceptGrounding" = "HOL-Analysis" +
     Compositional
     Crystallization
     Gauge
+    CrossToken
+    GradedConsolidation
     ConceptGrounding_Surface

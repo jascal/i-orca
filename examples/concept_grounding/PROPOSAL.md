@@ -6,7 +6,10 @@ conjectures that fell out of the concept-grounding experiments (the concept-as-h
 **geometry** of grounded concepts — the objects the existing packing corpus
 (`tropical/DecodeCapacity.thy`, `tropical/RoutingRank.thy`, `superposition/RoutingWelch.thy`)
 already reasons over. This corpus proves them, in the work package's priority order
-(C4 → C1 → C5 → C3 → C2 → C6), as six substrate theories under one `ConceptGrounding` session.
+(C4 → C1 → C5 → C3 → C2 → C6), as six substrate theories under one `ConceptGrounding` session —
+plus two follow-on conjectures (**C7**, **C8**) opened by the review of the Wyly PR
+(`pil` PR #10, `feat/concept-rule-learner`): the cross-token equality separation behind the
+retrieved/computed frontier, and the graded-incidence stability certificate behind the ω lifecycle.
 
 ## Discipline (inherited from the work package)
 
@@ -51,7 +54,16 @@ already reasons over. This corpus proves them, in the work package's priority or
 | C6 that gauge is **infinite** for DIM ≥ 2 (explicit Householder family) | `proved` | `hreflect_orthogonal`, `ungrounded_gauge_infinite` |
 | C6 exact alignment to a spanning frame ⇒ gauge trivial (R = id) | `proved` | `alignment_kills_gauge` |
 | C6 sign alignment ⇒ involutive gauge, finitely many (≤ 2^d) | `proved` | `sign_gauge_involutive`, `sign_gauge_finite` |
-| C1–C6 bridge to real-LLM measurements (pythia/qwen ceilings, tiny_math rank, wake_sleep band) | `open`/`empirical` | by design — see Discipline |
+| C7 no additive/linear reader (any features, any dimension) decides cross-token equality | `proved` | `CrossToken.thy` `equality_not_additive`, `equality_not_linear`, `equality_not_residual_linear`, `equality_not_membership_linear` |
+| C7 one bilinear feature decides equality exactly (threshold ½, margin ½); exists iff card V ≤ d | `proved` | `equality_bilinear`, `bilinear_reader_exists` |
+| C7 conjunctive per-position rules carve products; equality needs ≥ card V of them (tight) | `proved` | `conjunction_rule_is_product`, `equality_needs_card_rules`, `equality_card_rules_suffice` |
+| C7 the ~0.78 empirical ceiling for *approximate* readers; what pythia computes | `empirical` | not claimed — the theorems are about exact deciders over stated reader classes |
+| C8 anchored drift bound ‖p−p̄‖ ≤ G/(2λω) at stationarity; explicit freeze schedule | `proved` | `GradedConsolidation.thy` `anchored_drift_bound`, `freeze_limit` |
+| C8 drift-vs-margin certificates: membership and argmax decode preserved exactly | `proved` | `drifted_membership_preserved`, `drifted_decode_preserved` (+ `inner_drift_bound`, `amax_strict_winner`) |
+| C8 composed graded stability: stationarity + gradient bound + margin ⇒ zero forgetting at finite ω | `proved` | `graded_membership_stability` |
+| C8 sign-normalized updates provably ignore gradient scaling; plain steps scale linearly | `proved` | `sign_updates_ignore_scaling`, `plain_update_scales` (signSGD idealization of Adam — stated domain) |
+| C8 convergence to stationarity; Adam's moment estimates beyond the sign idealization; global (all-input) stability | `open`/`empirical` | margins are per-input, as in PIC_Prune |
+| C1–C8 bridge to real-LLM measurements (pythia/qwen ceilings, tiny_math rank, wake_sleep band, is_repeat wall) | `open`/`empirical` | by design — see Discipline |
 
 ## Empirical anchors (NOT proofs; the `empirical` facts the theorems formalize)
 

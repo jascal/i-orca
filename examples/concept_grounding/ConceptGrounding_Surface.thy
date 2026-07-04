@@ -1,5 +1,5 @@
 theory ConceptGrounding_Surface
-  imports Consolidation ConceptCells ComputedRank Compositional Crystallization Gauge
+  imports Consolidation ConceptCells ComputedRank Compositional Crystallization Gauge CrossToken GradedConsolidation
 begin
 
 text \<open>C4(i), one step: a masked update leaves every frozen concept's membership function identical. Cites `frozen_membership_invariant`.\<close>
@@ -350,6 +350,132 @@ theorem signgaugefinite:
   shows "finite {R::'a::euclidean_space \<Rightarrow> 'a. linear R \<and> (\<forall>v\<in>Basis. R v = v \<or> R v = - v)}"
 proof -
   show "finite {R::'a::euclidean_space \<Rightarrow> 'a. linear R \<and> (\<forall>v\<in>Basis. R v = v \<or> R v = - v)}" by (rule sign_gauge_finite)
+qed
+
+text \<open>C7(i), the 4-point core: an additive score g(t1) + h(t2) that clears theta exactly on the diagonal is contradictory on the four pairs from two distinct tokens -- matched and mismatched pairs have the same total. Dimension-free. Cites `equality_not_additive`.\<close>
+theorem equalitynotadditive:
+  shows "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> (\<And>t1 t2. t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> ((theta::real) \<le> g t1 + h t2) \<longleftrightarrow> (t1 = t2)) \<Longrightarrow> False"
+proof -
+  show "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> (\<And>t1 t2. t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> ((theta::real) \<le> g t1 + h t2) \<longleftrightarrow> (t1 = t2)) \<Longrightarrow> False" by (rule equality_not_additive[where V = V and x = x and y = y and theta = theta and g = g and h = h])
+qed
+
+text \<open>C7(i) packaged: over any vocabulary with two tokens there is NO additive equality decider at all -- which subsumes every linear head over concatenated per-position features in any dimension. Cites `equality_not_linear`.\<close>
+theorem equalitynotlinear:
+  shows "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> \<not> (\<exists>g h theta. \<forall>t1\<in>V. \<forall>t2\<in>V. ((theta::real) \<le> g t1 + h t2) \<longleftrightarrow> (t1 = t2))"
+proof -
+  show "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> \<not> (\<exists>g h theta. \<forall>t1\<in>V. \<forall>t2\<in>V. ((theta::real) \<le> g t1 + h t2) \<longleftrightarrow> (t1 = t2))" by (rule equality_not_linear)
+qed
+
+text \<open>C7(ii): a linear readout over concatenated per-position RESIDUALS is an additive reader, hence cannot decide cross-token equality -- the grounded reader ground_multipos trained, ruled out at every dimension. Cites `equality_not_residual_linear`.\<close>
+theorem equalitynotresiduallinear:
+  shows "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> \<not> (\<exists>theta. \<forall>t1\<in>V. \<forall>t2\<in>V. ((theta::real) \<le> (W1::'a::real_inner) \<bullet> r1 t1 + (W2::'a) \<bullet> r2 t2) \<longleftrightarrow> (t1 = t2))"
+proof -
+  show "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> \<not> (\<exists>theta. \<forall>t1\<in>V. \<forall>t2\<in>V. ((theta::real) \<le> (W1::'a::real_inner) \<bullet> r1 t1 + (W2::'a) \<bullet> r2 t2) \<longleftrightarrow> (t1 = t2))" by (rule equality_not_residual_linear)
+qed
+
+text \<open>C7(ii): neither can any bank of hyperplane concepts read per-position and combined linearly -- concept memberships are still additive across positions. The wall is structural, not a capacity limit. Cites `equality_not_membership_linear`.\<close>
+theorem equalitynotmembershiplinear:
+  shows "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> \<not> (\<exists>theta. \<forall>t1\<in>V. \<forall>t2\<in>V. ((theta::real) \<le> (\<Sum>c\<in>C. w1 c * (if fires u bb c (r1 t1) then 1 else 0)) + (\<Sum>c\<in>C. w2 c * (if fires u bb c (r2 t2) then 1 else 0))) \<longleftrightarrow> (t1 = t2))"
+proof -
+  show "x \<in> V \<Longrightarrow> y \<in> V \<Longrightarrow> x \<noteq> y \<Longrightarrow> \<not> (\<exists>theta. \<forall>t1\<in>V. \<forall>t2\<in>V. ((theta::real) \<le> (\<Sum>c\<in>C. w1 c * (if fires u bb c (r1 t1) then 1 else 0)) + (\<Sum>c\<in>C. w2 c * (if fires u bb c (r2 t2) then 1 else 0))) \<longleftrightarrow> (t1 = t2))" by (rule equality_not_membership_linear)
+qed
+
+text \<open>C7(iii): with orthonormal per-token features the bilinear score IS the equality indicator -- threshold one half, margin one half. The PR's soft-eq match and the QK-attention primitive. Cites `equality_bilinear`.\<close>
+theorem equalitybilinear:
+  shows "(\<And>t1 t2. t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> phi t1 \<bullet> phi t2 = (if t1 = t2 then 1 else 0)) \<Longrightarrow> t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> (1 / 2 \<le> phi t1 \<bullet> phi t2) \<longleftrightarrow> (t1 = t2)"
+proof -
+  show "(\<And>t1 t2. t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> phi t1 \<bullet> phi t2 = (if t1 = t2 then 1 else 0)) \<Longrightarrow> t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> (1 / 2 \<le> phi t1 \<bullet> phi t2) \<longleftrightarrow> (t1 = t2)" by (rule equality_bilinear)
+qed
+
+text \<open>C7(iii) existence: orthonormal token features -- hence an exact bilinear equality reader -- exist whenever card V fits the dimension. Paired with the impossibility, the separation theorem for the retrieved/computed frontier. Cites `bilinear_reader_exists`.\<close>
+theorem bilinearreaderexists:
+  shows "finite V \<Longrightarrow> card V \<le> DIM('a::euclidean_space) \<Longrightarrow> \<exists>phi::'t \<Rightarrow> 'a. \<forall>t1\<in>V. \<forall>t2\<in>V. (1 / 2 \<le> phi t1 \<bullet> phi t2) \<longleftrightarrow> (t1 = t2)"
+proof -
+  show "finite V \<Longrightarrow> card V \<le> DIM('a::euclidean_space) \<Longrightarrow> \<exists>phi::'t \<Rightarrow> 'a. \<forall>t1\<in>V. \<forall>t2\<in>V. (1 / 2 \<le> phi t1 \<bullet> phi t2) \<longleftrightarrow> (t1 = t2)" by (rule bilinear_reader_exists)
+qed
+
+text \<open>C7(iv): a conjunction of per-position concepts fires on a PRODUCT set -- the extents of its two position groups. Conjunctive rules over per-position memberships can only carve products. Cites `conjunction_rule_is_product`.\<close>
+theorem conjunctionruleisproduct:
+  shows "{(r1, r2). (\<forall>c\<in>S1. r1 \<in> Hspace u bb c) \<and> (\<forall>c\<in>S2. r2 \<in> Hspace u bb c)} = extent u bb S1 \<times> extent u bb S2"
+proof -
+  show "{(r1, r2). (\<forall>c\<in>S1. r1 \<in> Hspace u bb c) \<and> (\<forall>c\<in>S2. r2 \<in> Hspace u bb c)} = extent u bb S1 \<times> extent u bb S2" by (rule conjunction_rule_is_product)
+qed
+
+text \<open>C7(iv) counting: any family of product rules covering the diagonal without firing off-diagonal needs at least card V rules -- each sound rule pins one token. One symbolic eq_atom replaces card V geometric rules: the case for the unified substrate. Cites `equality_needs_card_rules`.\<close>
+theorem equalityneedscardrules:
+  shows "finite I \<Longrightarrow> (\<And>t. t \<in> V \<Longrightarrow> \<exists>i\<in>I. t \<in> A i \<and> t \<in> B i) \<Longrightarrow> (\<And>i t1 t2. i \<in> I \<Longrightarrow> t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> t1 \<in> A i \<Longrightarrow> t2 \<in> B i \<Longrightarrow> t1 = t2) \<Longrightarrow> card V \<le> card I"
+proof -
+  show "finite I \<Longrightarrow> (\<And>t. t \<in> V \<Longrightarrow> \<exists>i\<in>I. t \<in> A i \<and> t \<in> B i) \<Longrightarrow> (\<And>i t1 t2. i \<in> I \<Longrightarrow> t1 \<in> V \<Longrightarrow> t2 \<in> V \<Longrightarrow> t1 \<in> A i \<Longrightarrow> t2 \<in> B i \<Longrightarrow> t1 = t2) \<Longrightarrow> card V \<le> card I" by (rule equality_needs_card_rules)
+qed
+
+text \<open>C7(iv) tightness: the card V singleton rules cover the diagonal soundly -- the product-rule cost of equality is exactly card V. Cites `equality_card_rules_suffice`.\<close>
+theorem equalitycardrulessuffice:
+  shows "(\<forall>t\<in>V. \<exists>i\<in>V. t \<in> {i} \<and> t \<in> {i}) \<and> (\<forall>i\<in>V. \<forall>t1\<in>V. \<forall>t2\<in>V. t1 \<in> {i} \<longrightarrow> t2 \<in> {i} \<longrightarrow> t1 = t2)"
+proof -
+  show "(\<forall>t\<in>V. \<exists>i\<in>V. t \<in> {i} \<and> t \<in> {i}) \<and> (\<forall>i\<in>V. \<forall>t1\<in>V. \<forall>t2\<in>V. t1 \<in> {i} \<longrightarrow> t2 \<in> {i} \<longrightarrow> t1 = t2)" by (rule equality_card_rules_suffice)
+qed
+
+text \<open>Drift perturbs scores by at most D * norm r: the Cauchy-Schwarz step every certificate below rests on. Cites `inner_drift_bound`.\<close>
+theorem innerdriftbound:
+  shows "norm (v' - v) \<le> D \<Longrightarrow> \<bar>v' \<bullet> r - v \<bullet> r\<bar> \<le> D * norm r"
+proof -
+  show "norm (v' - v) \<le> D \<Longrightarrow> \<bar>v' \<bullet> r - v \<bullet> r\<bar> \<le> D * norm r" by (rule inner_drift_bound)
+qed
+
+text \<open>C8 core: at a stationary point of task-loss + quadratic incidence anchor, the drift obeys norm (p - pbar) ≤ G / (2*lam*omega) -- protection scales as one over the incidence importance. Cites `anchored_drift_bound`.\<close>
+theorem anchoreddriftbound:
+  shows "gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 \<Longrightarrow> norm gL \<le> G \<Longrightarrow> 0 < lam \<Longrightarrow> 0 < om \<Longrightarrow> norm (p - pbar) \<le> G / (2 * lam * om)"
+proof -
+  show "gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 \<Longrightarrow> norm gL \<le> G \<Longrightarrow> 0 < lam \<Longrightarrow> 0 < om \<Longrightarrow> norm (p - pbar) \<le> G / (2 * lam * om)" by (rule anchored_drift_bound)
+qed
+
+text \<open>The explicit freeze schedule: incidence omega ≥ G/(2*lam*eps) caps the drift at eps -- the binary freeze of C4 is the omega -> infinity limit, quantitatively. Cites `freeze_limit`.\<close>
+theorem freezelimit:
+  shows "gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 \<Longrightarrow> norm gL \<le> G \<Longrightarrow> 0 < lam \<Longrightarrow> 0 < om \<Longrightarrow> 0 < eps \<Longrightarrow> G / (2 * lam * eps) \<le> om \<Longrightarrow> norm (p - pbar) \<le> eps"
+proof -
+  show "gL + (2 * lam * om) *\<^sub>R (p - pbar) = 0 \<Longrightarrow> norm gL \<le> G \<Longrightarrow> 0 < lam \<Longrightarrow> 0 < om \<Longrightarrow> 0 < eps \<Longrightarrow> G / (2 * lam * eps) \<le> om \<Longrightarrow> norm (p - pbar) \<le> eps" by (rule freeze_limit)
+qed
+
+text \<open>The membership certificate: a concept whose direction drifted at most D keeps every membership whose margin beats D * norm r -- exactly, per input. Cites `drifted_membership_preserved`.\<close>
+theorem driftedmembershippreserved:
+  shows "norm (u' c - u c) \<le> D \<Longrightarrow> D * norm r < \<bar>u c \<bullet> r - b c\<bar> \<Longrightarrow> fires u' b c r = fires u b c r"
+proof -
+  show "norm (u' c - u c) \<le> D \<Longrightarrow> D * norm r < \<bar>u c \<bullet> r - b c\<bar> \<Longrightarrow> fires u' b c r = fires u b c r" by (rule drifted_membership_preserved)
+qed
+
+text \<open>A strict winner is the unique argmax -- the decode-side helper. Cites `amax_strict_winner`.\<close>
+theorem amaxstrictwinner:
+  shows "v0 \<in> V \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> U w \<bullet> r < U v0 \<bullet> r) \<Longrightarrow> amax V U r = {v0}"
+proof -
+  show "v0 \<in> V \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> U w \<bullet> r < U v0 \<bullet> r) \<Longrightarrow> amax V U r = {v0}" by (rule amax_strict_winner)
+qed
+
+text \<open>The decode certificate: if every readout direction drifted at most D and the winner's margin beats 2 * D * norm r, the argmax decision is identical before and after -- the PIC_Prune / PIC_Quant triangle shape with drift as the perturbation. Cites `drifted_decode_preserved`.\<close>
+theorem drifteddecodepreserved:
+  shows "(\<And>v. v \<in> V \<Longrightarrow> norm (U' v - U v) \<le> D) \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> U w \<bullet> r + 2 * (D * norm r) < U v0 \<bullet> r) \<Longrightarrow> amax V U' r = {v0} \<and> amax V U r = {v0}"
+proof -
+  show "(\<And>v. v \<in> V \<Longrightarrow> norm (U' v - U v) \<le> D) \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> U w \<bullet> r + 2 * (D * norm r) < U v0 \<bullet> r) \<Longrightarrow> amax V U' r = {v0} \<and> amax V U r = {v0}" by (rule drifted_decode_preserved)
+qed
+
+text \<open>C8 composed: stationarity of the omega-anchored objective + gradient bound + membership margin give EXACT per-input stability at finite omega -- C4's zero forgetting, margin-gated; the required margin shrinks to zero as omega grows. Cites `graded_membership_stability`.\<close>
+theorem gradedmembershipstability:
+  shows "gL + (2 * lam * om) *\<^sub>R (u' c - u c) = 0 \<Longrightarrow> norm gL \<le> G \<Longrightarrow> 0 < lam \<Longrightarrow> 0 < om \<Longrightarrow> G / (2 * lam * om) * norm r < \<bar>u c \<bullet> r - b c\<bar> \<Longrightarrow> fires u' b c r = fires u b c r"
+proof -
+  show "gL + (2 * lam * om) *\<^sub>R (u' c - u c) = 0 \<Longrightarrow> norm gL \<le> G \<Longrightarrow> 0 < lam \<Longrightarrow> 0 < om \<Longrightarrow> G / (2 * lam * om) * norm r < \<bar>u c \<bullet> r - b c\<bar> \<Longrightarrow> fires u' b c r = fires u b c r" by (rule graded_membership_stability)
+qed
+
+text \<open>The Adam finding as a theorem (signSGD idealization): an arbitrary positive per-step protection factor on the gradient leaves the ENTIRE trajectory unchanged -- multiplicative protection is a provable no-op under sign-normalized updates. Cites `sign_updates_ignore_scaling`.\<close>
+theorem signupdatesignorescaling:
+  shows "(q::nat \<Rightarrow> real) 0 = p 0 \<Longrightarrow> (\<And>n. 0 < c n) \<Longrightarrow> (\<And>n. p (Suc n) = p n - eta * sgn (grad n (p n))) \<Longrightarrow> (\<And>n. q (Suc n) = q n - eta * sgn (c n * grad n (q n))) \<Longrightarrow> q n = p n"
+proof -
+  show "(q::nat \<Rightarrow> real) 0 = p 0 \<Longrightarrow> (\<And>n. 0 < c n) \<Longrightarrow> (\<And>n. p (Suc n) = p n - eta * sgn (grad n (p n))) \<Longrightarrow> (\<And>n. q (Suc n) = q n - eta * sgn (c n * grad n (q n))) \<Longrightarrow> q n = p n" by (rule sign_updates_ignore_scaling)
+qed
+
+text \<open>The contrast: a plain gradient step shrinks linearly with the protection factor -- the mechanism scaling was wrongly expected to provide under Adam. Protection must enter the loss (the anchor), not the gradient magnitude. Cites `plain_update_scales`.\<close>
+theorem plainupdatescales:
+  shows "\<bar>((p::real) - eta * (c * g)) - p\<bar> = \<bar>c\<bar> * \<bar>eta * g\<bar>"
+proof -
+  show "\<bar>((p::real) - eta * (c * g)) - p\<bar> = \<bar>c\<bar> * \<bar>eta * g\<bar>" by (rule plain_update_scales)
 qed
 
 end

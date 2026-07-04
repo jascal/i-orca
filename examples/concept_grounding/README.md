@@ -17,6 +17,8 @@ status and the premise-strengthening report).
 | `Compositional.thy` | **C3** capacity gap | factored code: A+1 covering examples ⇒ exact generalization to all 2^A combos; partition code: unseen cell undetermined, needs all 2^A; conjunction = 1 rule vs 2^(A−card S₀) cells |
 | `Crystallization.thy` | **C2** collapse exactness | collapse exact iff region is one half-space (joint-redundancy direction proved); straddling midpoint witnesses block ANY half-space; quadrant instance fully worked |
 | `Gauge.thy` | **C6** gauge reduction | all of O(d) preserves decisions (and is provably infinite for d ≥ 2, explicit Householder family); exact frame alignment ⇒ gauge trivial; sign alignment ⇒ finite involutive gauge |
+| `CrossToken.thy` | **C7** equality separation *(from the Wyly review, pil PR #10)* | cross-token equality is linear-impossible (no additive reader at any dimension) yet bilinear-easy (orthonormal features, threshold ½); conjunctive per-position rules need ≥ card V where one eq_atom suffices — the kernel-checked case for the unified substrate |
+| `GradedConsolidation.thy` | **C8** graded stability *(from the Wyly review, pil PR #10)* | anchored drift ≤ G/(2λω) at stationarity, explicit freeze schedule; drift-vs-margin membership/decode certificates (PIC_Prune triangle shape); composed graded stability recovering C4 as ω→∞; sign-normalized updates provably ignore gradient scaling (the Adam finding) |
 
 `concept_grounding.i.orca.md` is the i-orca surface: every theorem stated in the DSL and
 discharged by `(rule <lemma>)` against the substrate. Its compiled form

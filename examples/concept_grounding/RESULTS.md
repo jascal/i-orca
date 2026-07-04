@@ -9,7 +9,7 @@ tag ledger and [`README.md`](README.md) for the map.
 ```
 $ .venv/bin/i-orca verify examples/concept_grounding/concept_grounding.i.orca.md
 ```
-All **50** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
+All **68** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier holes.
 
 ## Layer 2 — kernel check of the substrate (the load-bearing math)
 
@@ -17,24 +17,30 @@ All **50** surface theorems VALID, `formal_fraction_static = 1.000`, 0 frontier 
 $ isabelle build -d examples/concept_grounding -o quick_and_dirty ConceptGrounding
 ```
 
-`Finished ConceptGrounding`, exit 0, **zero `sorry`** across all six substrate theories
+`Finished ConceptGrounding`, exit 0, **zero `sorry`** across all eight substrate theories
 (`Consolidation.thy`, `ConceptCells.thy`, `ComputedRank.thy`, `Compositional.thy`,
-`Crystallization.thy`, `Gauge.thy`; Isabelle2025-2, parent `HOL-Analysis`). The `.thy` files are the
+`Crystallization.thy`, `Gauge.thy`, and the Wyly-review follow-ons `CrossToken.thy`,
+`GradedConsolidation.thy`; Isabelle2025-2, parent `HOL-Analysis`). The `.thy` files are the
 hand-authored, kernel-checked substrate; the `.i.orca.md` is the thin i-orca surface, each theorem
 discharged by `(rule <lemma>)`.
 
 ## Layer 3 — kernel check of the surface itself (end-to-end)
 
 The session also builds `ConceptGrounding_Surface.thy` — the i-orca surface compiled by
-`i-orca compile --target isar --document` — so all **50** surface theorems are re-derived inside the
+`i-orca compile --target isar --document` — so all **68** surface theorems are re-derived inside the
 kernel against the substrate (the `provable_opt` pattern): the surface is certified end-to-end, not
 just structurally.
 
-Toolchain note: closing this layer surfaced three missing entries in the Isar compiler's
-Unicode→escape table (`∙` → `\<bullet>`, `∘` → `\<circ>`, `∄` → `\<nexists>`), now added to
-`i_orca/compiler/isar.py` with a regression test — the geometry corpora lean on `∙` everywhere.
+Toolchain note: closing this layer surfaced four missing entries in the Isar compiler's
+Unicode→escape table (`∙` → `\<bullet>`, `∘` → `\<circ>`, `∄` → `\<nexists>`, `¦` → `\<bar>`), now
+added to `i_orca/compiler/isar.py` with a regression test — the geometry corpora lean on `∙` and
+`¦…¦` everywhere. Two surface-authoring gotchas worth recording: a theorem whose conclusion is
+`False` gives `(rule …)` no unification anchor, so its discharge method must pin the instantiation
+(`rule lemma[where …]`); and when a statement mentions two structurally unrelated inner-product
+readers (`W1 ∙ …`, `W2 ∙ …`) their spaces infer as *different* type variables unless annotated to
+the same `'a`.
 
-## The six theories
+## The eight theories
 
 | theory | conjecture | what it establishes |
 |--------|-----------|---------------------|
@@ -44,6 +50,8 @@ Unicode→escape table (`∙` → `\<bullet>`, `∘` → `\<circ>`, `∄` → `\
 | `Compositional` | C3 | factored code: fitting the card A+1 covering set determines all 2^A outputs (exact held-out generalization); partition code: any unseen cell is a free parameter for every target, so < 2^A samples never determine it; a conjunction is 1 threshold rule vs 2^(A−card S₀) partition cells |
 | `Crystallization` | C2 | joint redundancy ⇒ exact collapse; midpoint obstruction: any straddling pair of violators kills EVERY half-space representation; essential constraints always supply violating witnesses; the quadrant instance fully worked (both facets essential, provably no half-space) |
 | `Gauge` | C6 | every orthogonal gauge preserves memberships + decodes; that group is INFINITE for DIM ≥ 2 (explicit injective Householder family); exact alignment to a spanning frame forces R = id; sign-only alignment leaves an involutive gauge of finitely many (≤ 2^d) elements |
+| `CrossToken` | C7 *(Wyly review)* | no additive reader — hence no linear head over any per-position features, residuals or concept memberships, at any dimension — decides cross-token equality (4-point argument); one bilinear feature with orthonormal token features decides it exactly (threshold ½), and such features exist iff the vocabulary fits the dimension; conjunctive per-position rules only carve product sets and equality needs exactly card V of them where one eq_atom suffices |
+| `GradedConsolidation` | C8 *(Wyly review)* | at stationarity of task-loss + quadratic incidence anchor the drift is ≤ G/(2λω) with the explicit freeze schedule ω ≥ G/(2λε); memberships with margin > D·‖r‖ and decodes with margin > 2D·‖r‖ survive drift D exactly; composed: finite-ω stability, margin-gated, recovering C4 as ω→∞; signSGD provably ignores multiplicative gradient protection while plain SGD scales linearly — the anchor, not scaling, is the mechanism |
 
 ## Premise-strengthening report (what had to change to close each proof)
 
@@ -89,6 +97,20 @@ reality."* The ledger:
   theorem rather than a slogan: the ungrounded gauge group is provably infinite for DIM ≥ 2 via an
   explicit Householder family. The signed-*permutation* case (repeated singular values) is subsumed
   by the finite bound only for the diagonal subgroup; the full permutation stabilizer is not treated.
+
+- **C7 — exact deciders, stated reader classes.** The impossibility is for *exact* additive
+  deciders and the counting bound for *hard* ({0,1}) conjunction semantics over product rules;
+  Wyly's soft-AND with graded memberships and the ~0.78 approximate-reader ceiling stay
+  `empirical`. Nothing about what pythia's mechanism actually is is claimed — only that the
+  linear-reader wall at is_repeat is structurally forced, and that one bilinear/eq_atom primitive
+  removes it.
+- **C8 — stationarity as the stated regime.** The drift bound is a property of stationary points of
+  the anchored objective (force balance), not of any optimizer trajectory: convergence, rates, and
+  Adam beyond the signSGD idealization stay `open`. Margins are per-input (global stability needs
+  the sup over inputs, exactly as in pic_krein's PIC_Prune). The θ/γ-turnstile correspondence from
+  the Wyly PR is now theorem-backed at both ends — drop (PIC_Prune) and freeze (C4) — with this
+  corpus supplying the middle (finite ω); only the dynamics between stationary points remain
+  unproven.
 
 **Open / not claimed:** the polyhedral face-lattice order (C1); witnesses from bare essentialness +
 non-parallelism, and the margin-deficit magnitude (C2); any statement about argmax-decoder rank
