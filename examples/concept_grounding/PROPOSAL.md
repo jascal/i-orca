@@ -65,6 +65,8 @@ retrieved/computed frontier, and the graded-incidence stability certificate behi
 | C8 convergence to stationarity; Adam's moment estimates beyond the sign idealization; global (all-input) stability | `open`/`empirical` | margins are per-input, as in PIC_Prune |
 | ω-lifecycle: drop + drift composed under one budget; decode preserved when margin > 2·(Σ G_k/(2λω_k)·R + Σ β_k) | `proved` | `Lifecycle.thy` `lifecycle_perturbation`, `lifecycle_decode_preserved`, `omega_lifecycle_certificate` |
 | ω-lifecycle: β_k majorants actually tracked/maintained by an implementation; soft-AND middle layer | hypothesis / `empirical` | the implementation contract — `WYLY_OMEGA_BUDGET_SPEC.md` |
+| C9 retention-by-compilation (preempting cover: soft-independence, trajectory invariance, disjoint-guard order-irrelevance) | `proved` (Retention.thy, kernel-checked) | the self-compiling learner's zero-forgetting, as semantics |
+| C10 arbitration dominance (calibrated argmax ≥ every policy; 2ε miscalibration envelope) | `proved` (Arbitration.thy, kernel-checked) | the support-weighted cover's guarantee + the val-variance lesson |
 | C1–C8 bridge to real-LLM measurements (pythia/qwen ceilings, tiny_math rank, wake_sleep band, is_repeat wall) | `open`/`empirical` | by design — see Discipline |
 
 ## Empirical anchors (NOT proofs; the `empirical` facts the theorems formalize)

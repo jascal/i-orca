@@ -53,6 +53,8 @@ the same `'a`.
 | `Gauge` | C6 | every orthogonal gauge preserves memberships + decodes; that group is INFINITE for DIM ≥ 2 (explicit injective Householder family); exact alignment to a spanning frame forces R = id; sign-only alignment leaves an involutive gauge of finitely many (≤ 2^d) elements |
 | `CrossToken` | C7 *(Wyly review)* | no additive reader — hence no linear head over any per-position features, residuals or concept memberships, at any dimension — decides cross-token equality (4-point argument); one bilinear feature with orthonormal token features decides it exactly (threshold ½), and such features exist iff the vocabulary fits the dimension; conjunctive per-position rules only carve product sets and equality needs exactly card V of them where one eq_atom suffices |
 | `GradedConsolidation` | C8 *(Wyly review)* | at stationarity of task-loss + quadratic incidence anchor the drift is ≤ G/(2λω) with the explicit freeze schedule ω ≥ G/(2λε); memberships with margin > D·‖r‖ and decodes with margin > 2D·‖r‖ survive drift D exactly; composed: finite-ω stability, margin-gated, recovering C4 as ω→∞; signSGD provably ignores multiplicative gradient protection while plain SGD scales linearly — the anchor, not scaling, is the mechanism |
+| `Retention` | C9 *(self-compiling learner)* | covered-domain behavior independent of the soft function → constant along any training trajectory; certified agreement sets exactly preserved; off-domain the cover is the soft path; disjoint guards ⇒ firing rule sovereign, order irrelevant |
+| `Arbitration` | C10 *(support-weighted cover)* | calibrated argmax dominates every policy incl. fixed priority (sum_mono over cells); ε-miscalibrated argmax within 2ε·Σw of optimal |
 | `Lifecycle` | ω-lifecycle *(composition)* | drop + drift under ONE budget: per-unit score model (the PIC incidence sum); dropping D while kept units drift perturbs each class score by ≤ Σ_kept δ_k + Σ_dropped β_k (`lifecycle_perturbation`); winner margin > 2× that ⇒ the argmax decision survives the whole lifecycle step exactly (`lifecycle_decode_preserved`); ω-instrumented form with δ_k = G_k/(2λω_k)·R and tracked β majorants (`omega_lifecycle_certificate`) — the certificate a θ-drop implementation gates on (`WYLY_OMEGA_BUDGET_SPEC.md`) |
 
 ## Premise-strengthening report (what had to change to close each proof)
@@ -110,6 +112,16 @@ reality."* The ledger:
   the anchored objective (force balance), not of any optimizer trajectory: convergence, rates, and
   Adam beyond the signSGD idealization stay `open`. Margins are per-input (global stability needs
   the sup over inputs, exactly as in pic_krein's PIC_Prune).
+- **C9 — semantics, not dynamics; disjointness as the stated obligation.** Retention is proved for
+  the preempting-cover SEMANTICS: nothing is claimed about what was compiled being correct (the
+  Soufflé certificate's job, over its own domain), nor about the soft path's quality off-domain.
+  With overlapping guards, first-match order is load-bearing — order-irrelevance holds exactly
+  under the pairwise-disjointness premise the curriculum discharged with disjoint token ranges.
+- **C10 — calibration as the honest premise.** Dominance is over policies on the SAME cells with
+  TRUE per-cell accuracies; the practical arbiter maximizes estimates, and the 2ε envelope is the
+  entire content of the val-variance episodes: low-support confidence inflation grows ε and voids
+  the guarantee — which is why support pre-gates and per-family judge thresholds were needed.
+  Generalization from the estimation measure to a different test measure stays `empirical`.
 - **ω-lifecycle — the majorant is a maintained hypothesis.** `Lifecycle.thy` composes drop and
   drift under one budget, making the θ/γ-turnstile correspondence theorem-backed end to end (drop =
   PIC_Prune, freeze = C4, middle = C8, composed = `omega_lifecycle_certificate`). The honest

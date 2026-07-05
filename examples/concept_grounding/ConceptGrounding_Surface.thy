@@ -1,5 +1,5 @@
 theory ConceptGrounding_Surface
-  imports Consolidation ConceptCells ComputedRank Compositional Crystallization Gauge CrossToken GradedConsolidation Lifecycle
+  imports Consolidation ConceptCells ComputedRank Compositional Crystallization Gauge CrossToken GradedConsolidation Lifecycle Retention Arbitration
 begin
 
 text \<open>C4(i), one step: a masked update leaves every frozen concept's membership function identical. Cites `frozen_membership_invariant`.\<close>
@@ -511,6 +511,62 @@ theorem omegalifecyclecertificate:
   shows "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> gL k + (2 * lam * om k) *\<^sub>R (p' k - p k) = 0) \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> norm (gL k) \<le> G k) \<Longrightarrow> 0 < lam \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> 0 < om k) \<Longrightarrow> (\<And>k v. k \<in> K - D \<Longrightarrow> v \<in> V \<Longrightarrow> norm (reader k v) \<le> R) \<Longrightarrow> (\<And>k v. k \<in> D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>p k \<bullet> reader k v\<bar> \<le> \<beta> k) \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> score K (\<lambda>k v. p k \<bullet> reader k v) w + 2 * ((\<Sum>k\<in>K - D. G k / (2 * lam * om k) * R) + (\<Sum>k\<in>D. \<beta> k)) < score K (\<lambda>k v. p k \<bullet> reader k v) v0) \<Longrightarrow> argmax_set V (score (K - D) (\<lambda>k v. p' k \<bullet> reader k v)) = {v0} \<and> argmax_set V (score K (\<lambda>k v. p k \<bullet> reader k v)) = {v0}"
 proof -
   show "finite K \<Longrightarrow> D \<subseteq> K \<Longrightarrow> v0 \<in> V \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> gL k + (2 * lam * om k) *\<^sub>R (p' k - p k) = 0) \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> norm (gL k) \<le> G k) \<Longrightarrow> 0 < lam \<Longrightarrow> (\<And>k. k \<in> K - D \<Longrightarrow> 0 < om k) \<Longrightarrow> (\<And>k v. k \<in> K - D \<Longrightarrow> v \<in> V \<Longrightarrow> norm (reader k v) \<le> R) \<Longrightarrow> (\<And>k v. k \<in> D \<Longrightarrow> v \<in> V \<Longrightarrow> \<bar>p k \<bullet> reader k v\<bar> \<le> \<beta> k) \<Longrightarrow> (\<And>w. w \<in> V \<Longrightarrow> w \<noteq> v0 \<Longrightarrow> score K (\<lambda>k v. p k \<bullet> reader k v) w + 2 * ((\<Sum>k\<in>K - D. G k / (2 * lam * om k) * R) + (\<Sum>k\<in>D. \<beta> k)) < score K (\<lambda>k v. p k \<bullet> reader k v) v0) \<Longrightarrow> argmax_set V (score (K - D) (\<lambda>k v. p' k \<bullet> reader k v)) = {v0} \<and> argmax_set V (score K (\<lambda>k v. p k \<bullet> reader k v)) = {v0}" by (rule omega_lifecycle_certificate)
+qed
+
+text \<open>C9(i): on the covered domain (the union of installed guards) the preempting cover's output does not depend on the soft function at all. Cites `cover_soft_independent`.\<close>
+theorem coversoftindependent:
+  shows "x \<in> covered rs \<Longrightarrow> cover rs soft x = cover rs soft' x"
+proof -
+  show "x \<in> covered rs \<Longrightarrow> cover rs soft x = cover rs soft' x" by (rule cover_soft_independent)
+qed
+
+text \<open>C9 complement: off the covered domain the cover IS the soft function -- installed rules never constrain the plastic remainder. Cites `cover_off_domain`.\<close>
+theorem coveroffdomain:
+  shows "x \<notin> covered rs \<Longrightarrow> cover rs soft x = soft x"
+proof -
+  show "x \<notin> covered rs \<Longrightarrow> cover rs soft x = soft x" by (rule cover_off_domain)
+qed
+
+text \<open>C9(ii): along ANY trajectory of soft functions -- any optimizer, any task, any number of updates -- covered-domain behavior is identical at any two instants t and s. Zero forgetting is a property of the install semantics. Cites `retention_by_compilation`.\<close>
+theorem retentionbycompilation:
+  shows "x \<in> covered rs \<Longrightarrow> cover rs (traj t) x = cover rs (traj s) x"
+proof -
+  show "x \<in> covered rs \<Longrightarrow> cover rs (traj t) x = cover rs (traj s) x" by (rule retention_by_compilation)
+qed
+
+text \<open>C9(iii): the agreement SET with any target on any certified subset of the covered domain is identical at every training step -- the curriculum experiment's 1.000/1.000/1.000, as set equality. Cites `certified_accuracy_invariant`.\<close>
+theorem certifiedaccuracyinvariant:
+  shows "S \<subseteq> covered rs \<Longrightarrow> {x \<in> S. cover rs (traj t) x = tgt x} = {x \<in> S. cover rs (traj s) x = tgt x}"
+proof -
+  show "S \<subseteq> covered rs \<Longrightarrow> {x \<in> S. cover rs (traj t) x = tgt x} = {x \<in> S. cover rs (traj s) x = tgt x}" by (rule certified_accuracy_invariant)
+qed
+
+text \<open>C9(iv): with pairwise-disjoint guards, the rule that fires alone determines the answer -- whatever else is installed and wherever it sits in the list. Cites `fired_rule_decides`.\<close>
+theorem firedruledecides:
+  shows "pairwise (\<lambda>a b. fst a \<inter> fst b = {}) (set rs) \<Longrightarrow> r \<in> set rs \<Longrightarrow> x \<in> fst r \<Longrightarrow> cover rs soft x = snd r x"
+proof -
+  show "pairwise (\<lambda>a b. fst a \<inter> fst b = {}) (set rs) \<Longrightarrow> r \<in> set rs \<Longrightarrow> x \<in> fst r \<Longrightarrow> cover rs soft x = snd r x" by (rule fired_rule_decides)
+qed
+
+text \<open>C9(v): under pairwise-disjoint guards the installation ORDER is irrelevant -- any list with the same rule set computes the same cover. The disjointness obligation the curriculum discharged with token ranges, stated. Cites `cover_order_irrelevant`.\<close>
+theorem coverorderirrelevant:
+  shows "pairwise (\<lambda>a b. fst a \<inter> fst b = {}) (set rs) \<Longrightarrow> set rs' = set rs \<Longrightarrow> cover rs soft x = cover rs' soft x"
+proof -
+  show "pairwise (\<lambda>a b. fst a \<inter> fst b = {}) (set rs) \<Longrightarrow> set rs' = set rs \<Longrightarrow> cover rs soft x = cover rs' soft x" by (rule cover_order_irrelevant)
+qed
+
+text \<open>C10(i): with per-cell CALIBRATED confidences (acc = true per-cell accuracy on the evaluation measure), the argmax policy dominates EVERY policy -- every fixed tier priority included. The support-weighted cover's +0.03..+0.23, as a sum_mono. Cites `argmax_policy_optimal`.\<close>
+theorem argmaxpolicyoptimal:
+  shows "(\<And>c. c \<in> C \<Longrightarrow> 0 \<le> w c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> pol c \<in> app c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> opt c \<in> app c) \<Longrightarrow> (\<And>c r. c \<in> C \<Longrightarrow> r \<in> app c \<Longrightarrow> acc r c \<le> acc (opt c) c) \<Longrightarrow> polvalue w acc pol C \<le> polvalue w acc opt C"
+proof -
+  show "(\<And>c. c \<in> C \<Longrightarrow> 0 \<le> w c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> pol c \<in> app c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> opt c \<in> app c) \<Longrightarrow> (\<And>c r. c \<in> C \<Longrightarrow> r \<in> app c \<Longrightarrow> acc r c \<le> acc (opt c) c) \<Longrightarrow> polvalue w acc pol C \<le> polvalue w acc opt C" by (rule argmax_policy_optimal)
+qed
+
+text \<open>C10(ii): an arbiter maximizing ESTIMATED confidences within eps of truth is within 2*eps*(total weight) of the optimum -- the val-variance lesson as algebra: inflated low-support confidences grow eps and void the guarantee. Cites `miscalibration_bound`.\<close>
+theorem miscalibrationbound:
+  shows "finite C \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> 0 \<le> w c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> sel c \<in> app c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> opt c \<in> app c) \<Longrightarrow> (\<And>c r. c \<in> C \<Longrightarrow> r \<in> app c \<Longrightarrow> chat r c \<le> chat (sel c) c) \<Longrightarrow> (\<And>c r. c \<in> C \<Longrightarrow> r \<in> app c \<Longrightarrow> \<bar>chat r c - acc r c\<bar> \<le> eps) \<Longrightarrow> polvalue w acc opt C - polvalue w acc sel C \<le> 2 * eps * (\<Sum>c\<in>C. w c)"
+proof -
+  show "finite C \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> 0 \<le> w c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> sel c \<in> app c) \<Longrightarrow> (\<And>c. c \<in> C \<Longrightarrow> opt c \<in> app c) \<Longrightarrow> (\<And>c r. c \<in> C \<Longrightarrow> r \<in> app c \<Longrightarrow> chat r c \<le> chat (sel c) c) \<Longrightarrow> (\<And>c r. c \<in> C \<Longrightarrow> r \<in> app c \<Longrightarrow> \<bar>chat r c - acc r c\<bar> \<le> eps) \<Longrightarrow> polvalue w acc opt C - polvalue w acc sel C \<le> 2 * eps * (\<Sum>c\<in>C. w c)" by (rule miscalibration_bound)
 qed
 
 end

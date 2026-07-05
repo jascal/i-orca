@@ -31,6 +31,15 @@
                                threshold 1/2); conjunctive per-position rules only carve product sets and
                                need >= card V of them (tight) where one symbolic eq_atom suffices -- the
                                kernel-checked case for Wyly's unified substrate.
+    C9  Retention.thy       -- RETENTION BY COMPILATION (the self-compiling learner): a preempting
+                               cover's behavior on the covered domain is independent of the soft
+                               function, hence invariant along ANY training trajectory; agreement on
+                               certified subsets is exactly preserved; with pairwise-disjoint guards
+                               the firing rule is sovereign and installation order is irrelevant.
+    C10 Arbitration.thy     -- ARBITRATION DOMINANCE (the support-weighted cover): with per-cell
+                               CALIBRATED confidences, argmax arbitration dominates every policy
+                               (fixed priority included); under eps-miscalibration it is within
+                               2*eps*(total weight) of optimal -- the val-variance lesson as algebra.
     C8  GradedConsolidation.thy -- the graded stability-plasticity certificate: anchored drift bound
                                norm(p - pbar) <= G/(2*lam*omega) at stationarity, freeze limit, drift-vs-
                                margin membership/decode preservation (PIC_Prune triangle shape), composed
@@ -1481,3 +1490,165 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite K ⟹ D ⊆ K ⟹ v0 ∈ V ⟹ (⋀k. k ∈ K - D ⟹ gL k + (2 * lam * om k) *\<^sub>R (p' k - p k) = 0) ⟹ (⋀k. k ∈ K - D ⟹ norm (gL k) ≤ G k) ⟹ 0 < lam ⟹ (⋀k. k ∈ K - D ⟹ 0 < om k) ⟹ (⋀k v. k ∈ K - D ⟹ v ∈ V ⟹ norm (reader k v) ≤ R) ⟹ (⋀k v. k ∈ D ⟹ v ∈ V ⟹ ¦p k ∙ reader k v¦ ≤ β k) ⟹ (⋀w. w ∈ V ⟹ w ≠ v0 ⟹ score K (λk v. p k ∙ reader k v) w + 2 * ((∑k∈K - D. G k / (2 * lam * om k) * R) + (∑k∈D. β k)) < score K (λk v. p k ∙ reader k v) v0) ⟹ argmax_set V (score (K - D) (λk v. p' k ∙ reader k v)) = {v0} ∧ argmax_set V (score K (λk v. p k ∙ reader k v)) = {v0} | chain the anchored drift bounds and the beta majorants into the lifecycle certificate | — | (rule omega_lifecycle_certificate) | method |
+
+
+<!-- ============================================================================
+     C9 -- RETENTION BY COMPILATION (Retention.thy): the self-compiling learner's
+     central claim as semantics, not training dynamics.
+     ============================================================================ -->
+
+# theorem CoverSoftIndependent
+> C9(i): on the covered domain (the union of installed guards) the preempting cover's output does not depend on the soft function at all. Cites `cover_soft_independent`.
+
+## imports
+| Theory    |
+|-----------|
+| Retention |
+
+## goal
+| Statement |
+|-----------|
+| x ∈ covered rs ⟹ cover rs soft x = cover rs soft' x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | x ∈ covered rs ⟹ cover rs soft x = cover rs soft' x | induction on the rule list; the first firing guard preempts before soft is consulted | — | (rule cover_soft_independent) | method |
+
+
+# theorem CoverOffDomain
+> C9 complement: off the covered domain the cover IS the soft function -- installed rules never constrain the plastic remainder. Cites `cover_off_domain`.
+
+## imports
+| Theory    |
+|-----------|
+| Retention |
+
+## goal
+| Statement |
+|-----------|
+| x ∉ covered rs ⟹ cover rs soft x = soft x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | x ∉ covered rs ⟹ cover rs soft x = soft x | no guard contains x, so the recursion falls through to soft | — | (rule cover_off_domain) | method |
+
+
+# theorem RetentionByCompilation
+> C9(ii): along ANY trajectory of soft functions -- any optimizer, any task, any number of updates -- covered-domain behavior is identical at any two instants t and s. Zero forgetting is a property of the install semantics. Cites `retention_by_compilation`.
+
+## imports
+| Theory    |
+|-----------|
+| Retention |
+
+## goal
+| Statement |
+|-----------|
+| x ∈ covered rs ⟹ cover rs (traj t) x = cover rs (traj s) x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | x ∈ covered rs ⟹ cover rs (traj t) x = cover rs (traj s) x | instantiate soft-independence at the trajectory's endpoints | — | (rule retention_by_compilation) | method |
+
+
+# theorem CertifiedAccuracyInvariant
+> C9(iii): the agreement SET with any target on any certified subset of the covered domain is identical at every training step -- the curriculum experiment's 1.000/1.000/1.000, as set equality. Cites `certified_accuracy_invariant`.
+
+## imports
+| Theory    |
+|-----------|
+| Retention |
+
+## goal
+| Statement |
+|-----------|
+| S ⊆ covered rs ⟹ {x ∈ S. cover rs (traj t) x = tgt x} = {x ∈ S. cover rs (traj s) x = tgt x} |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | S ⊆ covered rs ⟹ {x ∈ S. cover rs (traj t) x = tgt x} = {x ∈ S. cover rs (traj s) x = tgt x} | pointwise soft-independence on S lifts to the agreement set | — | (rule certified_accuracy_invariant) | method |
+
+
+# theorem FiredRuleDecides
+> C9(iv): with pairwise-disjoint guards, the rule that fires alone determines the answer -- whatever else is installed and wherever it sits in the list. Cites `fired_rule_decides`.
+
+## imports
+| Theory    |
+|-----------|
+| Retention |
+
+## goal
+| Statement |
+|-----------|
+| pairwise (λa b. fst a ∩ fst b = {}) (set rs) ⟹ r ∈ set rs ⟹ x ∈ fst r ⟹ cover rs soft x = snd r x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | pairwise (λa b. fst a ∩ fst b = {}) (set rs) ⟹ r ∈ set rs ⟹ x ∈ fst r ⟹ cover rs soft x = snd r x | induction: the head either is r (disjointness forbids a second firing guard) or defers to the tail | — | (rule fired_rule_decides) | method |
+
+
+# theorem CoverOrderIrrelevant
+> C9(v): under pairwise-disjoint guards the installation ORDER is irrelevant -- any list with the same rule set computes the same cover. The disjointness obligation the curriculum discharged with token ranges, stated. Cites `cover_order_irrelevant`.
+
+## imports
+| Theory    |
+|-----------|
+| Retention |
+
+## goal
+| Statement |
+|-----------|
+| pairwise (λa b. fst a ∩ fst b = {}) (set rs) ⟹ set rs' = set rs ⟹ cover rs soft x = cover rs' soft x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | pairwise (λa b. fst a ∩ fst b = {}) (set rs) ⟹ set rs' = set rs ⟹ cover rs soft x = cover rs' soft x | either the unique firing rule decides both covers, or neither fires and both are soft | — | (rule cover_order_irrelevant) | method |
+
+
+<!-- ============================================================================
+     C10 -- ARBITRATION DOMINANCE (Arbitration.thy): the support-weighted cover's
+     guarantee, with calibration as the explicit premise.
+     ============================================================================ -->
+
+# theorem ArgmaxPolicyOptimal
+> C10(i): with per-cell CALIBRATED confidences (acc = true per-cell accuracy on the evaluation measure), the argmax policy dominates EVERY policy -- every fixed tier priority included. The support-weighted cover's +0.03..+0.23, as a sum_mono. Cites `argmax_policy_optimal`.
+
+## imports
+| Theory      |
+|-------------|
+| Arbitration |
+
+## goal
+| Statement |
+|-----------|
+| (⋀c. c ∈ C ⟹ 0 ≤ w c) ⟹ (⋀c. c ∈ C ⟹ pol c ∈ app c) ⟹ (⋀c. c ∈ C ⟹ opt c ∈ app c) ⟹ (⋀c r. c ∈ C ⟹ r ∈ app c ⟹ acc r c ≤ acc (opt c) c) ⟹ polvalue w acc pol C ≤ polvalue w acc opt C |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | (⋀c. c ∈ C ⟹ 0 ≤ w c) ⟹ (⋀c. c ∈ C ⟹ pol c ∈ app c) ⟹ (⋀c. c ∈ C ⟹ opt c ∈ app c) ⟹ (⋀c r. c ∈ C ⟹ r ∈ app c ⟹ acc r c ≤ acc (opt c) c) ⟹ polvalue w acc pol C ≤ polvalue w acc opt C | per-cell the maximizer wins; nonnegative weights lift the inequality through the sum | — | (rule argmax_policy_optimal) | method |
+
+
+# theorem MiscalibrationBound
+> C10(ii): an arbiter maximizing ESTIMATED confidences within eps of truth is within 2*eps*(total weight) of the optimum -- the val-variance lesson as algebra: inflated low-support confidences grow eps and void the guarantee. Cites `miscalibration_bound`.
+
+## imports
+| Theory      |
+|-------------|
+| Arbitration |
+
+## goal
+| Statement |
+|-----------|
+| finite C ⟹ (⋀c. c ∈ C ⟹ 0 ≤ w c) ⟹ (⋀c. c ∈ C ⟹ sel c ∈ app c) ⟹ (⋀c. c ∈ C ⟹ opt c ∈ app c) ⟹ (⋀c r. c ∈ C ⟹ r ∈ app c ⟹ chat r c ≤ chat (sel c) c) ⟹ (⋀c r. c ∈ C ⟹ r ∈ app c ⟹ ¦chat r c - acc r c¦ ≤ eps) ⟹ polvalue w acc opt C - polvalue w acc sel C ≤ 2 * eps * (∑c∈C. w c) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite C ⟹ (⋀c. c ∈ C ⟹ 0 ≤ w c) ⟹ (⋀c. c ∈ C ⟹ sel c ∈ app c) ⟹ (⋀c. c ∈ C ⟹ opt c ∈ app c) ⟹ (⋀c r. c ∈ C ⟹ r ∈ app c ⟹ chat r c ≤ chat (sel c) c) ⟹ (⋀c r. c ∈ C ⟹ r ∈ app c ⟹ ¦chat r c - acc r c¦ ≤ eps) ⟹ polvalue w acc opt C - polvalue w acc sel C ≤ 2 * eps * (∑c∈C. w c) | per cell the optimum exceeds the selection by at most two calibration widths; weight and sum | — | (rule miscalibration_bound) | method |
