@@ -1,0 +1,15 @@
+session "ConceptGrounding" = "HOL-Analysis" +
+  options [quick_and_dirty]
+  theories
+    Consolidation
+    ConceptCells
+    ComputedRank
+    Compositional
+    Crystallization
+    Gauge
+    CrossToken
+    GradedConsolidation
+    Lifecycle
+    Retention
+    Arbitration
+    ConceptGrounding_Surface
