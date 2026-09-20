@@ -1,0 +1,5 @@
+session "Streaming" = "HOL" +
+  options [quick_and_dirty]
+  theories
+    EventTime
+    Streaming_Surface
