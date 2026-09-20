@@ -1,6 +1,6 @@
 # Results — event-time streaming corpus
 
-Isabelle2025-2. Session `Streaming` = `HOL` + `EventTime` + `Streaming_Surface`.
+Isabelle2025-2. Session `Streaming` = `HOL` + `EventTime` + `Equivalence` + `Streaming_Surface`.
 
 ## Structural verification
 
@@ -26,7 +26,13 @@ Running Streaming ...
 Finished Streaming (0:00:01 elapsed time)
 ```
 
-10 theorems, 0 `sorry`, 0 `oops`.
+20 theorems, 0 `sorry`, 0 `oops`.
+
+Surface theorems, in order: the ten event-time results above, then
+`FilterIsEngineAgnostic`, `ProjectIsEngineAgnostic`, `CompatibleImpliesEquivalent`,
+`StatelessPipelineIsPortable`, `WindowContainment`, `WindowAssignmentUnique`,
+`DedupBoundedKeepsSuperset`, `DedupAgreeOnClustered`, `DedupHorizonsDifferWitness`,
+`OutputModeIsSemantic` — all VALID at `formal_fraction_static=1.000`.
 
 ## Non-vacuity
 
@@ -39,6 +45,15 @@ same lemma. Isabelle rejected it:
 *** goal (1 subgoal):
 ***  1. ⟦xs ≠ []; int hi ≤ wmk d xs⟧ ⟹ ∃t∈set xs. int hi + int d + 1 ≤ int t
 *** Failed to apply initial proof method
+```
+
+A second control targeted the equivalence half: `dedup_bounded_keeps_superset` with the subset
+direction **reversed**, which is plausible-looking and false. Isabelle rejected it too:
+
+```
+*** Failed to apply initial proof method
+*** goal (1 subgoal):
+***  1. kept (Some d) xs ⊆ kept None xs
 ```
 
 The corpus also deliberately does **not** list cited lemmas in `## context`: the compiler lowers
@@ -57,3 +72,15 @@ context rows to local `assumes`, which would turn each citation into a vacuous `
 
 The third row is the intended behaviour: the modelled figure would be an under-estimate, and an
 under-estimate would let an unmeetable budget pass.
+
+`compatible_implies_equivalent` is the soundness argument for s-orca's `portable:` property, which
+reports the premise list it discharged:
+
+```
+pass  portable: spark  (every construct agrees unconditionally)
+pass  portable: flink  (1 residual assumption(s): PORTABILITY_IDLE_SOURCE)
+pass  portable: spark  (1 residual assumption(s): PORTABILITY_DEDUP_SEMANTICS)
+```
+
+The last line is the irreducible case: `dedup_horizons_differ_witness` says no pipeline-level
+check can clear it.

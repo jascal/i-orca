@@ -2,4 +2,5 @@ session "Streaming" = "HOL" +
   options [quick_and_dirty]
   theories
     EventTime
+    Equivalence
     Streaming_Surface

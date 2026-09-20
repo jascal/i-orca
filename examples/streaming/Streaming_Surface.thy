@@ -1,5 +1,5 @@
 theory Streaming_Surface
-  imports EventTime
+  imports EventTime Equivalence
 begin
 
 text \<open>Closing a window on the watermark loses nothing. Under bounded lateness `d` — every arriving event is at most `d` behind the largest event time already seen — if the watermark has reached a window's upper edge `hi`, then every event whose time falls below `hi` has already arrived. Contrapositively, no event belonging to a closed window can still be in flight. This is the theorem that makes a declared `watermark:` sound rather than merely conventional. Cites `watermark_safety`.\<close>
@@ -70,6 +70,76 @@ theorem chainfloorupper:
   shows "0 < w1 \<Longrightarrow> 0 < w2 \<Longrightarrow> win_hi w2 (win_hi w1 t) + d1 + d2 \<le> t + w1 + w2 + d1 + d2"
 proof -
   show "0 < w1 \<Longrightarrow> 0 < w2 \<Longrightarrow> win_hi w2 (win_hi w1 t) + d1 + d2 \<le> t + w1 + w2 + d1 + d2" by (rule chain_floor_upper)
+qed
+
+text \<open>A filter is a per-record map, so it denotes the same function in any engine whatsoever. This is the base case of portability: for stateless work there is no side condition to discharge and nothing for a migration to get wrong. Cites `stateless_op_agrees(1)`.\<close>
+theorem filterisengineagnostic:
+  shows "op_agrees E1 E2 (Filter p)"
+proof -
+  show "op_agrees E1 E2 (Filter p)" by (rule stateless_op_agrees(1))
+qed
+
+text \<open>The same for a projection. Cites `stateless_op_agrees(2)`.\<close>
+theorem projectisengineagnostic:
+  shows "op_agrees E1 E2 (Project f)"
+proof -
+  show "op_agrees E1 E2 (Project f)" by (rule stateless_op_agrees(2))
+qed
+
+text \<open>The congruence, and the theorem `portable:` discharges. If two engines agree operator by operator, they agree on the whole pipeline. This is what licenses checking portability construct by construct — a per-operator matrix — instead of reasoning about pipelines as indivisible wholes. Cites `compatible_implies_equivalent`.\<close>
+theorem compatibleimpliesequivalent:
+  shows "compatible E1 E2 ps \<Longrightarrow> run E1 ps xs = run E2 ps xs"
+proof -
+  show "compatible E1 E2 ps \<Longrightarrow> run E1 ps xs = run E2 ps xs" by (rule compatible_implies_equivalent)
+qed
+
+text \<open>The unconditional corollary: a pipeline built only from stateless operators is portable between any two engines, with an empty side-condition list. Cites `stateless_pipeline_portable`.\<close>
+theorem statelesspipelineisportable:
+  shows "\<forall>p \<in> set ps. (\<exists>q. p = Filter q) \<or> (\<exists>f. p = Project f) \<Longrightarrow> run E1 ps xs = run E2 ps xs"
+proof -
+  show "\<forall>p \<in> set ps. (\<exists>q. p = Filter q) \<or> (\<exists>f. p = Project f) \<Longrightarrow> run E1 ps xs = run E2 ps xs" by (rule stateless_pipeline_portable)
+qed
+
+text \<open>Each event lies in the window the assignment gives it: `win_lo w t ≤ t < win_lo w t + w`. Well-definedness, and the fact that makes "same assignment" a meaningful condition. Cites `window_containment`.\<close>
+theorem windowcontainment:
+  shows "0 < w \<Longrightarrow> win_lo w t \<le> t \<and> t < win_lo w t + w"
+proof -
+  show "0 < w \<Longrightarrow> win_lo w t \<le> t \<and> t < win_lo w t + w" by (rule window_containment)
+qed
+
+text \<open>Window assignment is forced, so it is not a place two engines can differ. ANY epoch-aligned tumbling window of width `w` containing `t` is `win_lo w t`. This converts a strong assumption, that the engines assign events to the same windows, into a weak and checkable one: that both use epoch-aligned tumbling windows. Cites `window_assignment_unique`.\<close>
+theorem windowassignmentunique:
+  shows "0 < w \<Longrightarrow> b mod w = 0 \<Longrightarrow> b \<le> t \<Longrightarrow> t < b + w \<Longrightarrow> b = win_lo w t"
+proof -
+  show "0 < w \<Longrightarrow> b mod w = 0 \<Longrightarrow> b \<le> t \<Longrightarrow> t < b + w \<Longrightarrow> b = win_lo w t" by (rule window_assignment_unique)
+qed
+
+text \<open>Deduplication with a bounded key memory suppresses no more than deduplication with an unbounded one. Operationally: the engine that forgets keys may emit duplicates the other removes, and the difference is one-directional. Cites `dedup_bounded_keeps_superset`.\<close>
+theorem dedupboundedkeepssuperset:
+  shows "kept None xs \<subseteq> kept (Some d) xs"
+proof -
+  show "kept None xs \<subseteq> kept (Some d) xs" by (rule dedup_bounded_keeps_superset)
+qed
+
+text \<open>The two deduplication semantics agree when every repeat of a key falls inside the horizon. Note what this condition is about: the DATA, not the pipeline. Cites `dedup_agree_on_clustered`.\<close>
+theorem dedupagreeonclustered:
+  shows "clustered d xs \<Longrightarrow> dedup_list None xs = dedup_list (Some d) xs"
+proof -
+  show "clustered d xs \<Longrightarrow> dedup_list None xs = dedup_list (Some d) xs" by (rule dedup_agree_on_clustered)
+qed
+
+text \<open>And nothing about the pipeline can reconcile them: two records sharing a key and separated by more than the horizon are kept by the bounded engine and dropped by the unbounded one. This is why s-orca reports `PORTABILITY_DEDUP_SEMANTICS` as a warning requiring a human decision rather than an error the verifier can clear — the formalisation says there is nothing for the verifier to check, because the missing premise is about the data. Cites `dedup_horizons_differ_witness`.\<close>
+theorem deduphorizonsdifferwitness:
+  shows "dedup_list None [(0, 7), (100, 7)] \<noteq> dedup_list (Some 10) [(0, 7), (100, 7)]"
+proof -
+  show "dedup_list None [(0, 7), (100, 7)] \<noteq> dedup_list (Some 10) [(0, 7), (100, 7)]" by (rule dedup_horizons_differ_witness)
+qed
+
+text \<open>An aggregate emitted as a changelog and the same aggregate emitted once are different functions, not different renderings of one function. This is why an output-mode mismatch is an error in s-orca rather than a note. Cites `output_mode_is_semantic`.\<close>
+theorem outputmodeissemantic:
+  shows "update_out [1, 2] \<noteq> append_out [1, 2]"
+proof -
+  show "update_out [1, 2] \<noteq> append_out [1, 2]" by (rule output_mode_is_semantic)
 qed
 
 end

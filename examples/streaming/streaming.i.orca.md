@@ -263,3 +263,233 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | 0 < w1 ⟹ 0 < w2 ⟹ win_hi w2 (win_hi w1 t) + d1 + d2 ≤ t + w1 + w2 + d1 + d2 | each stage's upper edge is at most one width above its input time | — | (rule chain_floor_upper) | method |
+
+
+# theorem FilterIsEngineAgnostic
+
+> A filter is a per-record map, so it denotes the same function in any engine whatsoever. This is the base case of portability: for stateless work there is no side condition to discharge and nothing for a migration to get wrong. Cites `stateless_op_agrees(1)`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| op_agrees E1 E2 (Filter p) |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | op_agrees E1 E2 (Filter p) | the semantics mentions no engine parameter | — | (rule stateless_op_agrees(1)) | method |
+
+
+# theorem ProjectIsEngineAgnostic
+
+> The same for a projection. Cites `stateless_op_agrees(2)`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| op_agrees E1 E2 (Project f) |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | op_agrees E1 E2 (Project f) | the semantics mentions no engine parameter | — | (rule stateless_op_agrees(2)) | method |
+
+
+# theorem CompatibleImpliesEquivalent
+
+> The congruence, and the theorem `portable:` discharges. If two engines agree operator by operator, they agree on the whole pipeline. This is what licenses checking portability construct by construct — a per-operator matrix — instead of reasoning about pipelines as indivisible wholes. Cites `compatible_implies_equivalent`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| compatible E1 E2 ps ⟹ run E1 ps xs = run E2 ps xs |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | compatible E1 E2 ps ⟹ run E1 ps xs = run E2 ps xs | induction along the operator list, rewriting with per-operator agreement at each step | — | (rule compatible_implies_equivalent) | method |
+
+
+# theorem StatelessPipelineIsPortable
+
+> The unconditional corollary: a pipeline built only from stateless operators is portable between any two engines, with an empty side-condition list. Cites `stateless_pipeline_portable`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| ∀p ∈ set ps. (∃q. p = Filter q) ∨ (∃f. p = Project f) ⟹ run E1 ps xs = run E2 ps xs |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀p ∈ set ps. (∃q. p = Filter q) ∨ (∃f. p = Project f) ⟹ run E1 ps xs = run E2 ps xs | every operator agrees unconditionally, so the congruence applies | — | (rule stateless_pipeline_portable) | method |
+
+
+# theorem WindowContainment
+
+> Each event lies in the window the assignment gives it: `win_lo w t ≤ t < win_lo w t + w`. Well-definedness, and the fact that makes "same assignment" a meaningful condition. Cites `window_containment`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| 0 < w ⟹ win_lo w t ≤ t ∧ t < win_lo w t + w |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | 0 < w ⟹ win_lo w t ≤ t ∧ t < win_lo w t + w | the floor of t to a multiple of w is below t and within w of it | — | (rule window_containment) | method |
+
+
+# theorem WindowAssignmentUnique
+
+> Window assignment is forced, so it is not a place two engines can differ. ANY epoch-aligned tumbling window of width `w` containing `t` is `win_lo w t`. This converts a strong assumption, that the engines assign events to the same windows, into a weak and checkable one: that both use epoch-aligned tumbling windows. Cites `window_assignment_unique`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| 0 < w ⟹ b mod w = 0 ⟹ b ≤ t ⟹ t < b + w ⟹ b = win_lo w t |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | 0 < w ⟹ b mod w = 0 ⟹ b ≤ t ⟹ t < b + w ⟹ b = win_lo w t | an aligned lower edge below t and within w of it pins the quotient t div w | — | (rule window_assignment_unique) | method |
+
+
+# theorem DedupBoundedKeepsSuperset
+
+> Deduplication with a bounded key memory suppresses no more than deduplication with an unbounded one. Operationally: the engine that forgets keys may emit duplicates the other removes, and the difference is one-directional. Cites `dedup_bounded_keeps_superset`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| kept None xs ⊆ kept (Some d) xs |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | kept None xs ⊆ kept (Some d) xs | a key unseen under an unbounded memory is unseen under a bounded one | — | (rule dedup_bounded_keeps_superset) | method |
+
+
+# theorem DedupAgreeOnClustered
+
+> The two deduplication semantics agree when every repeat of a key falls inside the horizon. Note what this condition is about: the DATA, not the pipeline. Cites `dedup_agree_on_clustered`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| clustered d xs ⟹ dedup_list None xs = dedup_list (Some d) xs |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | clustered d xs ⟹ dedup_list None xs = dedup_list (Some d) xs | under clustering the two membership tests coincide index by index | — | (rule dedup_agree_on_clustered) | method |
+
+
+# theorem DedupHorizonsDifferWitness
+
+> And nothing about the pipeline can reconcile them: two records sharing a key and separated by more than the horizon are kept by the bounded engine and dropped by the unbounded one. This is why s-orca reports `PORTABILITY_DEDUP_SEMANTICS` as a warning requiring a human decision rather than an error the verifier can clear — the formalisation says there is nothing for the verifier to check, because the missing premise is about the data. Cites `dedup_horizons_differ_witness`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| dedup_list None [(0, 7), (100, 7)] ≠ dedup_list (Some 10) [(0, 7), (100, 7)] |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | dedup_list None [(0, 7), (100, 7)] ≠ dedup_list (Some 10) [(0, 7), (100, 7)] | the second record is beyond the horizon, so the bounded engine re-emits it | — | (rule dedup_horizons_differ_witness) | method |
+
+
+# theorem OutputModeIsSemantic
+
+> An aggregate emitted as a changelog and the same aggregate emitted once are different functions, not different renderings of one function. This is why an output-mode mismatch is an error in s-orca rather than a note. Cites `output_mode_is_semantic`.
+
+## imports
+
+| Theory      |
+|-------------|
+| Equivalence |
+
+## goal
+
+| Statement |
+|-----------|
+| update_out [1, 2] ≠ append_out [1, 2] |
+
+## proof
+
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | update_out [1, 2] ≠ append_out [1, 2] | the changelog carries the running value at each step, the append stream only the final one | — | (rule output_mode_is_semantic) | method |

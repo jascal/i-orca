@@ -30,6 +30,39 @@ closes once the watermark reaches `win_hi`.
 | `latency_floor_newest` / `latency_floor_oldest` | The single-stage wait is bracketed in `[d, w + d]`. |
 | `chain_floor_lower` / `chain_floor_upper` | Along a chain the waits add: the composed floor lies between `Σd` and `Σ(w + d)`. |
 
+## Equivalence: when do two engines compute the same thing?
+
+`Equivalence.thy` makes the question s-orca's `portable:` property asks precise. A pipeline is a
+list of operators; an *engine* is the record of choices where two implementations may legitimately
+differ. The headline is a congruence.
+
+| Theorem | Says |
+|---|---|
+| `compatible_implies_equivalent` | Agreement operator by operator lifts to agreement on the whole pipeline. This is what licenses checking portability construct by construct instead of reasoning about pipelines as wholes. |
+| `stateless_op_agrees` | Filter and project are per-record maps and cannot differ between engines. No side condition, ever. |
+| `stateless_pipeline_portable` | So a pipeline built only from stateless operators is portable with an empty side-condition list. |
+| `window_containment` / `window_assignment_unique` | Any epoch-aligned tumbling window of width `w` containing `t` **is** `win_lo w t`. |
+| `dedup_bounded_keeps_superset` | A bounded key memory suppresses no more than an unbounded one, so the difference is one-directional. |
+| `dedup_agree_on_clustered` | The two deduplication semantics agree when every repeat of a key falls inside the horizon. |
+| `dedup_horizons_differ_witness` | And they demonstrably differ otherwise. |
+| `output_mode_is_semantic` | A changelog and a single emission are different functions, not different renderings. |
+
+The per-operator side conditions split three ways, and **the split is the useful part**:
+
+- **Unconditional.** Stateless work has nothing to discharge. A migration cannot get it wrong.
+- **Dischargeable.** `window_assignment_unique` converts a strong assumption, that the engines
+  assign events to the same windows, into a weak checkable one, that both use epoch-aligned
+  tumbling windows. This is the pattern to look for when adding matrix entries.
+- **Irreducible.** `dedup_horizons_differ_witness` shows two records sharing a key and separated
+  by more than the horizon: kept by the bounded engine, dropped by the unbounded one. No condition
+  on the *pipeline* can reconcile them; only an assumption about the *data* can.
+
+That third case validated an existing design decision rather than changing one. s-orca reports
+`PORTABILITY_DEDUP_SEMANTICS` as a warning for a human to decide rather than an error the verifier
+can clear, and the formalisation says why: there is nothing for the verifier to check, because the
+missing premise is not about the pipeline. Conversely `output_mode_is_semantic` shows an
+output-mode mismatch really is a difference of function, which is why that one is an error.
+
 ## Why it exists
 
 `window_never_closes_with_idle_channel` is not hypothetical. s-orca's cross-engine Kafka gate ran
@@ -45,7 +78,8 @@ advancing the watermark makes events late. That is a trade the pipeline author o
 
 `chain_floor_upper` licenses s-orca's `latency_floor` property, which sums `window + watermark`
 along each path and answers whether a pipeline could meet a latency budget *on any hardware at
-all*.
+all*. `compatible_implies_equivalent` licenses its `portable:` property, which now reports the
+premise list it discharged rather than a bare pass.
 
 ## Scope
 
@@ -65,7 +99,7 @@ i-orca verify examples/streaming/streaming.i.orca.md
 isabelle build -D examples/streaming -o quick_and_dirty Streaming
 ```
 
-`EventTime.thy` carries the proofs and contains no `sorry` and no `oops`.
+`EventTime.thy` and `Equivalence.thy` carry the proofs and contain no `sorry` and no `oops`.
 `Streaming_Surface.thy` is generated from `streaming.i.orca.md` by
 `i-orca compile --target isar --document` and discharges each stated theorem by `(rule …)` against
 `EventTime.thy`.
