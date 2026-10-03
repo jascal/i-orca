@@ -13,7 +13,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 ## Discipline
 
-- **Every item here is `open` until it exists in i-orca.** Several have short classical proofs (sketched). That makes
+- **Every item here is `open` until it exists in i-orca** (see the tag ledger below for what now does). Several have short classical proofs (sketched). That makes
   them *tractable*, not `proved`. Cite the `.thy` file and lemma before changing any tag in PIC_SPEC.
 - **The paper is `empirical`** (sampled test sets, hand-chosen role schemes, templated stimuli). A proved T-theorem is
   a statement about TPR-shaped geometry. It is **not** evidence that any particular model is TPR-shaped. The paper's
@@ -25,6 +25,36 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
   sufficient condition yields zero violations by construction. The check says nothing about tightness, the distance
   to the boundary, or the failure side, where the condition is false and decoding still succeeds. **T4–T6 were not
   checked at all.** No sibling repo may cite any T-item as a certificate until its `.thy` lemma exists.
+
+## Tag ledger (2026-10-03)
+
+The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PIC_Core`, `quick_and_dirty = false`,
+0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 11 surface theorems are kernel-checked
+(`formal_fraction_real = 1.000` each).
+
+| item | status | lemma(s) in `PIC_Binding.thy` |
+|---|---|---|
+| T0 bound incidence | `open` (definitional; not encoded) | — |
+| T1 absolute coherence `μ(F⊗R) = max(μ_F, μ_R)` | **`proved`** | `tensor_coherence` |
+| T1 signed coherence (the form to encode) | **`proved`** | `tensor_signed_coherence` |
+| T1′ optimal margin ≥ 1 − signed coherence | **`proved`** | `tensor_optimal_margin` |
+| T2 claims 1–3 (diagonal-inclusive FP, Welch value, ratio) | **`proved`** | `tensor_frame_potential`, `tensor_welch_value`, `tensor_fp_welch_ratio` |
+| T2 claim 4 (tensor of tight frames is tight) | `open` | — |
+| T3 matched-filter unbinding, one factor of 2 | **`proved`** | `unbind_certified` |
+| T4 (a)–(c) | `open` | — |
+| T5(a) last-layer substitution | **`proved`** | `substitution_certified`, `substitution_certified_max`, `substitution_certified_norm` |
+| T5(b) uniform over a domain, T5(c) hull ceiling | `open` (not separately encoded) | — |
+| T6 (a), (b) | `open` | — |
+
+The tensor product is a concrete construction, `tprod f r = (χ i. f$i *⇩R r)` in `real^'m^'n`. The identity
+`⟨f⊗r, g⊗s⟩ = ⟨f,g⟩⟨r,s⟩` is the proved lemma `inner_tprod`, not an assumption.
+
+What `proved` covers:
+- The geometry of TPR-shaped frames, and the decision-side substitution certificate.
+- Nothing about whether any model is TPR-shaped.
+- Empirical use: pil `docs/notes/tpr_substitution_certificate.md` (coverage of the certificate on GPT-2) and lm-sae
+  `docs/TPR_SYSTEMATICITY_PREREG.md` (the representational test).
 
 ## Setup and notation
 
