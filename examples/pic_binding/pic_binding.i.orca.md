@@ -7,7 +7,11 @@
 
   Verification:
     - substrate:  isabelle build -d examples/pic_core PIC_Core
-    - surface:    i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core
+    - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
+                  i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
+      All 11 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-03, ~80 s).
+      Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
+      (~8 min and heavy memory each) -- same verdict, much slower.
 
   Scope: T1 (absolute + SIGNED), T1', T2 (diagonal-inclusive convention), T3 (one factor of 2), T5(a).
   OPEN: T2 claim 4 (frame-operator tightness), T4, T5(b)/(c), T6, the pairwise substitution certificate, and the
