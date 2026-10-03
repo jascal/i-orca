@@ -20,6 +20,11 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
   fit quality is not evidence for any theorem.
 - **State the domain.** All statements are over finite filler and role sets, with the unit-norm / bias-free conventions
   of §5.1–5.3 unless stated otherwise.
+- **Numerical checks are not support.** T1–T3 were checked on random frames (T1 and T2 to machine precision; T3 with
+  0 violations in 4,540 cases where its condition held). That only catches a bug in implementing the sketch. A
+  sufficient condition yields zero violations by construction. The check says nothing about tightness, the distance
+  to the boundary, or the failure side, where the condition is false and decoding still succeeds. **T4–T6 were not
+  checked at all.** No sibling repo may cite any T-item as a certificate until its `.thy` lemma exists.
 
 ## Setup and notation
 
@@ -65,9 +70,17 @@ every bound pair `(a,s)` used as a unit decode direction has optimal margin at l
 - Signed form: at least `1 − max(μ^F_a, μ^R_s, max_{b≠a, t≠s} ⟨f_a,f_b⟩⟨r_s,r_t⟩)`.
 - Note: the last term can be positive even when both factors' signed coherences are negative.
 
+**Encode the signed form, not the absolute-value slogan.** `1 − max(μ_F, μ_R)` is only a lower bound. Because the
+both-differ term can be positive when both signed coherences are negative, the signed per-pair margin is the
+statement worth kernel-checking.
+
 **Tractability:** high. The lemma is two case splits. T1′ composes with an existing theorem.
 
 ## T2 — Frame potential and the Welch ratio are multiplicative
+
+**Convention (load-bearing).** Here `FP` **includes the diagonal**, `FP(X) = Σ_{i,j}⟨x_i,x_j⟩²`, and
+`W(X) = n²/d` is its Welch value. Only in this convention do the claims below factor. The off-diagonal form
+`Σ_{i≠j}⟨x_i,x_j⟩² ≥ n(n−d)/d` does **not** factor the same way.
 
 **Claims.**
 1. `FP(B) = FP(F)·FP(R)`.
@@ -76,9 +89,14 @@ every bound pair `(a,s)` used as a unit decode direction has optimal margin at l
 4. In particular, the tensor product of two tight frames is tight:
    `Σ (f⊗r)(f⊗r)ᵀ = (Σ f fᵀ) ⊗ (Σ r rᵀ)`.
 
-**Why it matters.** pil reports `fp/welch` as its frame-quality number. T2 says binding *multiplies* the two
-factors' excess over the Welch floor. So a role frame at 1.1× Welch and a filler frame at 1.1× Welch give a bound
-frame at 1.21×. That is a concrete, checkable prediction for any TPR fit to pil or fieldrun sources.
+**Why it matters, and what it does not predict.** In the diagonal-inclusive convention, binding *multiplies* the two
+factors' ratios to the Welch value. pil's reported `fp/welch` uses the **other** convention:
+- `geometry.frame_potential` is the off-diagonal mean `Σ_{i≠j}⟨·,·⟩² / (n(n−1))`;
+- `geometry.welch_bound` is `(n−d)/(d(n−1))`.
+
+That ratio does not factor. So T2 makes **no** "1.1 × 1.1 = 1.21" prediction about pil's number. A prediction for
+pil has to be restated in pil's convention, or pil has to report the diagonal-inclusive ratio. For unit vectors the
+conversion is `FP_incl = n + n(n−1)·fp_pil`.
 
 **Proof.** Expand the double sum over pairs; it factors. Tightness via the Kronecker identity.
 **Tractability:** high. It needs a Kronecker / tensor-product carrier in the Isabelle library, or `vec` reshaping
@@ -98,6 +116,14 @@ decode the filler by argmax over `F`, with scores `L(b) = ⟨y_s, f_b⟩`.
 - The first term has matched-filter margin `1 − μ^F_{σ(s)}` (`mfmargin_unit`).
 - The crosstalk is a per-token perturbation bounded by `δ = (k−1)μ_R`, using unit norms and Cauchy–Schwarz.
 - `decode_margin_certified` finishes it, with the same tightness caveat.
+
+**Pin the constant before encoding.** The factor 2 enters **once**, from `decode_margin_certified`
+(`margin > 2δ` for a per-score perturbation `|L′(b) − L(b)| ≤ δ`). Here `δ` must be the **per-score** crosstalk bound:
+`|Σ_{t≠s}⟨r_t,r_s⟩⟨f_{σ(t)},f_b⟩| ≤ (k−1)μ_R`, since each `|⟨f_{σ(t)},f_b⟩| ≤ 1`.
+- Do not bound the *difference* of two scores inside `δ`.
+- Do not then apply the lemma's 2 again.
+
+Either would double-count to `4(k−1)μ_R`. That is still sound, but it is a different, weaker statement.
 
 **Why it matters.** This states the paper's "unbinding is exact when roles are independent" quantitatively and
 non-asymptotically, in PIC's own certificate. It is exactly a frame-side condition on the role frame.
@@ -173,6 +199,10 @@ point's margin.
 
 **Tractability:** (a) trivial. (b) needs a careful statement of the clean-up operator; T3 supplies the unbinding step.
 
+**What has *not* tested T6(a).** pil#132 projected onto `span(W)` of a fitted TPR. There only 44% of
+`‖U_gold − U_rival‖²` lay inside the subspace, so (a)'s hypothesis was false at that site. Its margin change
+(3.80 → 3.39) is consistent with removing out-of-span components. It is neither a test nor a refutation of (a).
+
 ---
 
 ## Suggested order
@@ -185,7 +215,7 @@ point's margin.
 ## Empirical hooks (not part of the proofs)
 
 - **pil:** for the T6 experiment, compare linear projection with clean-up projection on margins and
-  `retrievable_fraction`, and test T2's multiplicativity on fitted role/filler frames.
+  `retrievable_fraction`. Test T2's multiplicativity only in the diagonal-inclusive convention (see T2).
 - **rosetta:** a certified TPR substitution at the last layer (T5) is a decision-side statement. It still does not
   produce a weights-free `circuits.dl`; the downstream decode stays the model's.
 - **Pre-registration of any proposer use:** `rosetta/DISCOVER_BRIDGE.md`.
