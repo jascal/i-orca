@@ -26,11 +26,11 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
   to the boundary, or the failure side, where the condition is false and decoding still succeeds. **T4–T6 were not
   checked at all.** No sibling repo may cite any T-item as a certificate until its `.thy` lemma exists.
 
-## Tag ledger (2026-10-03)
+## Tag ledger (2026-10-04)
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 15 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 21 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -47,7 +47,9 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PI
 | T5(a), pairwise, EXACT (iff): `L(t) − L(v) > ⟨r − r̂, U_t − U_v⟩` ∀ rivals | **`proved`** | `substitution_pairwise_iff`, `substitution_certified_pairwise` |
 | uniform T5(a) ⟹ pairwise (pairwise is at least as strong) | **`proved`** | `uniform_implies_pairwise` |
 | hybrid: pairwise on a rival set K + norm tail bound outside K | **`proved`** | `substitution_certified_hybrid` |
-| T5(b) uniform over a domain, T5(c) hull ceiling | `open` (not separately encoded) | — |
+| T5(b) uniform over a domain (given ‖r − r̂‖ ≤ ε on all of D) | **`proved`** | `substitution_domain_norm`, `substitution_domain_pairwise`, `domain_norm_implies_pairwise` |
+| T5(b) premise: a bound on the fit error off the evaluated contexts | `open` | — |
+| T5(c) hull ceiling (bias-free): a margin-threshold certificate needs `m < ‖r‖·hdist(t)` | **`proved`** | `hull_margin_upper_scaled`, `certificate_hull_ceiling`, `substitution_hull_ceiling` |
 | T6 (a), (b) | `open` | — |
 
 The tensor product is a concrete construction, `tprod f r = (χ i. f$i *⇩R r)` in `real^'m^'n`. The identity
@@ -209,6 +211,13 @@ norm on `{‖x‖ ≥ m}`. That bound is `open` and not attempted here.
 
 **Tractability:** (a) and (b) are immediate instances of `decode_margin_certified`. (c) is immediate from
 `gdecodable_iff_hull_dist`.
+
+**Status (2026-10-04).** (b) and (c) are kernel-checked (see the ledger). Two refinements of the claims above:
+- (b) is proved as stated, plus a per-rival form (`margin over v > ε·‖U_t − U_v‖`) that is at least as strong. Its
+  premise, an error bound on *all* of `D`, is exactly the part that stays `open` for unevaluated contexts.
+- (c) is proved for any residual norm: a margin-threshold certificate needs `m < ‖r‖·hdist(t)`. The ceiling is
+  **independent of the substitute**, not of the model: it is set by the frame `U` and `‖r‖`. It bounds threshold
+  certificates (uniform, norm, hybrid tail) only; the exact pairwise certificate is an iff and has no ceiling.
 
 ## T6 — What "projection" can and cannot widen (sets up the pil experiment)
 
