@@ -30,7 +30,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 21 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 22 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -50,6 +50,7 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PI
 | T5(b) uniform over a domain (given ‖r − r̂‖ ≤ ε on all of D) | **`proved`** | `substitution_domain_norm`, `substitution_domain_pairwise`, `domain_norm_implies_pairwise` |
 | T5(b) premise: a bound on the fit error off the evaluated contexts | `open` | — |
 | T5(c) hull ceiling (bias-free): a margin-threshold certificate needs `m < ‖r‖·hdist(t)` | **`proved`** | `hull_margin_upper_scaled`, `certificate_hull_ceiling`, `substitution_hull_ceiling` |
+| T5(c) biased, via the lift `(U_v, b_v/s)`: `m < ‖(w, s)‖·hdist_lifted(t)` for every `s > 0` (upper bound) | **`proved`** | `certificate_hull_ceiling_biased` |
 | T6 (a), (b) | `open` | — |
 
 The tensor product is a concrete construction, `tprod f r = (χ i. f$i *⇩R r)` in `real^'m^'n`. The identity

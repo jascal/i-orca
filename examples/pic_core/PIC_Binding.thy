@@ -31,11 +31,13 @@
     T5c certificate_hull_ceiling     : bias-free; a certificate needing every margin > m fires only if
                                        m < |r| * infdist (U t) (conv hull rivals) -- a ceiling set by the frame and
                                        |r|, independent of the substitute;
-        substitution_hull_ceiling    : the uniform instance, m = 2 delta.
+        substitution_hull_ceiling    : the uniform instance, m = 2 delta;
+        certificate_hull_ceiling_biased : with a per-token bias b, by lifting to (U v, b v / s): the ceiling is
+                                       norm (w, s) * lifted hull distance, for every s > 0 (upper bound only).
 
   HONEST SCOPE. Decode-input (post-norm) substitution only: the pre-norm Lipschitz step, T2's frame-operator
   tightness (claim 4), T4 and T6 stay OPEN. T5(b) certifies D only GIVEN the error bound on all of D; bounding
-  the fit error off the evaluated contexts is not supplied here. T5(c) is bias-free. Nothing here says any model is TPR-shaped.
+  the fit error off the evaluated contexts is not supplied here. T5(c) is bias-free, or biased via the lift (an upper bound, not attained in general). Nothing here says any model is TPR-shaped.
   Self-contained over PIC_Logic + PIC_Margin_Hull (+ HOL-Analysis); 0 sorry, quick_and_dirty = false.
 *)
 theory PIC_Binding
@@ -617,5 +619,31 @@ corollary substitution_hull_ceiling:
       and marg: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> inner r (U t) - inner r (U v) > 2 * \<delta>"
   shows "2 * \<delta> < norm r * infdist (U t) (convex hull (U ` (V - {t})))"
   using certificate_hull_ceiling[of "V - {t}"] finV other marg by blast
+
+text \<open>Biased decode, by lifting. A per-token bias b is a bias-free frame one dimension up:
+  inner (w, s) (U v, b v / s) = inner w (U v) + b v for any s > 0. So the ceiling holds with the lifted frame and
+  the lifted residual norm sqrt (|w|^2 + s^2), for EVERY s > 0. This is how a context-constant component c of the
+  decode input is treated as a bias (b v = inner c (U v), w = u - c), which tightens the ceiling when c dominates.
+  It is an upper bound only: the lifted optimum need not be attained with last coordinate exactly s.\<close>
+
+corollary certificate_hull_ceiling_biased:
+  fixes U :: "'v \<Rightarrow> 'a::euclidean_space" and b :: "'v \<Rightarrow> real"
+  assumes finC: "finite C" and neC: "C \<noteq> {}" and s: "0 < s"
+      and marg: "\<forall>v\<in>C. (inner w (U t) + b t) - (inner w (U v) + b v) > m"
+  shows "m < norm (w, s) * infdist (U t, b t / s) (convex hull ((\<lambda>v. (U v, b v / s)) ` C))"
+proof -
+  have lift: "inner (w, s) (U v, b v / s) = inner w (U v) + b v" for v
+    using s by (simp add: inner_Pair)
+  have "\<forall>v\<in>C. inner (w, s) (U t, b t / s) - inner (w, s) (U v, b v / s) > m"
+  proof
+    fix v assume v: "v \<in> C"
+    show "inner (w, s) (U t, b t / s) - inner (w, s) (U v, b v / s) > m"
+      unfolding lift using marg v by blast
+  qed
+  thus ?thesis
+    using certificate_hull_ceiling[where U = "\<lambda>v. (U v, b v / s)" and r = "(w, s)" and t = t and m = m,
+                                   OF finC neC]
+    by simp
+qed
 
 end

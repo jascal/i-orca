@@ -9,12 +9,12 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 21 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 22 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
   Scope: T1 (absolute + SIGNED), T1', T2 (diagonal-inclusive convention), T3 (one factor of 2), T5(a) (uniform,
-  pairwise-exact, hybrid), T5(b) (domain, given an error bound on the whole domain), T5(c) (bias-free hull ceiling).
+  pairwise-exact, hybrid), T5(b) (domain, given an error bound on the whole domain), T5(c) (hull ceiling; bias-free, and biased via a lift).
   OPEN: T2 claim 4 (frame-operator tightness), T4, T6, bounding the fit error off the evaluated contexts, and the
   pre-norm Lipschitz step. No theorem here says any model is TPR-shaped.
 -->
@@ -396,3 +396,21 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite V ⟹ V - {t} ≠ {} ⟹ ∀v∈V. v ≠ t ⟶ inner r ((U::'v ⇒ 'a::euclidean_space) t) - inner r (U v) > 2 * δ ⟹ 2 * δ < norm r * infdist (U t) (convex hull (U ` (V - {t}))) | discharged by the kernel-checked substrate lemma | — | (rule substitution_hull_ceiling) | method |
+
+# theorem CertificateHullCeilingBiased
+> T5(c), biased decode by lifting: with a per-token bias b, a certificate needing every margin > m fires only if m < ‖(w, s)‖ · infdist((U_t, b_t/s), conv{(U_v, b_v/s)}), for every s > 0. An upper bound only. Cites `certificate_hull_ceiling_biased`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| finite C ⟹ C ≠ {} ⟹ 0 < s ⟹ ∀v∈C. (inner w ((U::'v ⇒ 'a::euclidean_space) t) + (b::'v ⇒ real) t) - (inner w (U v) + b v) > m ⟹ m < norm (w, s) * infdist (U t, b t / s) (convex hull ((λv. (U v, b v / s)) ` C)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite C ⟹ C ≠ {} ⟹ 0 < s ⟹ ∀v∈C. (inner w ((U::'v ⇒ 'a::euclidean_space) t) + (b::'v ⇒ real) t) - (inner w (U v) + b v) > m ⟹ m < norm (w, s) * infdist (U t, b t / s) (convex hull ((λv. (U v, b v / s)) ` C)) | discharged by the kernel-checked substrate lemma | — | (rule certificate_hull_ceiling_biased) | method |
