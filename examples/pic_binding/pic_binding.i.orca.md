@@ -9,7 +9,7 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 11 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-03, ~80 s).
+      All 15 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-03, ~80 s).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
@@ -215,3 +215,75 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | t ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ ∀v∈V. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > 2 * (norm (r - rhat) * u) ⟹ decodes_to (λv. inner rhat (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule substitution_certified_norm) | method |
+
+# theorem SubstitutionPairwiseIff
+> T5(a), pairwise and EXACT: the substituted decode keeps t iff, for every rival v, the original margin over v exceeds ⟨r - r̂, U t - U v⟩. Cites `substitution_pairwise_iff`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| t ∈ V ⟹ decodes_to (λv. inner rhat ((U::'v ⇒ 'a::real_inner) v) + bias v) V t = (∀v∈V. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | t ∈ V ⟹ decodes_to (λv. inner rhat ((U::'v ⇒ 'a::real_inner) v) + bias v) V t = (∀v∈V. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)) | discharged by the kernel-checked substrate lemma | — | (rule substitution_pairwise_iff) | method |
+
+# theorem SubstitutionCertifiedPairwise
+> T5(a), pairwise certificate (the sufficiency half of the iff). Cites `substitution_certified_pairwise`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ (inner r ((U::'v ⇒ 'a::real_inner) t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v) ⟹ decodes_to (λv. inner rhat (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ (inner r ((U::'v ⇒ 'a::real_inner) t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v) ⟹ decodes_to (λv. inner rhat (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule substitution_certified_pairwise) | method |
+
+# theorem UniformImpliesPairwise
+> The pairwise certificate is at least as strong as the uniform one: the uniform T5(a) hypothesis implies the pairwise condition. Cites `uniform_implies_pairwise`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| t ∈ V ⟹ ∀v∈V. ¦inner (r - rhat) ((U::'v ⇒ 'a::real_inner) v)¦ ≤ δ ⟹ ∀v∈V. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > 2 * δ ⟹ ∀v∈V. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | t ∈ V ⟹ ∀v∈V. ¦inner (r - rhat) ((U::'v ⇒ 'a::real_inner) v)¦ ≤ δ ⟹ ∀v∈V. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > 2 * δ ⟹ ∀v∈V. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v) | discharged by the kernel-checked substrate lemma | — | (rule uniform_implies_pairwise) | method |
+
+# theorem SubstitutionCertifiedHybrid
+> Hybrid certificate: pairwise on a rival set K, and outside K the norm tail bound |⟨r - r̂, U t⟩| + |r - r̂|·u_max. Cites `substitution_certified_hybrid`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| t ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ ∀v∈K. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v) ⟹ ∀v∈V - K. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > ¦inner (r - rhat) (U t)¦ + norm (r - rhat) * u ⟹ decodes_to (λv. inner rhat (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | t ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ ∀v∈K. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v) ⟹ ∀v∈V - K. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > ¦inner (r - rhat) (U t)¦ + norm (r - rhat) * u ⟹ decodes_to (λv. inner rhat (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule substitution_certified_hybrid) | method |

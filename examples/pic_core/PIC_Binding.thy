@@ -411,4 +411,85 @@ proof (rule substitution_certified[OF tV _ marg])
   qed
 qed
 
+section \<open>T5(a), pairwise -- the exact substitution certificate\<close>
+
+text \<open>Per rival, the substituted decode keeps @{term t} iff the original margin over that rival exceeds the
+  projection of the substitution error onto the readout difference. The condition is EXACT (an iff), so it
+  certifies precisely the contexts on which the decision is preserved; the uniform form above is a sufficient
+  special case, and the hybrid form checks only a finite rival set K pairwise and bounds the rest by a norm.\<close>
+
+lemma subst_logit_gap:
+  "(inner rhat (U t) + bias t) - (inner rhat (U v) + bias v)
+   = ((inner r (U t) + bias t) - (inner r (U v) + bias v)) - inner (r - rhat) (U t - U v)"
+  by (simp add: inner_diff_left inner_diff_right algebra_simps)
+
+theorem substitution_pairwise_iff:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner"
+  assumes tV: "t \<in> V"
+  shows "decodes_to (\<lambda>v. inner rhat (U v) + bias v) V t
+         \<longleftrightarrow> (\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+               (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v))"
+proof -
+  have "inner rhat (U v) + bias v < inner rhat (U t) + bias t
+        \<longleftrightarrow> (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)" for v
+    using subst_logit_gap[of rhat U t bias v r] by linarith
+  thus ?thesis using tV by (simp add: decodes_to_def)
+qed
+
+corollary substitution_certified_pairwise:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner"
+  assumes tV: "t \<in> V"
+      and pair: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+                   (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)"
+  shows "decodes_to (\<lambda>v. inner rhat (U v) + bias v) V t"
+  using substitution_pairwise_iff[OF tV] pair by blast
+
+theorem uniform_implies_pairwise:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner"
+  assumes tV: "t \<in> V"
+      and delta: "\<forall>v\<in>V. \<bar>inner (r - rhat) (U v)\<bar> \<le> \<delta>"
+      and marg: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> (inner r (U t) + bias t) - (inner r (U v) + bias v) > 2 * \<delta>"
+  shows "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+           (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)"
+proof (intro ballI impI)
+  fix v assume v: "v \<in> V" and ne: "v \<noteq> t"
+  have "inner (r - rhat) (U t - U v) = inner (r - rhat) (U t) - inner (r - rhat) (U v)"
+    by (simp add: inner_diff_right)
+  also have "\<dots> \<le> \<bar>inner (r - rhat) (U t)\<bar> + \<bar>inner (r - rhat) (U v)\<bar>" by linarith
+  also have "\<dots> \<le> 2 * \<delta>" using delta tV v by (smt (verit))
+  finally show "(inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)"
+    using marg v ne by fastforce
+qed
+
+theorem substitution_certified_hybrid:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner"
+  assumes tV: "t \<in> V"
+      and umax: "\<forall>v\<in>V. norm (U v) \<le> u"
+      and head: "\<forall>v\<in>K. v \<noteq> t \<longrightarrow>
+                   (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)"
+      and tail: "\<forall>v\<in>V - K. v \<noteq> t \<longrightarrow>
+                   (inner r (U t) + bias t) - (inner r (U v) + bias v)
+                   > \<bar>inner (r - rhat) (U t)\<bar> + norm (r - rhat) * u"
+  shows "decodes_to (\<lambda>v. inner rhat (U v) + bias v) V t"
+proof (rule substitution_certified_pairwise[OF tV], intro ballI impI)
+  fix v assume v: "v \<in> V" and ne: "v \<noteq> t"
+  show "(inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v)"
+  proof (cases "v \<in> K")
+    case True
+    thus ?thesis using head ne by blast
+  next
+    case False
+    have cs: "\<bar>inner (r - rhat) (U v)\<bar> \<le> norm (r - rhat) * u"
+    proof -
+      have "\<bar>inner (r - rhat) (U v)\<bar> \<le> norm (r - rhat) * norm (U v)" by (rule Cauchy_Schwarz_ineq2)
+      also have "\<dots> \<le> norm (r - rhat) * u" using umax v by (simp add: mult_left_mono)
+      finally show ?thesis .
+    qed
+    have "inner (r - rhat) (U t - U v) = inner (r - rhat) (U t) - inner (r - rhat) (U v)"
+      by (simp add: inner_diff_right)
+    also have "\<dots> \<le> \<bar>inner (r - rhat) (U t)\<bar> + norm (r - rhat) * u" using cs by linarith
+    finally show ?thesis using tail v ne False by fastforce
+  qed
+qed
+
 end

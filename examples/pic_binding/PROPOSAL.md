@@ -30,7 +30,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 11 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 15 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -44,6 +44,9 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PI
 | T3 matched-filter unbinding, one factor of 2 | **`proved`** | `unbind_certified` |
 | T4 (a)–(c) | `open` | — |
 | T5(a) last-layer substitution | **`proved`** | `substitution_certified`, `substitution_certified_max`, `substitution_certified_norm` |
+| T5(a), pairwise, EXACT (iff): `L(t) − L(v) > ⟨r − r̂, U_t − U_v⟩` ∀ rivals | **`proved`** | `substitution_pairwise_iff`, `substitution_certified_pairwise` |
+| uniform T5(a) ⟹ pairwise (pairwise is at least as strong) | **`proved`** | `uniform_implies_pairwise` |
+| hybrid: pairwise on a rival set K + norm tail bound outside K | **`proved`** | `substitution_certified_hybrid` |
 | T5(b) uniform over a domain, T5(c) hull ceiling | `open` (not separately encoded) | — |
 | T6 (a), (b) | `open` | — |
 
