@@ -9,13 +9,13 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 23 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 31 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
   Scope: T1 (absolute + SIGNED), T1', T2 (diagonal-inclusive convention), T3 (one factor of 2), T5(a) (uniform,
   pairwise-exact, hybrid), T5(b) (domain, given an error bound on the whole domain), T5(c) (hull ceiling; bias-free, and biased via a lift).
-  OPEN: T2 claim 4 (frame-operator tightness), T4, T6, bounding the fit error off the evaluated contexts, and the
+  T6(b) clean-up constants (PIC_Cleanup.thy). OPEN: T2 claim 4 (frame-operator tightness), T4, T6(a), bounding the fit error off the evaluated contexts, and the
   pre-norm Lipschitz step. No theorem here says any model is TPR-shaped.
 -->
 
@@ -432,3 +432,147 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | ∀x∈D. t x ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ 0 ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (ε * u) ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > ε * norm (U (t x) - U v) | discharged by the kernel-checked substrate lemma | — | (rule domain_norm_premise_implies_pairwise) | method |
+
+# theorem NearestPointCleanup
+> T6(b): a γ-separated code and a query within γ/2 of a code point: that point is the unique nearest. Cites `nearest_point_cleanup`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀a∈A. ∀a'∈A. a ≠ a' ⟶ γ ≤ dist ((c::'a ⇒ 'x::metric_space) a) (c a') ⟹ a ∈ A ⟹ dist g (c a) < γ / 2 ⟹ ∀a'∈A. a' ≠ a ⟶ dist g (c a) < dist g (c a') |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀a∈A. ∀a'∈A. a ≠ a' ⟶ γ ≤ dist ((c::'a ⇒ 'x::metric_space) a) (c a') ⟹ a ∈ A ⟹ dist g (c a) < γ / 2 ⟹ ∀a'∈A. a' ≠ a ⟶ dist g (c a) < dist g (c a') | discharged by the kernel-checked substrate lemma | — | (rule nearest_point_cleanup) | method |
+
+# theorem NearestPointRadiusTight
+> T6(b): γ/2 cannot be enlarged; the midpoint of two code points γ apart is equidistant. Cites `nearest_point_radius_tight`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| dist ((γ::real) / 2) 0 = ¦γ¦ / 2 ∧ dist (γ / 2) γ = ¦γ¦ / 2 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | dist ((γ::real) / 2) 0 = ¦γ¦ / 2 ∧ dist (γ / 2) γ = ¦γ¦ / 2 | discharged by the kernel-checked substrate lemma | — | (rule nearest_point_radius_tight) | method |
+
+# theorem UnbindNormLe
+> T6(b): unbinding is bounded, ‖unbind e w‖ ≤ ‖e‖‖w‖ (Frobenius). Cites `unbind_norm_le`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| norm (unbind (e::real^'m^'n) w) ≤ norm e * norm w |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | norm (unbind (e::real^'m^'n) w) ≤ norm e * norm w | discharged by the kernel-checked substrate lemma | — | (rule unbind_norm_le) | method |
+
+# theorem RoleCleanup
+> T6(b): with ⟨r_s, w⟩ = 1, if crosstalk + ‖e‖‖w‖ < γ/2 then the nearest filler to the role-s readout is σ(s). Cites `role_cleanup`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ s ∈ D ⟹ inner (r s) w = 1 ⟹ ∀a∈F. ∀a'∈F. a ≠ a' ⟶ γ ≤ dist ((f::'b ⇒ real^'n) a) (f a') ⟹ σ s ∈ F ⟹ norm (∑t∈D - {s}. scaleR (inner (r t) w) (f (σ t))) + norm e * norm w < γ / 2 ⟹ ah ∈ F ⟹ ∀a'∈F. dist (unbind (structure_tpr f r σ D + e) w) (f ah) ≤ dist (unbind (structure_tpr f r σ D + e) w) (f a') ⟹ ah = σ s |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ s ∈ D ⟹ inner (r s) w = 1 ⟹ ∀a∈F. ∀a'∈F. a ≠ a' ⟶ γ ≤ dist ((f::'b ⇒ real^'n) a) (f a') ⟹ σ s ∈ F ⟹ norm (∑t∈D - {s}. scaleR (inner (r t) w) (f (σ t))) + norm e * norm w < γ / 2 ⟹ ah ∈ F ⟹ ∀a'∈F. dist (unbind (structure_tpr f r σ D + e) w) (f ah) ≤ dist (unbind (structure_tpr f r σ D + e) w) (f a') ⟹ ah = σ s | discharged by the kernel-checked substrate lemma | — | (rule role_cleanup) | method |
+
+# theorem LeftInverseNoise
+> T6(b): through a linear left inverse P of W with ‖P y‖ ≤ K‖y‖, tensor noise is at most K times residual noise. Cites `left_inverse_noise`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| linear (P::'d::real_normed_vector ⇒ 'e::real_normed_vector) ⟹ ∀T. P (W T) = T ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ norm (P (u - b0) - T) ≤ K * norm (u - (W T + b0)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | linear (P::'d::real_normed_vector ⇒ 'e::real_normed_vector) ⟹ ∀T. P (W T) = T ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ norm (P (u - b0) - T) ≤ K * norm (u - (W T + b0)) | discharged by the kernel-checked substrate lemma | — | (rule left_inverse_noise) | method |
+
+# theorem AgreementBall
+> T6(b): if ‖n‖·‖U_t − U_v‖ < the code point's margin over every rival v, the host x + n decides t. The radius min_v m_v/‖U_t − U_v‖ is the distance to t's cell boundary. Cites `agreement_ball`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm n * norm ((U::'v ⇒ 'a::real_inner) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner (x + n) (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm n * norm ((U::'v ⇒ 'a::real_inner) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner (x + n) (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule agreement_ball) | method |
+
+# theorem CleanupCertifiedExact
+> T6(b) certificate, part 1: within the clean-up radius ρ, clean-up returns the code point x(σ) exactly. Cites `cleanup_certified(1)`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. ∀a∈F s. ∀a'∈F s. a ≠ a' ⟶ γ s ≤ dist ((f::'b ⇒ real^'n) a) (f a') ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. norm (∑t∈D - {s}. scaleR (inner (r t) (w s)) (f (σ t))) + K * norm (u - x) * norm (w s) < γ s / 2 ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. ∀a∈F s. ∀a'∈F s. a ≠ a' ⟶ γ s ≤ dist ((f::'b ⇒ real^'n) a) (f a') ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. norm (∑t∈D - {s}. scaleR (inner (r t) (w s)) (f (σ t))) + K * norm (u - x) * norm (w s) < γ s / 2 ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x | discharged by the kernel-checked substrate lemma | — | (rule cleanup_certified(1)) | method |
+
+# theorem CleanupCertifiedDecision
+> T6(b) certificate, part 2: within the agreement radius β, the host decides the code point's decision t. Cites `cleanup_certified(2)`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. ∀a∈F s. ∀a'∈F s. a ≠ a' ⟶ γ s ≤ dist ((f::'b ⇒ real^'n) a) (f a') ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. norm (∑t∈D - {s}. scaleR (inner (r t) (w s)) (f (σ t))) + K * norm (u - x) * norm (w s) < γ s / 2 ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. ∀a∈F s. ∀a'∈F s. a ≠ a' ⟶ γ s ≤ dist ((f::'b ⇒ real^'n) a) (f a') ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. norm (∑t∈D - {s}. scaleR (inner (r t) (w s)) (f (σ t))) + K * norm (u - x) * norm (w s) < γ s / 2 ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule cleanup_certified(2)) | method |
