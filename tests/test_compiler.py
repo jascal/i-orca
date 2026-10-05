@@ -170,3 +170,28 @@ def test_isar_document_unions_imports():
     assert "Main" in out and "Complex_Main" in out
     assert out.count("theorem ") == 2
     assert out.rstrip().endswith("end")
+
+
+SUBSCRIPT_SRC = """\
+# theorem Sub
+## imports
+| Theory       |
+|--------------|
+| Complex_Main |
+## goal
+| Statement |
+|-----------|
+| norm (a *⇩R x) = ¦a¦ * norm x ∧ y⇧2 ≥ 0 |
+## proof
+| Id | Claim | By | Using | Method | Status |
+|----|-------|----|-------|--------|--------|
+| s0 | norm (a *⇩R x) = ¦a¦ * norm x ∧ y⇧2 ≥ 0 | cite | — | (rule foo) | method |
+"""
+
+
+def test_isar_translates_sub_and_superscript_control_symbols():
+    # Isabelle prints scaleR as `*⇩R` and power2 as `⇧2`; copied back into a claim, the
+    # control symbols must lower to \\<^sub> / \\<^sup> or the statement fails to parse.
+    out = compile_isar(_thm(SUBSCRIPT_SRC))
+    assert r"*\<^sub>R" in out and "⇩" not in out
+    assert r"y\<^sup>2" in out and "⇧" not in out
