@@ -27,11 +27,12 @@
     T5b substitution_domain_norm     : ONE fit-error bound eps on a whole domain D of contexts, with every margin
                                        > 2 eps u_max, certifies every context in D (evaluated or not);
         substitution_domain_pairwise : the per-rival domain form, margin over v > eps * |U t - U v|;
-        domain_norm_implies_pairwise : the per-rival threshold never exceeds the norm one.
+        domain_norm_implies_pairwise : the per-rival threshold never exceeds the norm one;
+        domain_norm_premise_implies_pairwise : the norm-form domain premises (eps >= 0) imply the per-rival ones.
     T5c certificate_hull_ceiling     : bias-free; a certificate needing every margin > m fires only if
                                        m < |r| * infdist (U t) (conv hull rivals) -- a ceiling set by the frame and
                                        |r|, independent of the substitute;
-        substitution_hull_ceiling    : the uniform instance, m = 2 delta;
+        substitution_hull_ceiling    : the BIAS-FREE uniform threshold instance, m = 2 delta;
         certificate_hull_ceiling_biased : with a per-token bias b, by lifting to (U v, b v / s): the ceiling is
                                        norm (w, s) * lifted hull distance, for every s > 0 (upper bound only).
 
@@ -571,6 +572,23 @@ proof -
   finally have n: "norm (U t - U v) \<le> 2 * u" .
   have "\<epsilon> * norm (U t - U v) \<le> \<epsilon> * (2 * u)" by (rule mult_left_mono[OF n eps])
   thus ?thesis by simp
+qed
+
+theorem domain_norm_premise_implies_pairwise:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner" and r :: "'x \<Rightarrow> 'a" and t :: "'x \<Rightarrow> 'v"
+  assumes tV: "\<forall>x\<in>D. t x \<in> V"
+      and umax: "\<forall>v\<in>V. norm (U v) \<le> u"
+      and eps: "0 \<le> \<epsilon>"
+      and marg: "\<forall>x\<in>D. \<forall>v\<in>V. v \<noteq> t x \<longrightarrow>
+                   (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (\<epsilon> * u)"
+  shows "\<forall>x\<in>D. \<forall>v\<in>V. v \<noteq> t x \<longrightarrow>
+           (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > \<epsilon> * norm (U (t x) - U v)"
+proof (intro ballI impI)
+  fix x v assume x: "x \<in> D" and v: "v \<in> V" and ne: "v \<noteq> t x"
+  have "\<epsilon> * norm (U (t x) - U v) \<le> 2 * (\<epsilon> * u)"
+    by (rule domain_norm_implies_pairwise[OF _ v umax eps]) (use tV x in blast)
+  thus "(inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > \<epsilon> * norm (U (t x) - U v)"
+    using marg x v ne by fastforce
 qed
 
 section \<open>T5(c) -- the hull ceiling on any margin-threshold certificate\<close>

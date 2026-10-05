@@ -9,7 +9,7 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 22 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 23 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
@@ -380,7 +380,7 @@
 | s_show | finite C ⟹ C ≠ {} ⟹ ∀v∈C. inner r ((U::'v ⇒ 'a::euclidean_space) t) - inner r (U v) > m ⟹ m < norm r * infdist (U t) (convex hull (U ` C)) | discharged by the kernel-checked substrate lemma | — | (rule certificate_hull_ceiling) | method |
 
 # theorem SubstitutionHullCeiling
-> T5(c), uniform instance: the uniform substitution certificate (margin > 2δ) fires only if 2δ < ‖r‖·hdist(t). Cites `substitution_hull_ceiling`.
+> T5(c), bias-free uniform threshold instance: a bias-free margin ⟨r, U_t⟩ − ⟨r, U_v⟩ > 2δ for every rival is possible only if 2δ < ‖r‖·hdist(t). A biased margin is bounded by `certificate_hull_ceiling_biased`, not by this. Cites `substitution_hull_ceiling`.
 
 ## imports
 | Theory      |
@@ -414,3 +414,21 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite C ⟹ C ≠ {} ⟹ 0 < s ⟹ ∀v∈C. (inner w ((U::'v ⇒ 'a::euclidean_space) t) + (b::'v ⇒ real) t) - (inner w (U v) + b v) > m ⟹ m < norm (w, s) * infdist (U t, b t / s) (convex hull ((λv. (U v, b v / s)) ` C)) | discharged by the kernel-checked substrate lemma | — | (rule certificate_hull_ceiling_biased) | method |
+
+# theorem DomainNormPremiseImpliesPairwise
+> T5(b): the norm-form domain premises (with ε ≥ 0) imply the per-rival domain premises, so `substitution_domain_pairwise` certifies everything `substitution_domain_norm` does. Cites `domain_norm_premise_implies_pairwise`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| ∀x∈D. t x ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ 0 ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (ε * u) ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > ε * norm (U (t x) - U v) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀x∈D. t x ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ 0 ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (ε * u) ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > ε * norm (U (t x) - U v) | discharged by the kernel-checked substrate lemma | — | (rule domain_norm_premise_implies_pairwise) | method |

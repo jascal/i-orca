@@ -1,4 +1,4 @@
-# PIC × tensor-product binding — an i-orca work package (all `open`)
+# PIC × tensor-product binding — an i-orca work package (see the tag ledger for what is `proved`)
 
 **For:** an i-orca agent (Isabelle-kernel-checked proofs).
 **Source:** McCoy, Soulos, Linzen & Smolensky (2026), *The Emergent Symbolic Structure of Artificial Neural
@@ -30,7 +30,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 22 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 23 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -47,7 +47,8 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PI
 | T5(a), pairwise, EXACT (iff): `L(t) − L(v) > ⟨r − r̂, U_t − U_v⟩` ∀ rivals | **`proved`** | `substitution_pairwise_iff`, `substitution_certified_pairwise` |
 | uniform T5(a) ⟹ pairwise (pairwise is at least as strong) | **`proved`** | `uniform_implies_pairwise` |
 | hybrid: pairwise on a rival set K + norm tail bound outside K | **`proved`** | `substitution_certified_hybrid` |
-| T5(b) uniform over a domain (given ‖r − r̂‖ ≤ ε on all of D) | **`proved`** | `substitution_domain_norm`, `substitution_domain_pairwise`, `domain_norm_implies_pairwise` |
+| T5(b) uniform over a domain (given ‖r − r̂‖ ≤ ε on all of D) | **`proved`** | `substitution_domain_norm`, `substitution_domain_pairwise` |
+| T5(b) the per-rival domain form is at least as strong (norm premises with ε ≥ 0 ⟹ per-rival premises) | **`proved`** | `domain_norm_implies_pairwise`, `domain_norm_premise_implies_pairwise` |
 | T5(b) premise: a bound on the fit error off the evaluated contexts | `open` | — |
 | T5(c) hull ceiling (bias-free): a margin-threshold certificate needs `m < ‖r‖·hdist(t)` | **`proved`** | `hull_margin_upper_scaled`, `certificate_hull_ceiling`, `substitution_hull_ceiling` |
 | T5(c) biased, via the lift `(U_v, b_v/s)`: `m < ‖(w, s)‖·hdist_lifted(t)` for every `s > 0` (upper bound) | **`proved`** | `certificate_hull_ceiling_biased` |
@@ -198,9 +199,12 @@ role vocabularies in 2880-dimensional GPT-OSS force (a) and (b).
 - **(b) Uniform over a domain.** Suppose that on a set `D` of contexts, `‖r(x) − r̂(x)‖ ≤ ε` and
   `margin(L_x,V,t_x) > 2 u_max ε` for all `x ∈ D`. Then substituting the TPR preserves every decision on `D`.
   The certificate covers `D`, not only the sampled points, provided `ε` bounds the fit error on all of `D`.
-- **(c) Bias-free hull form.** By `optimal_margin_hull`, the relevant margin is at most the hull distance of `U_t` to
-  its rivals. So substitution can only be certified for tokens whose hull distance exceeds `2ε` (unit frame). That
-  is a model-independent ceiling on what any last-layer fit can certify.
+- **(c) Hull ceiling (as proved).** For a **bias-free** decode and a residual of **any** norm, a certificate that
+  needs every margin `⟨r, U_t⟩ − ⟨r, U_v⟩ > m` can fire only if `m < ‖r‖·hdist(t)`, where `hdist(t)` is the
+  distance from `U_t` to the convex hull of its rivals. It bounds **threshold** certificates only (uniform, norm,
+  the hybrid tail), not the exact pairwise iff. The ceiling is set by the frame `U` and `‖r‖`: it is independent of
+  the substitute, **not** of the model. With a per-token bias, the lift `(U_v, b_v/s)` gives an upper bound for
+  every `s > 0` (`certificate_hull_ceiling_biased`).
 
 **Why it matters.** The paper's evidence that substitution preserves behaviour is a sampled accuracy (within 2.4
 points on GPT-OSS). At the last layer, T5 turns that into a per-input, and conditionally domain-wide, **proof**, using
