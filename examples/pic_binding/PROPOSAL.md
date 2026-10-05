@@ -30,7 +30,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cleanup.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 31 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 39 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -53,6 +53,7 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cle
 | T5(c) hull ceiling (bias-free): a margin-threshold certificate needs `m < ‖r‖·hdist(t)` | **`proved`** | `hull_margin_upper_scaled`, `certificate_hull_ceiling`, `substitution_hull_ceiling` |
 | T5(c) biased, via the lift `(U_v, b_v/s)`: `m < ‖(w, s)‖·hdist_lifted(t)` for every `s > 0` (upper bound) | **`proved`** | `certificate_hull_ceiling_biased` |
 | T6 (a) linear projection in the readout span leaves margins unchanged | `open` | — |
+| T6 (b) directional clean-up radius `ρ_dir` (exact per half-space, ≥ `ρ`) | **`proved`** | `nearest_iff_halfspace`, `directional_snap`, `directional_radius_tight`, `directional_q_bound`, `worst_case_implies_directional`, `role_readout_decomp`, `role_cleanup_directional`, `cleanup_certified_directional` (in `PIC_Cleanup.thy`) |
 | T6 (b) clean-up constants: exact recovery within `ρ(σ)`, host agreement within `β(σ)` | **`proved`** | `nearest_point_cleanup`, `nearest_point_selects`, `nearest_point_radius_tight`, `unbind_norm_le`, `role_cleanup_close`, `role_cleanup`, `cleanup_exact`, `left_inverse_noise`, `agreement_ball`, `cleanup_certified` (in `PIC_Cleanup.thy`) |
 
 The tensor product is a concrete construction, `tprod f r = (χ i. f$i *⇩R r)` in `real^'m^'n`. The identity
@@ -261,6 +262,14 @@ point's margin.
 - **Correction to the claim above.** Clean-up does not raise the *host's* margin. It makes the substitute exactly a
   code point, so the certificate is issued from the **code's** margin (via `β`), over a whole ball of residuals.
   Whether host residuals land within `min(ρ, β)` of their code points is the empirical question.
+- **Directional radius (2026-10-05).** pil #139 found clean-up exact at `‖n‖ ≈ 80ρ`, so the worst-case `ρ` is loose.
+  The exact clean-up region is an intersection of half-spaces, one per rival filler `a` of role `s`:
+  `⟨M_s n, d_a⟩ < ‖d_a‖²/2 − ⟨c_s, d_a⟩`, with `d_a = f_a − f_σ(s)` and `M_s n = unbind(P n, w_s)`. Its inradius
+  around `x(σ)` is **`ρ_dir(σ) = min_s min_{a≠σ(s)} (‖d_a‖²/2 − ⟨c_s, d_a⟩) / ‖q_{s,a}‖`**, with `q_{s,a} = M_sᵀ d_a`.
+  - It is exact per half-space (`directional_radius_tight`), and never below `ρ`
+    (`directional_q_bound`: `‖q‖ ≤ K‖w_s‖‖d‖`; `worst_case_implies_directional`).
+  - `cleanup_certified_directional`: `‖n‖ < min(ρ_dir, β)` ⟹ exact clean-up and host agreement.
+  - How much of #139's exact-recovery set `ρ_dir` certifies is empirical, and not yet measured.
 
 **What has *not* tested T6(a).** pil#132 projected onto `span(W)` of a fitted TPR. There only 44% of
 `‖U_gold − U_rival‖²` lay inside the subspace, so (a)'s hypothesis was false at that site. Its margin change

@@ -9,7 +9,7 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 31 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 39 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
@@ -576,3 +576,147 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. ∀a∈F s. ∀a'∈F s. a ≠ a' ⟶ γ s ≤ dist ((f::'b ⇒ real^'n) a) (f a') ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. norm (∑t∈D - {s}. scaleR (inner (r t) (w s)) (f (σ t))) + K * norm (u - x) * norm (w s) < γ s / 2 ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule cleanup_certified(2)) | method |
+
+# theorem NearestIffHalfspace
+> Directional clean-up: the readout fs + z is strictly nearer fs than fa iff ⟨z, fa − fs⟩ < ‖fa − fs‖²/2 (the bisector half-space). Cites `nearest_iff_halfspace`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| dist ((fs::'a::real_inner) + z) fs < dist (fs + z) fa ⟷ inner z (fa - fs) < (norm (fa - fs))⇧2 / 2 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | dist ((fs::'a::real_inner) + z) fs < dist (fs + z) fa ⟷ inner z (fa - fs) < (norm (fa - fs))⇧2 / 2 | discharged by the kernel-checked substrate lemma | — | (rule nearest_iff_halfspace) | method |
+
+# theorem DirectionalSnap
+> Directional clean-up: if the readout offset is c + m with ⟨m, d⟩ = ⟨n, q⟩, then ‖n‖‖q‖ < ‖d‖²/2 − ⟨c, d⟩ keeps fs strictly nearer than fa. Cites `directional_snap`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| inner (m::'a::real_inner) (fa - fs) = inner (n::'d::real_inner) q ⟹ norm n * norm q < (norm (fa - fs))⇧2 / 2 - inner c (fa - fs) ⟹ dist (fs + (c + m)) fs < dist (fs + (c + m)) fa |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | inner (m::'a::real_inner) (fa - fs) = inner (n::'d::real_inner) q ⟹ norm n * norm q < (norm (fa - fs))⇧2 / 2 - inner c (fa - fs) ⟹ dist (fs + (c + m)) fs < dist (fs + (c + m)) fa | discharged by the kernel-checked substrate lemma | — | (rule directional_snap) | method |
+
+# theorem DirectionalRadiusTight
+> Directional clean-up: the radius (‖d‖²/2 − ⟨c, d⟩)/‖q‖ is exact; noise of that size along q reaches the bisector. Cites `directional_radius_tight`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀y. inner ((M::'d::real_inner ⇒ 'a::real_inner) y) d = inner y q ⟹ q ≠ 0 ⟹ (norm d)⇧2 / 2 - inner c d ≤ t * norm q ⟹ ¬ dist (fs + (c + M ((t / norm q) *⇩R q))) fs < dist (fs + (c + M ((t / norm q) *⇩R q))) (fs + d) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀y. inner ((M::'d::real_inner ⇒ 'a::real_inner) y) d = inner y q ⟹ q ≠ 0 ⟹ (norm d)⇧2 / 2 - inner c d ≤ t * norm q ⟹ ¬ dist (fs + (c + M ((t / norm q) *⇩R q))) fs < dist (fs + (c + M ((t / norm q) *⇩R q))) (fs + d) | discharged by the kernel-checked substrate lemma | — | (rule directional_radius_tight) | method |
+
+# theorem DirectionalQBound
+> Directional clean-up: ‖q‖ ≤ K‖w‖‖d‖, so the directional radius never falls below the worst-case one. Cites `directional_q_bound`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀y. inner (unbind ((P::'d::real_inner ⇒ real^'m^'n) y) w) d = inner y q ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ 0 ≤ K ⟹ norm q ≤ K * norm w * norm d |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀y. inner (unbind ((P::'d::real_inner ⇒ real^'m^'n) y) w) d = inner y q ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ 0 ≤ K ⟹ norm q ≤ K * norm w * norm d | discharged by the kernel-checked substrate lemma | — | (rule directional_q_bound) | method |
+
+# theorem WorstCaseImpliesDirectional
+> Directional clean-up: the worst-case condition ‖n‖·K‖w‖ < γ/2 (γ ≤ ‖d‖) implies the directional one. Cites `worst_case_implies_directional`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀y. inner (unbind ((P::'d::real_inner ⇒ real^'m^'n) y) w) d = inner y q ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ 0 ≤ K ⟹ norm (n::'d) * (K * norm w) < γ / 2 ⟹ γ ≤ norm d ⟹ d ≠ 0 ⟹ norm n * norm q < (norm d)⇧2 / 2 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀y. inner (unbind ((P::'d::real_inner ⇒ real^'m^'n) y) w) d = inner y q ⟹ ∀y. norm (P y) ≤ K * norm y ⟹ 0 ≤ K ⟹ norm (n::'d) * (K * norm w) < γ / 2 ⟹ γ ≤ norm d ⟹ d ≠ 0 ⟹ norm n * norm q < (norm d)⇧2 / 2 | discharged by the kernel-checked substrate lemma | — | (rule worst_case_implies_directional) | method |
+
+# theorem RoleCleanupDirectional
+> Directional clean-up, per role: the half-space condition for every rival filler forces the nearest filler to be σ(s). Cites `role_cleanup_directional`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ s ∈ D ⟹ inner (r s) w = 1 ⟹ σ s ∈ (F::'b set) ⟹ ah ∈ F ⟹ ∀a∈F. inner (unbind e w) ((f::'b ⇒ real^'n) a - f (σ s)) = inner (n::'d::real_inner) (q a) ⟹ ∀a∈F. a ≠ σ s ⟶ norm n * norm (q a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) w *⇩R f (σ t)) (f a - f (σ s)) ⟹ ∀a'∈F. dist (unbind (structure_tpr f r σ D + e) w) (f ah) ≤ dist (unbind (structure_tpr f r σ D + e) w) (f a') ⟹ ah = σ s |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ s ∈ D ⟹ inner (r s) w = 1 ⟹ σ s ∈ (F::'b set) ⟹ ah ∈ F ⟹ ∀a∈F. inner (unbind e w) ((f::'b ⇒ real^'n) a - f (σ s)) = inner (n::'d::real_inner) (q a) ⟹ ∀a∈F. a ≠ σ s ⟶ norm n * norm (q a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) w *⇩R f (σ t)) (f a - f (σ s)) ⟹ ∀a'∈F. dist (unbind (structure_tpr f r σ D + e) w) (f ah) ≤ dist (unbind (structure_tpr f r σ D + e) w) (f a') ⟹ ah = σ s | discharged by the kernel-checked substrate lemma | — | (rule role_cleanup_directional) | method |
+
+# theorem CleanupCertifiedDirectionalExact
+> Directional T6(b) certificate, part 1: clean-up returns x(σ) exactly within ρ_dir. Cites `cleanup_certified_directional`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x | discharged by the kernel-checked substrate lemma | — | (rule cleanup_certified_directional(1)) | method |
+
+# theorem CleanupCertifiedDirectionalDecision
+> Directional T6(b) certificate, part 2: the host decides the code point's t within β. Cites `cleanup_certified_directional`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule cleanup_certified_directional(2)) | method |
