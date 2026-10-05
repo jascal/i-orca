@@ -18,6 +18,9 @@
                                     the DIRECTIONAL clean-up radius (|d|^2/2 - <c,d>) / |q|, exact per half-space
                                     (directional_radius_tight) and never below the worst case
                                     (directional_q_bound, worst_case_implies_directional);
+    projection_preserves_differences / _margins / _decision, projection_margin_changes,
+    projection_preserves_margins_iff : T6(a) -- an orthogonal projection preserves every margin of every residual
+                                    IFF it fixes every readout difference;
     cleanup_certified             : the composition -- clean-up returns x(sigma) exactly AND the host decides
                                     the code point's decision t.
 
@@ -363,6 +366,83 @@ proof -
   thus "W (structure_tpr f r \<sigma>h D) + b0 = x" using xdef by simp
   have "decodes_to (\<lambda>v. inner (x + (u - x)) (U v) + bias v) V t" by (rule agreement_ball[OF tV beta])
   thus "decodes_to (\<lambda>v. inner u (U v) + bias v) V t" by simp
+qed
+
+section \<open>T6(a) -- linear projection preserves every margin iff it fixes every readout difference\<close>
+
+text \<open>P is an orthogonal projection: linear, idempotent and self-adjoint. If P fixes every readout difference
+  U v - U w, then <P r, U v - U w> = <r, U v - U w> for every residual r, so every margin and every decision is
+  unchanged. Conversely, if P moves one difference d, the residual r = d - P d changes the margin along d by
+  |d - P d|^2 > 0. So a LINEAR projection can widen no margin unless its range misses a readout difference.\<close>
+
+theorem projection_preserves_differences:
+  fixes P :: "'a::real_inner \<Rightarrow> 'a"
+  assumes sa: "\<forall>x y. inner (P x) y = inner x (P y)"
+      and fx: "P d = d"
+  shows "inner (P r) d = inner r d"
+  using sa fx by simp
+
+theorem projection_preserves_margins:
+  fixes P :: "'a::real_inner \<Rightarrow> 'a" and U :: "'v \<Rightarrow> 'a"
+  assumes sa: "\<forall>x y. inner (P x) y = inner x (P y)"
+      and fx: "P (U t - U v) = U t - U v"
+  shows "(inner (P r) (U t) + bias t) - (inner (P r) (U v) + bias v)
+         = (inner r (U t) + bias t) - (inner r (U v) + bias v)"
+proof -
+  have "inner (P r) (U t - U v) = inner r (U t - U v)" by (rule projection_preserves_differences[OF sa fx])
+  thus ?thesis by (simp add: inner_diff_right)
+qed
+
+theorem projection_preserves_decision:
+  fixes P :: "'a::real_inner \<Rightarrow> 'a" and U :: "'v \<Rightarrow> 'a"
+  assumes sa: "\<forall>x y. inner (P x) y = inner x (P y)"
+      and fx: "\<forall>v\<in>V. P (U t - U v) = U t - U v"
+  shows "decodes_to (\<lambda>v. inner (P r) (U v) + bias v) V t \<longleftrightarrow> decodes_to (\<lambda>v. inner r (U v) + bias v) V t"
+proof -
+  have m: "inner (P r) (U v) + bias v < inner (P r) (U t) + bias t
+           \<longleftrightarrow> inner r (U v) + bias v < inner r (U t) + bias t" if "v \<in> V" for v
+    using projection_preserves_margins[where P = P and U = U and t = t and v = v and r = r and bias = bias, OF sa]
+          fx that by fastforce
+  show ?thesis unfolding decodes_to_def using m by blast
+qed
+
+theorem projection_margin_changes:
+  fixes P :: "'a::real_inner \<Rightarrow> 'a"
+  assumes lin: "linear P" and idem: "\<forall>x. P (P x) = P x"
+      and sa: "\<forall>x y. inner (P x) y = inner x (P y)"
+      and moved: "P d \<noteq> d"
+  shows "inner (P (d - P d)) d = 0" and "inner (d - P d) d = (norm (d - P d))\<^sup>2" and "(norm (d - P d))\<^sup>2 > 0"
+proof -
+  have P0: "P (d - P d) = 0" using idem by (simp add: linear_diff[OF lin])
+  show "inner (P (d - P d)) d = 0" by (simp add: P0)
+  have orth: "inner (d - P d) (P d) = 0"
+    using sa P0 by (metis inner_zero_left)
+  have "inner (d - P d) d = inner (d - P d) (d - P d) + inner (d - P d) (P d)"
+    by (simp add: inner_diff_right)
+  thus "inner (d - P d) d = (norm (d - P d))\<^sup>2" using orth by (simp add: power2_norm_eq_inner)
+  show "(norm (d - P d))\<^sup>2 > 0" using moved by simp
+qed
+
+theorem projection_preserves_margins_iff:
+  fixes P :: "'a::real_inner \<Rightarrow> 'a" and U :: "'v \<Rightarrow> 'a"
+  assumes lin: "linear P" and idem: "\<forall>x. P (P x) = P x"
+      and sa: "\<forall>x y. inner (P x) y = inner x (P y)"
+  shows "(\<forall>r. \<forall>v\<in>V. \<forall>w\<in>V. inner (P r) (U v - U w) = inner r (U v - U w))
+         \<longleftrightarrow> (\<forall>v\<in>V. \<forall>w\<in>V. P (U v - U w) = U v - U w)"
+proof
+  assume all: "\<forall>v\<in>V. \<forall>w\<in>V. P (U v - U w) = U v - U w"
+  show "\<forall>r. \<forall>v\<in>V. \<forall>w\<in>V. inner (P r) (U v - U w) = inner r (U v - U w)"
+    using projection_preserves_differences[OF sa] all by blast
+next
+  assume pres: "\<forall>r. \<forall>v\<in>V. \<forall>w\<in>V. inner (P r) (U v - U w) = inner r (U v - U w)"
+  show "\<forall>v\<in>V. \<forall>w\<in>V. P (U v - U w) = U v - U w"
+  proof (intro ballI, rule ccontr)
+    fix v w assume v: "v \<in> V" and w: "w \<in> V" and ne: "P (U v - U w) \<noteq> U v - U w"
+    let ?d = "U v - U w"
+    note c = projection_margin_changes[OF lin idem sa ne]
+    have "inner (P (?d - P ?d)) ?d = inner (?d - P ?d) ?d" using pres v w by blast
+    thus False using c by simp
+  qed
 qed
 
 end

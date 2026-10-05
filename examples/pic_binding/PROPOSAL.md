@@ -30,7 +30,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cleanup.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 39 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 46 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -52,7 +52,7 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cle
 | T5(b) premise: a bound on the fit error off the evaluated contexts | `open` | — |
 | T5(c) hull ceiling (bias-free): a margin-threshold certificate needs `m < ‖r‖·hdist(t)` | **`proved`** | `hull_margin_upper_scaled`, `certificate_hull_ceiling`, `substitution_hull_ceiling` |
 | T5(c) biased, via the lift `(U_v, b_v/s)`: `m < ‖(w, s)‖·hdist_lifted(t)` for every `s > 0` (upper bound) | **`proved`** | `certificate_hull_ceiling_biased` |
-| T6 (a) linear projection in the readout span leaves margins unchanged | `open` | — |
+| T6 (a) an orthogonal projection preserves every margin of every residual **iff** it fixes every readout difference | **`proved`** | `projection_preserves_differences`, `projection_preserves_margins`, `projection_preserves_decision`, `projection_margin_changes`, `projection_preserves_margins_iff` (in `PIC_Cleanup.thy`) |
 | T6 (b) directional clean-up radius `ρ_dir` (exact per half-space, ≥ `ρ`) | **`proved`** | `nearest_iff_halfspace`, `directional_snap`, `directional_radius_tight`, `directional_q_bound`, `worst_case_implies_directional`, `role_readout_decomp`, `role_cleanup_directional`, `cleanup_certified_directional` (in `PIC_Cleanup.thy`) |
 | T6 (b) clean-up constants: exact recovery within `ρ(σ)`, host agreement within `β(σ)` | **`proved`** | `nearest_point_cleanup`, `nearest_point_selects`, `nearest_point_radius_tight`, `unbind_norm_le`, `role_cleanup_close`, `role_cleanup`, `cleanup_exact`, `left_inverse_noise`, `agreement_ball`, `cleanup_certified` (in `PIC_Cleanup.thy`) |
 
@@ -247,6 +247,19 @@ is the PIC reading of the paper's "limitivism": the model realises a noisy point
 point's margin.
 
 **Tractability:** (a) trivial. (b) needs a careful statement of the clean-up operator; T3 supplies the unbinding step.
+
+**Status of (a) (2026-10-05): kernel-checked, as an iff** (`pic_core/PIC_Cleanup.thy`). For an orthogonal projection
+`P` (linear, idempotent, self-adjoint):
+- if `P` fixes every readout difference, then `⟨P r, U_t − U_v⟩ = ⟨r, U_t − U_v⟩` for every residual `r`, so every
+  margin and every decision is unchanged (`projection_preserves_margins`, `projection_preserves_decision`);
+- conversely, if `P` moves a difference `d`, the residual `r = d − P d` scores 0 along `d` after projection but
+  `‖d − P d‖² > 0` before (`projection_margin_changes`);
+- so it preserves all margins **iff** its range contains every readout difference
+  (`projection_preserves_margins_iff`).
+
+This makes the consequence above exact, for linear orthogonal projections: a margin gain is possible only if the
+projection's range misses some readout difference (case (i)). Otherwise it must come from a nonlinear reader (ii) or
+from snapping (iii). The 44%-in-span measurement from pil#132 below remains the relevant empirical fact.
 
 **Status of (b) (2026-10-04): stated with constants and kernel-checked** (`pic_core/PIC_Cleanup.thy`).
 - **Clean-up operator.** Code points `x(σ) = W·T(σ) + b₀` with `T(σ)` the structure TPR. Given a residual `u`:
