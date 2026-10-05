@@ -172,7 +172,20 @@ class IsabelleBackend:
             formal_fraction_real=n_checked / n,
             isabelle=self.version(),
             raw_output=output,
+            error=None if ok else self._build_error(steps, output),
         )
+
+    @staticmethod
+    def _build_error(steps: dict[str, str], output: str, max_lines: int = 8) -> str:
+        """Summarise a failed build. Without this a statement that does not even parse
+        reports formal_fraction_real = 0.0 and no error, indistinguishable from a proof
+        the kernel rejected."""
+        lines = [ln.strip() for ln in output.splitlines() if ln.lstrip().startswith("***")]
+        detail = " | ".join(lines[:max_lines]) if lines else "(no *** lines in Isabelle output)"
+        failed = [sid for sid, st in steps.items() if st == "failed"]
+        where = (f"step {', '.join(failed)} failed" if failed
+                 else "not attributable to a step (e.g. a parse or type error in a statement)")
+        return f"Isabelle build failed, {where}: {detail}"
 
     def _build_theory(
         self, thy_name: str, thy_src: str, theorem: Theorem, timeout_s: int

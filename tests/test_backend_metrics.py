@@ -114,3 +114,56 @@ def test_root_text_registers_extra_dirs(tmp_path):
     assert f'    "{d2.resolve()}"' in txt
     # directories precede the theories clause
     assert txt.index("directories") < txt.index("theories")
+
+
+def test_failed_build_reports_an_error(monkeypatch):
+    # A statement that does not parse used to report formal_fraction_real = 0.0 with
+    # error = None, indistinguishable from a rejected proof.
+    src = """\
+# theorem Bad
+## imports
+| Theory |
+|--------|
+| Main   |
+## goal
+| Statement |
+|-----------|
+| P |
+## proof
+| Id | Claim | By | Using | Method | Status |
+|----|-------|----|-------|--------|--------|
+| s_show | P | cite | — | (rule foo) | method |
+"""
+    thm = parse(src).theorems[0]
+    b = IsabelleBackend(isabelle_bin="/fake/isabelle")
+    out = 'Running Bad ...\n*** Inner syntax error (line 6)\n*** at "⇩R f"\nBad FAILED'
+    monkeypatch.setattr(b, "_build_theory", lambda *a, **k: (False, out))
+    r = b.check_proof(thm)
+    assert r.formal_fraction_real == 0.0
+    assert r.error is not None
+    assert "Inner syntax error" in r.error
+    assert "not attributable to a step" in r.error
+    assert r.to_dict()["error"] == r.error
+
+
+def test_clean_build_has_no_error(monkeypatch):
+    src = """\
+# theorem Good
+## imports
+| Theory |
+|--------|
+| Main   |
+## goal
+| Statement |
+|-----------|
+| True |
+## proof
+| Id | Claim | By | Using | Method | Status |
+|----|-------|----|-------|--------|--------|
+| s_show | True | trivial | — | simp | method |
+"""
+    thm = parse(src).theorems[0]
+    b = IsabelleBackend(isabelle_bin="/fake/isabelle")
+    monkeypatch.setattr(b, "_build_theory", lambda *a, **k: (True, "Finished Good"))
+    r = b.check_proof(thm)
+    assert r.formal_fraction_real == 1.0 and r.error is None

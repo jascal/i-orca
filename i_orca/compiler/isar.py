@@ -50,6 +50,10 @@ _TERM_SYMBOLS = {
     "ε": r"\<epsilon>", "θ": r"\<theta>", "λ ": r"\<lambda> ", "μ": r"\<mu>",
     "ρ": r"\<rho>", "σ": r"\<sigma>", "τ": r"\<tau>", "φ": r"\<phi>",
     "Δ": r"\<Delta>", "Σ": r"\<Sigma>", "Π": r"\<Pi>", "Φ": r"\<Phi>",
+    # Control symbols: Isabelle's own Unicode rendering of sub/superscripts, as in
+    # `a *⇩R x` (scaleR) and `x⇧2` (power2). Copied from Isabelle output, they must
+    # lower back to the escapes or the term fails to parse.
+    "⇩": r"\<^sub>", "⇧": r"\<^sup>",
 }
 
 
