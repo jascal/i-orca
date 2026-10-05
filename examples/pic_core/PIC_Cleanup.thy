@@ -21,6 +21,9 @@
     projection_preserves_differences / _margins / _decision, projection_margin_changes,
     projection_preserves_margins_iff : T6(a) -- an orthogonal projection preserves every margin of every residual
                                     IFF it fixes every readout difference;
+    role_cleanup_offset / cleanup_local_certified : a certified ball around an OBSERVED residual u0 -- every
+                                    u0 + e with |e| below u0's clean-up and host slacks gets exact clean-up and the
+                                    code point's decision;
     cleanup_certified             : the composition -- clean-up returns x(sigma) exactly AND the host decides
                                     the code point's decision t.
 
@@ -443,6 +446,81 @@ next
     have "inner (P (?d - P ?d)) ?d = inner (?d - P ?d) ?d" using pres v w by blast
     thus False using c by simp
   qed
+qed
+
+section \<open>Certified neighbourhoods around an observed residual\<close>
+
+text \<open>Ball certificates centred on the code point x(sigma) need |u - x(sigma)| small. Centred on an OBSERVED residual
+  u0 instead, the offset n0 = u0 - x(sigma) is a fixed part of every role readout, and only the perturbation e is
+  bounded: every u = u0 + e with |e| below the clean-up slack and the host slack of u0 gets exact clean-up AND the
+  code point's decision.\<close>
+
+lemma role_cleanup_offset:
+  fixes f :: "'b \<Rightarrow> real^'n" and e :: "'d::real_inner" and q :: "'b \<Rightarrow> 'd"
+  assumes finD: "finite D" and s: "s \<in> D" and one: "inner (r s) w = 1"
+      and inF: "\<sigma> s \<in> F" and ah: "ah \<in> F"
+      and rep: "\<forall>a\<in>F. inner (unbind E w) (f a - f (\<sigma> s)) = inner e (q a)"
+      and rad: "\<forall>a\<in>F. a \<noteq> \<sigma> s \<longrightarrow> norm e * norm (q a)
+                  < (norm (f a - f (\<sigma> s)))\<^sup>2 / 2
+                    - inner ((\<Sum>t\<in>D - {s}. inner (r t) w *\<^sub>R f (\<sigma> t)) + unbind E0 w) (f a - f (\<sigma> s))"
+      and near: "\<forall>a'\<in>F. dist (unbind (structure_tpr f r \<sigma> D + (E0 + E)) w) (f ah)
+                         \<le> dist (unbind (structure_tpr f r \<sigma> D + (E0 + E)) w) (f a')"
+  shows "ah = \<sigma> s"
+proof (rule ccontr)
+  assume ne: "ah \<noteq> \<sigma> s"
+  let ?c = "(\<Sum>t\<in>D - {s}. inner (r t) w *\<^sub>R f (\<sigma> t)) + unbind E0 w"
+  have g: "unbind (structure_tpr f r \<sigma> D + (E0 + E)) w = f (\<sigma> s) + (?c + unbind E w)"
+    using role_readout_decomp[where D = D and s = s and r = r and w = w and f = f and \<sigma> = \<sigma> and e = "E0 + E",
+                              OF finD s one]
+    by (simp add: unbind_add add.assoc)
+  have "dist (f (\<sigma> s) + (?c + unbind E w)) (f (\<sigma> s)) < dist (f (\<sigma> s) + (?c + unbind E w)) (f ah)"
+    by (rule directional_snap[where n = e and q = "q ah"]) (use rep rad ah ne in auto)
+  moreover have "dist (f (\<sigma> s) + (?c + unbind E w)) (f ah) \<le> dist (f (\<sigma> s) + (?c + unbind E w)) (f (\<sigma> s))"
+    using near inF g by metis
+  ultimately show False by linarith
+qed
+
+theorem cleanup_local_certified:
+  fixes f :: "'b \<Rightarrow> real^'n" and U :: "'v \<Rightarrow> 'd::real_inner"
+    and W :: "real^'m^'n \<Rightarrow> 'd" and P :: "'d \<Rightarrow> real^'m^'n" and q :: "'s \<Rightarrow> 'b \<Rightarrow> 'd"
+  assumes finD: "finite D"
+      and lin: "linear P" and inv: "\<forall>T. P (W T) = T"
+      and one: "\<forall>s\<in>D. inner (r s) (w s) = 1"
+      and inF: "\<forall>s\<in>D. \<sigma> s \<in> F s"
+      and rep: "\<forall>s\<in>D. \<forall>a\<in>F s. \<forall>y. inner (unbind (P y) (w s)) (f a - f (\<sigma> s)) = inner y (q s a)"
+      and rad: "\<forall>s\<in>D. \<forall>a\<in>F s. a \<noteq> \<sigma> s \<longrightarrow> norm e * norm (q s a)
+                  < (norm (f a - f (\<sigma> s)))\<^sup>2 / 2
+                    - inner ((\<Sum>t\<in>D - {s}. inner (r t) (w s) *\<^sub>R f (\<sigma> t)) + unbind (P (u0 - x)) (w s))
+                            (f a - f (\<sigma> s))"
+      and xdef: "x = W (structure_tpr f r \<sigma> D) + b0"
+      and ah: "\<forall>s\<in>D. \<sigma>h s \<in> F s"
+      and near: "\<forall>s\<in>D. \<forall>a'\<in>F s. dist (unbind (P (u0 + e - b0)) (w s)) (f (\<sigma>h s))
+                                   \<le> dist (unbind (P (u0 + e - b0)) (w s)) (f a')"
+      and tV: "t \<in> V"
+      and host: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+                   norm e * norm (U t - U v) < (inner u0 (U t) + bias t) - (inner u0 (U v) + bias v)"
+  shows "W (structure_tpr f r \<sigma>h D) + b0 = x"
+    and "decodes_to (\<lambda>v. inner (u0 + e) (U v) + bias v) V t"
+proof -
+  have Pu: "P (u0 + e - b0) = structure_tpr f r \<sigma> D + (P (u0 - x) + P e)"
+  proof -
+    have "P (u0 + e - b0) = P (W (structure_tpr f r \<sigma> D) + ((u0 - x) + e))" by (simp add: xdef algebra_simps)
+    also have "\<dots> = structure_tpr f r \<sigma> D + (P (u0 - x) + P e)" using inv by (simp add: linear_add[OF lin])
+    finally show ?thesis .
+  qed
+  have roles: "\<forall>s\<in>D. \<sigma>h s = \<sigma> s"
+  proof
+    fix s assume s: "s \<in> D"
+    have rep_e: "\<forall>a\<in>F s. inner (unbind (P e) (w s)) (f a - f (\<sigma> s)) = inner e (q s a)" using rep s by blast
+    show "\<sigma>h s = \<sigma> s"
+    proof (rule role_cleanup_offset[where D = D and s = s and r = r and w = "w s" and f = f and \<sigma> = \<sigma>
+                                      and E = "P e" and E0 = "P (u0 - x)" and F = "F s" and ah = "\<sigma>h s"
+                                      and e = e and q = "q s"])
+    qed (use finD s one inF ah rep_e rad near Pu in auto)
+  qed
+  have "structure_tpr f r \<sigma>h D = structure_tpr f r \<sigma> D" by (rule cleanup_exact[OF roles])
+  thus "W (structure_tpr f r \<sigma>h D) + b0 = x" using xdef by simp
+  show "decodes_to (\<lambda>v. inner (u0 + e) (U v) + bias v) V t" by (rule agreement_ball[OF tV host])
 qed
 
 end
