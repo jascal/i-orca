@@ -28,9 +28,9 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 ## Tag ledger (2026-10-04)
 
-The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PIC_Core`, `quick_and_dirty = false`,
+The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cleanup.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 23 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 31 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -52,7 +52,8 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` (session `PI
 | T5(b) premise: a bound on the fit error off the evaluated contexts | `open` | — |
 | T5(c) hull ceiling (bias-free): a margin-threshold certificate needs `m < ‖r‖·hdist(t)` | **`proved`** | `hull_margin_upper_scaled`, `certificate_hull_ceiling`, `substitution_hull_ceiling` |
 | T5(c) biased, via the lift `(U_v, b_v/s)`: `m < ‖(w, s)‖·hdist_lifted(t)` for every `s > 0` (upper bound) | **`proved`** | `certificate_hull_ceiling_biased` |
-| T6 (a), (b) | `open` | — |
+| T6 (a) linear projection in the readout span leaves margins unchanged | `open` | — |
+| T6 (b) clean-up constants: exact recovery within `ρ(σ)`, host agreement within `β(σ)` | **`proved`** | `nearest_point_cleanup`, `nearest_point_selects`, `nearest_point_radius_tight`, `unbind_norm_le`, `role_cleanup_close`, `role_cleanup`, `cleanup_exact`, `left_inverse_noise`, `agreement_ball`, `cleanup_certified` (in `PIC_Cleanup.thy`) |
 
 The tensor product is a concrete construction, `tprod f r = (χ i. f$i *⇩R r)` in `real^'m^'n`. The identity
 `⟨f⊗r, g⊗s⟩ = ⟨f,g⟩⟨r,s⟩` is the proved lemma `inner_tprod`, not an assumption.
@@ -246,6 +247,21 @@ point's margin.
 
 **Tractability:** (a) trivial. (b) needs a careful statement of the clean-up operator; T3 supplies the unbinding step.
 
+**Status of (b) (2026-10-04): stated with constants and kernel-checked** (`pic_core/PIC_Cleanup.thy`).
+- **Clean-up operator.** Code points `x(σ) = W·T(σ) + b₀` with `T(σ)` the structure TPR. Given a residual `u`:
+  decode `P(u − b₀)` with a linear left inverse `P` of `W` (`‖P y‖ ≤ K‖y‖`); for each role `s`, unbind with a
+  readout `w_s` normalised so `⟨r_s, w_s⟩ = 1`; snap to the nearest filler; rebind.
+- **Clean-up radius.** With `n = u − x(σ)`, filler separation `γ_s`, and crosstalk
+  `κ_s(σ) = ‖Σ_{t≠s} ⟨r_t, w_s⟩ f_{σ(t)}‖` (zero for dual roles), clean-up returns `x(σ)` **exactly** when
+  `‖n‖ < ρ(σ) = min_s (γ_s/2 − κ_s(σ)) / (K·‖w_s‖)`. The `γ/2` is tight.
+- **Agreement radius.** The host decides the code point's decision `t` when
+  `‖n‖ < β(σ) = min_{v≠t} m_v(σ) / ‖U_t − U_v‖`, with `m_v(σ)` the code point's margin over `v`. That is the
+  distance from `x(σ)` to the boundary of `t`'s decision cell, so it is tight.
+- **The certificate.** `‖u − x(σ)‖ < min(ρ(σ), β(σ))` ⟹ clean-up returns `x(σ)` and the host decides `t(σ)`.
+- **Correction to the claim above.** Clean-up does not raise the *host's* margin. It makes the substitute exactly a
+  code point, so the certificate is issued from the **code's** margin (via `β`), over a whole ball of residuals.
+  Whether host residuals land within `min(ρ, β)` of their code points is the empirical question.
+
 **What has *not* tested T6(a).** pil#132 projected onto `span(W)` of a fitted TPR. There only 44% of
 `‖U_gold − U_rival‖²` lay inside the subspace, so (a)'s hypothesis was false at that site. Its margin change
 (3.80 → 3.39) is consistent with removing out-of-span components. It is neither a test nor a refutation of (a).
@@ -257,7 +273,7 @@ point's margin.
 1. T1, T2 and T3 first: short, and they compose existing lemmas.
 2. Then T5(a)/(b)/(c), which produces the certificate a substitution experiment can cite.
 3. Then T6(a).
-4. T4(c), T6(b) and the pre-norm Lipschitz scope stay `open` until someone works out the constants.
+4. T4(c) and the pre-norm Lipschitz scope stay `open` until someone works out the constants. (T6(b)'s are done.)
 
 ## Empirical hooks (not part of the proofs)
 
