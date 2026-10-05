@@ -24,8 +24,21 @@
         substitution_certified_max   : the same with delta = that max over a finite V (the stated form);
         substitution_certified_norm  : the Cauchy-Schwarz form  delta = |r - r_hat| * u_max.
 
+    T5b substitution_domain_norm     : ONE fit-error bound eps on a whole domain D of contexts, with every margin
+                                       > 2 eps u_max, certifies every context in D (evaluated or not);
+        substitution_domain_pairwise : the per-rival domain form, margin over v > eps * |U t - U v|;
+        domain_norm_implies_pairwise : the per-rival threshold never exceeds the norm one;
+        domain_norm_premise_implies_pairwise : the norm-form domain premises (eps >= 0) imply the per-rival ones.
+    T5c certificate_hull_ceiling     : bias-free; a certificate needing every margin > m fires only if
+                                       m < |r| * infdist (U t) (conv hull rivals) -- a ceiling set by the frame and
+                                       |r|, independent of the substitute;
+        substitution_hull_ceiling    : the BIAS-FREE uniform threshold instance, m = 2 delta;
+        certificate_hull_ceiling_biased : with a per-token bias b, by lifting to (U v, b v / s): the ceiling is
+                                       norm (w, s) * lifted hull distance, for every s > 0 (upper bound only).
+
   HONEST SCOPE. Decode-input (post-norm) substitution only: the pre-norm Lipschitz step, T2's frame-operator
-  tightness (claim 4), T4, T5(b)/(c) and T6 stay OPEN. Nothing here says any model is TPR-shaped.
+  tightness (claim 4), T4 and T6 stay OPEN. T5(b) certifies D only GIVEN the error bound on all of D; bounding
+  the fit error off the evaluated contexts is not supplied here. T5(c) is bias-free, or biased via the lift (an upper bound, not attained in general). Nothing here says any model is TPR-shaped.
   Self-contained over PIC_Logic + PIC_Margin_Hull (+ HOL-Analysis); 0 sorry, quick_and_dirty = false.
 *)
 theory PIC_Binding
@@ -490,6 +503,165 @@ proof (rule substitution_certified_pairwise[OF tV], intro ballI impI)
     also have "\<dots> \<le> \<bar>inner (r - rhat) (U t)\<bar> + norm (r - rhat) * u" using cs by linarith
     finally show ?thesis using tail v ne False by fastforce
   qed
+qed
+
+section \<open>T5(b) -- substitution certified uniformly over a domain of contexts\<close>
+
+text \<open>A domain D of contexts x, each with a decode input r x, a substitute rhat x and a decision t x. If ONE
+  error bound eps holds on all of D, one margin condition certifies every context in D at once, including
+  contexts never evaluated. The theorem moves the burden to the hypothesis: bounding the fit error on all of D
+  is an empirical or separate claim, not something this theory supplies.\<close>
+
+theorem substitution_domain_norm:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner" and r rhat :: "'x \<Rightarrow> 'a" and t :: "'x \<Rightarrow> 'v"
+  assumes tV: "\<forall>x\<in>D. t x \<in> V"
+      and umax: "\<forall>v\<in>V. norm (U v) \<le> u"
+      and err: "\<forall>x\<in>D. norm (r x - rhat x) \<le> \<epsilon>"
+      and marg: "\<forall>x\<in>D. \<forall>v\<in>V. v \<noteq> t x \<longrightarrow>
+                   (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (\<epsilon> * u)"
+  shows "\<forall>x\<in>D. decodes_to (\<lambda>v. inner (rhat x) (U v) + bias v) V (t x)"
+proof
+  fix x assume x: "x \<in> D"
+  have tx: "t x \<in> V" using tV x by blast
+  have u0: "0 \<le> u" using umax tx by (meson norm_ge_zero order_trans)
+  have le: "norm (r x - rhat x) * u \<le> \<epsilon> * u" using err x u0 by (simp add: mult_right_mono)
+  show "decodes_to (\<lambda>v. inner (rhat x) (U v) + bias v) V (t x)"
+  proof (rule substitution_certified_norm[OF tx umax])
+    show "\<forall>v\<in>V. v \<noteq> t x \<longrightarrow> (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v)
+            > 2 * (norm (r x - rhat x) * u)"
+      using marg x le by fastforce
+  qed
+qed
+
+theorem substitution_domain_pairwise:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner" and r rhat :: "'x \<Rightarrow> 'a" and t :: "'x \<Rightarrow> 'v"
+  assumes tV: "\<forall>x\<in>D. t x \<in> V"
+      and err: "\<forall>x\<in>D. norm (r x - rhat x) \<le> \<epsilon>"
+      and marg: "\<forall>x\<in>D. \<forall>v\<in>V. v \<noteq> t x \<longrightarrow>
+                   (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v)
+                   > \<epsilon> * norm (U (t x) - U v)"
+  shows "\<forall>x\<in>D. decodes_to (\<lambda>v. inner (rhat x) (U v) + bias v) V (t x)"
+proof
+  fix x assume x: "x \<in> D"
+  have tx: "t x \<in> V" using tV x by blast
+  show "decodes_to (\<lambda>v. inner (rhat x) (U v) + bias v) V (t x)"
+  proof (rule substitution_certified_pairwise[OF tx], intro ballI impI)
+    fix v assume v: "v \<in> V" and ne: "v \<noteq> t x"
+    have "inner (r x - rhat x) (U (t x) - U v) \<le> norm (r x - rhat x) * norm (U (t x) - U v)"
+      by (rule norm_cauchy_schwarz)
+    also have "\<dots> \<le> \<epsilon> * norm (U (t x) - U v)" using err x by (simp add: mult_right_mono)
+    finally show "(inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v)
+                  > inner (r x - rhat x) (U (t x) - U v)"
+      using marg x v ne by fastforce
+  qed
+qed
+
+text \<open>The per-rival domain form is at least as strong as the norm form: its threshold is never larger.\<close>
+
+theorem domain_norm_implies_pairwise:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner"
+  assumes tV: "t \<in> V" and v: "v \<in> V" and umax: "\<forall>w\<in>V. norm (U w) \<le> u" and eps: "0 \<le> \<epsilon>"
+  shows "\<epsilon> * norm (U t - U v) \<le> 2 * (\<epsilon> * u)"
+proof -
+  have "norm (U t - U v) \<le> norm (U t) + norm (U v)" by (rule norm_triangle_ineq4)
+  also have "\<dots> \<le> 2 * u"
+  proof -
+    have "norm (U t) \<le> u" "norm (U v) \<le> u" using umax tV v by blast+
+    thus ?thesis by linarith
+  qed
+  finally have n: "norm (U t - U v) \<le> 2 * u" .
+  have "\<epsilon> * norm (U t - U v) \<le> \<epsilon> * (2 * u)" by (rule mult_left_mono[OF n eps])
+  thus ?thesis by simp
+qed
+
+theorem domain_norm_premise_implies_pairwise:
+  fixes U :: "'v \<Rightarrow> 'a::real_inner" and r :: "'x \<Rightarrow> 'a" and t :: "'x \<Rightarrow> 'v"
+  assumes tV: "\<forall>x\<in>D. t x \<in> V"
+      and umax: "\<forall>v\<in>V. norm (U v) \<le> u"
+      and eps: "0 \<le> \<epsilon>"
+      and marg: "\<forall>x\<in>D. \<forall>v\<in>V. v \<noteq> t x \<longrightarrow>
+                   (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (\<epsilon> * u)"
+  shows "\<forall>x\<in>D. \<forall>v\<in>V. v \<noteq> t x \<longrightarrow>
+           (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > \<epsilon> * norm (U (t x) - U v)"
+proof (intro ballI impI)
+  fix x v assume x: "x \<in> D" and v: "v \<in> V" and ne: "v \<noteq> t x"
+  have "\<epsilon> * norm (U (t x) - U v) \<le> 2 * (\<epsilon> * u)"
+    by (rule domain_norm_implies_pairwise[OF _ v umax eps]) (use tV x in blast)
+  thus "(inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > \<epsilon> * norm (U (t x) - U v)"
+    using marg x v ne by fastforce
+qed
+
+section \<open>T5(c) -- the hull ceiling on any margin-threshold certificate\<close>
+
+text \<open>Bias-free decode. hull_margin_upper bounds the worst-rival margin of a UNIT residual by the hull distance;
+  scaling gives margin <= norm r * hull distance for any residual. So a certificate that needs every margin above
+  a threshold m can fire only when m < norm r * hdist(t). The ceiling depends on the frame U and the residual
+  norm, NOT on the substitute: no fit, however good, is certified past it by a margin-threshold certificate.
+  The EXACT pairwise certificate (substitution_pairwise_iff) is not a threshold certificate and has no such
+  ceiling.\<close>
+
+lemma hull_margin_upper_scaled:
+  fixes U :: "'v \<Rightarrow> 'a::euclidean_space"
+  assumes finC: "finite C" and neC: "C \<noteq> {}"
+  shows "\<exists>v\<in>C. inner r (U t - U v) \<le> norm r * infdist (U t) (convex hull (U ` C))"
+proof (cases "r = 0")
+  case True
+  thus ?thesis using neC by auto
+next
+  case False
+  define s where "s = (1 / norm r) *\<^sub>R r"
+  have ns: "norm s \<le> 1" using False by (simp add: s_def)
+  obtain v where v: "v \<in> C" "inner s (U t - U v) \<le> infdist (U t) (convex hull (U ` C))"
+    using hull_margin_upper[where U = U and t = t, OF finC neC ns] by blast
+  have "inner r (U t - U v) = norm r * inner s (U t - U v)" using False by (simp add: s_def)
+  also have "\<dots> \<le> norm r * infdist (U t) (convex hull (U ` C))" using v(2) by (simp add: mult_left_mono)
+  finally show ?thesis using v(1) by blast
+qed
+
+theorem certificate_hull_ceiling:
+  fixes U :: "'v \<Rightarrow> 'a::euclidean_space"
+  assumes finC: "finite C" and neC: "C \<noteq> {}"
+      and marg: "\<forall>v\<in>C. inner r (U t) - inner r (U v) > m"
+  shows "m < norm r * infdist (U t) (convex hull (U ` C))"
+proof -
+  obtain v where v: "v \<in> C" "inner r (U t - U v) \<le> norm r * infdist (U t) (convex hull (U ` C))"
+    using hull_margin_upper_scaled[OF finC neC] by blast
+  have "m < inner r (U t) - inner r (U v)" using marg v(1) by blast
+  also have "\<dots> = inner r (U t - U v)" by (simp add: inner_diff_right)
+  finally show ?thesis using v(2) by linarith
+qed
+
+corollary substitution_hull_ceiling:
+  fixes U :: "'v \<Rightarrow> 'a::euclidean_space"
+  assumes finV: "finite V" and other: "V - {t} \<noteq> {}"
+      and marg: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow> inner r (U t) - inner r (U v) > 2 * \<delta>"
+  shows "2 * \<delta> < norm r * infdist (U t) (convex hull (U ` (V - {t})))"
+  using certificate_hull_ceiling[of "V - {t}"] finV other marg by blast
+
+text \<open>Biased decode, by lifting. A per-token bias b is a bias-free frame one dimension up:
+  inner (w, s) (U v, b v / s) = inner w (U v) + b v for any s > 0. So the ceiling holds with the lifted frame and
+  the lifted residual norm sqrt (|w|^2 + s^2), for EVERY s > 0. This is how a context-constant component c of the
+  decode input is treated as a bias (b v = inner c (U v), w = u - c), which tightens the ceiling when c dominates.
+  It is an upper bound only: the lifted optimum need not be attained with last coordinate exactly s.\<close>
+
+corollary certificate_hull_ceiling_biased:
+  fixes U :: "'v \<Rightarrow> 'a::euclidean_space" and b :: "'v \<Rightarrow> real"
+  assumes finC: "finite C" and neC: "C \<noteq> {}" and s: "0 < s"
+      and marg: "\<forall>v\<in>C. (inner w (U t) + b t) - (inner w (U v) + b v) > m"
+  shows "m < norm (w, s) * infdist (U t, b t / s) (convex hull ((\<lambda>v. (U v, b v / s)) ` C))"
+proof -
+  have lift: "inner (w, s) (U v, b v / s) = inner w (U v) + b v" for v
+    using s by (simp add: inner_Pair)
+  have "\<forall>v\<in>C. inner (w, s) (U t, b t / s) - inner (w, s) (U v, b v / s) > m"
+  proof
+    fix v assume v: "v \<in> C"
+    show "inner (w, s) (U t, b t / s) - inner (w, s) (U v, b v / s) > m"
+      unfolding lift using marg v by blast
+  qed
+  thus ?thesis
+    using certificate_hull_ceiling[where U = "\<lambda>v. (U v, b v / s)" and r = "(w, s)" and t = t and m = m,
+                                   OF finC neC]
+    by simp
 qed
 
 end

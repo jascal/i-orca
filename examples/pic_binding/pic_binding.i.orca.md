@@ -9,12 +9,13 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 15 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-03, ~80 s).
+      All 23 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
-  Scope: T1 (absolute + SIGNED), T1', T2 (diagonal-inclusive convention), T3 (one factor of 2), T5(a).
-  OPEN: T2 claim 4 (frame-operator tightness), T4, T5(b)/(c), T6, the pairwise substitution certificate, and the
+  Scope: T1 (absolute + SIGNED), T1', T2 (diagonal-inclusive convention), T3 (one factor of 2), T5(a) (uniform,
+  pairwise-exact, hybrid), T5(b) (domain, given an error bound on the whole domain), T5(c) (hull ceiling; bias-free, and biased via a lift).
+  OPEN: T2 claim 4 (frame-operator tightness), T4, T6, bounding the fit error off the evaluated contexts, and the
   pre-norm Lipschitz step. No theorem here says any model is TPR-shaped.
 -->
 
@@ -287,3 +288,147 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | t ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ ∀v∈K. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > inner (r - rhat) (U t - U v) ⟹ ∀v∈V - K. v ≠ t ⟶ (inner r (U t) + bias t) - (inner r (U v) + bias v) > ¦inner (r - rhat) (U t)¦ + norm (r - rhat) * u ⟹ decodes_to (λv. inner rhat (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule substitution_certified_hybrid) | method |
+
+# theorem SubstitutionDomainNorm
+> T5(b): one fit-error bound ε on a whole domain D, with every margin > 2·ε·u_max, certifies every context in D (evaluated or not). Cites `substitution_domain_norm`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| ∀x∈D. t x ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ ∀x∈D. norm (r x - rhat x) ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (ε * u) ⟹ ∀x∈D. decodes_to (λv. inner (rhat x) (U v) + bias v) V (t x) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀x∈D. t x ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ ∀x∈D. norm (r x - rhat x) ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (ε * u) ⟹ ∀x∈D. decodes_to (λv. inner (rhat x) (U v) + bias v) V (t x) | discharged by the kernel-checked substrate lemma | — | (rule substitution_domain_norm) | method |
+
+# theorem SubstitutionDomainPairwise
+> T5(b), per-rival: with ‖r − r̂‖ ≤ ε on D, margin over each rival v > ε·‖U_t − U_v‖ certifies every context in D. Cites `substitution_domain_pairwise`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| ∀x∈D. t x ∈ V ⟹ ∀x∈D. norm (r x - rhat x) ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > ε * norm ((U::'v ⇒ 'a::real_inner) (t x) - U v) ⟹ ∀x∈D. decodes_to (λv. inner (rhat x) (U v) + bias v) V (t x) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀x∈D. t x ∈ V ⟹ ∀x∈D. norm (r x - rhat x) ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > ε * norm ((U::'v ⇒ 'a::real_inner) (t x) - U v) ⟹ ∀x∈D. decodes_to (λv. inner (rhat x) (U v) + bias v) V (t x) | discharged by the kernel-checked substrate lemma | — | (rule substitution_domain_pairwise) | method |
+
+# theorem DomainNormImpliesPairwise
+> T5(b): the per-rival domain threshold never exceeds the norm one, so the per-rival form is at least as strong. Cites `domain_norm_implies_pairwise`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| t ∈ V ⟹ v ∈ V ⟹ ∀w∈V. norm ((U::'v ⇒ 'a::real_inner) w) ≤ u ⟹ 0 ≤ ε ⟹ ε * norm (U t - U v) ≤ 2 * (ε * u) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | t ∈ V ⟹ v ∈ V ⟹ ∀w∈V. norm ((U::'v ⇒ 'a::real_inner) w) ≤ u ⟹ 0 ≤ ε ⟹ ε * norm (U t - U v) ≤ 2 * (ε * u) | discharged by the kernel-checked substrate lemma | — | (rule domain_norm_implies_pairwise) | method |
+
+# theorem HullMarginUpperScaled
+> T5(c) substrate: for any residual r (not only unit), some rival's margin is at most ‖r‖ times the hull distance. Cites `hull_margin_upper_scaled`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| finite C ⟹ C ≠ {} ⟹ ∃v∈C. inner r ((U::'v ⇒ 'a::euclidean_space) t - U v) ≤ norm r * infdist (U t) (convex hull (U ` C)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite C ⟹ C ≠ {} ⟹ ∃v∈C. inner r ((U::'v ⇒ 'a::euclidean_space) t - U v) ≤ norm r * infdist (U t) (convex hull (U ` C)) | discharged by the kernel-checked substrate lemma | — | (rule hull_margin_upper_scaled) | method |
+
+# theorem CertificateHullCeiling
+> T5(c): bias-free; a certificate needing every margin > m can fire only if m < ‖r‖·hdist(t). The ceiling is set by the frame and ‖r‖, independent of the substitute. Cites `certificate_hull_ceiling`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| finite C ⟹ C ≠ {} ⟹ ∀v∈C. inner r ((U::'v ⇒ 'a::euclidean_space) t) - inner r (U v) > m ⟹ m < norm r * infdist (U t) (convex hull (U ` C)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite C ⟹ C ≠ {} ⟹ ∀v∈C. inner r ((U::'v ⇒ 'a::euclidean_space) t) - inner r (U v) > m ⟹ m < norm r * infdist (U t) (convex hull (U ` C)) | discharged by the kernel-checked substrate lemma | — | (rule certificate_hull_ceiling) | method |
+
+# theorem SubstitutionHullCeiling
+> T5(c), bias-free uniform threshold instance: a bias-free margin ⟨r, U_t⟩ − ⟨r, U_v⟩ > 2δ for every rival is possible only if 2δ < ‖r‖·hdist(t). A biased margin is bounded by `certificate_hull_ceiling_biased`, not by this. Cites `substitution_hull_ceiling`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| finite V ⟹ V - {t} ≠ {} ⟹ ∀v∈V. v ≠ t ⟶ inner r ((U::'v ⇒ 'a::euclidean_space) t) - inner r (U v) > 2 * δ ⟹ 2 * δ < norm r * infdist (U t) (convex hull (U ` (V - {t}))) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite V ⟹ V - {t} ≠ {} ⟹ ∀v∈V. v ≠ t ⟶ inner r ((U::'v ⇒ 'a::euclidean_space) t) - inner r (U v) > 2 * δ ⟹ 2 * δ < norm r * infdist (U t) (convex hull (U ` (V - {t}))) | discharged by the kernel-checked substrate lemma | — | (rule substitution_hull_ceiling) | method |
+
+# theorem CertificateHullCeilingBiased
+> T5(c), biased decode by lifting: with a per-token bias b, a certificate needing every margin > m fires only if m < ‖(w, s)‖ · infdist((U_t, b_t/s), conv{(U_v, b_v/s)}), for every s > 0. An upper bound only. Cites `certificate_hull_ceiling_biased`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| finite C ⟹ C ≠ {} ⟹ 0 < s ⟹ ∀v∈C. (inner w ((U::'v ⇒ 'a::euclidean_space) t) + (b::'v ⇒ real) t) - (inner w (U v) + b v) > m ⟹ m < norm (w, s) * infdist (U t, b t / s) (convex hull ((λv. (U v, b v / s)) ` C)) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite C ⟹ C ≠ {} ⟹ 0 < s ⟹ ∀v∈C. (inner w ((U::'v ⇒ 'a::euclidean_space) t) + (b::'v ⇒ real) t) - (inner w (U v) + b v) > m ⟹ m < norm (w, s) * infdist (U t, b t / s) (convex hull ((λv. (U v, b v / s)) ` C)) | discharged by the kernel-checked substrate lemma | — | (rule certificate_hull_ceiling_biased) | method |
+
+# theorem DomainNormPremiseImpliesPairwise
+> T5(b): the norm-form domain premises (with ε ≥ 0) imply the per-rival domain premises, so `substitution_domain_pairwise` certifies everything `substitution_domain_norm` does. Cites `domain_norm_premise_implies_pairwise`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Binding |
+
+## goal
+| Statement |
+|-----------|
+| ∀x∈D. t x ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ 0 ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (ε * u) ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > ε * norm (U (t x) - U v) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀x∈D. t x ∈ V ⟹ ∀v∈V. norm ((U::'v ⇒ 'a::real_inner) v) ≤ u ⟹ 0 ≤ ε ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > 2 * (ε * u) ⟹ ∀x∈D. ∀v∈V. v ≠ t x ⟶ (inner (r x) (U (t x)) + bias (t x)) - (inner (r x) (U v) + bias v) > ε * norm (U (t x) - U v) | discharged by the kernel-checked substrate lemma | — | (rule domain_norm_premise_implies_pairwise) | method |
