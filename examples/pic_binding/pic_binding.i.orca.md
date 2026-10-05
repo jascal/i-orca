@@ -9,7 +9,7 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 49 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 51 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
@@ -900,3 +900,39 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm e * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner ((∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) + unbind (P (u0 - x)) (w s)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u0 + e - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u0 + e - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm e * norm ((U::'v ⇒ 'd) t - U v) < (inner u0 (U t) + bias t) - (inner u0 (U v) + bias v) ⟹ decodes_to (λv. inner (u0 + e) (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule cleanup_local_certified(2)) | method |
+
+# theorem ConvexStrictAffine
+> Hull certificates: a strict affine inequality that holds at every point of a finite family holds at every convex combination. Cites `convex_strict_affine`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ ∀i∈I. 0 ≤ l i ⟹ sum l I = 1 ⟹ ∀i∈I. inner ((u::'i ⇒ 'a::real_inner) i) w + b > 0 ⟹ inner (∑i∈I. l i *⇩R u i) w + b > 0 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ ∀i∈I. 0 ≤ l i ⟹ sum l I = 1 ⟹ ∀i∈I. inner ((u::'i ⇒ 'a::real_inner) i) w + b > 0 ⟹ inner (∑i∈I. l i *⇩R u i) w + b > 0 | discharged by the kernel-checked substrate lemma | — | (rule convex_strict_affine) | method |
+
+# theorem HullCertifiedConditions
+> Hull certificates: a family of strict affine conditions (clean-up slacks, agreement margins) holding at every residual of a class holds on the class's convex hull. Cites `hull_certified_conditions`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite I ⟹ ∀i∈I. 0 ≤ l i ⟹ sum l I = 1 ⟹ ∀i∈I. ∀k∈K. inner ((u::'i ⇒ 'a::real_inner) i) ((w::'k ⇒ 'a) k) + b k > 0 ⟹ ∀k∈K. inner (∑i∈I. l i *⇩R u i) (w k) + b k > 0 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite I ⟹ ∀i∈I. 0 ≤ l i ⟹ sum l I = 1 ⟹ ∀i∈I. ∀k∈K. inner ((u::'i ⇒ 'a::real_inner) i) ((w::'k ⇒ 'a) k) + b k > 0 ⟹ ∀k∈K. inner (∑i∈I. l i *⇩R u i) (w k) + b k > 0 | discharged by the kernel-checked substrate lemma | — | (rule hull_certified_conditions) | method |

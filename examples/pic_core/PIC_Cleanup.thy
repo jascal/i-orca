@@ -24,6 +24,9 @@
     role_cleanup_offset / cleanup_local_certified : a certified ball around an OBSERVED residual u0 -- every
                                     u0 + e with |e| below u0's clean-up and host slacks gets exact clean-up and the
                                     code point's decision;
+    convex_strict_affine / hull_certified_conditions : strict affine conditions (the clean-up slacks and the
+                                    agreement margins) that hold at every residual of a finite family hold at every
+                                    convex combination -- the hull ceiling for set-level bounds;
     cleanup_certified             : the composition -- clean-up returns x(sigma) exactly AND the host decides
                                     the code point's decision t.
 
@@ -522,5 +525,50 @@ proof -
   thus "W (structure_tpr f r \<sigma>h D) + b0 = x" using xdef by simp
   show "decodes_to (\<lambda>v. inner (u0 + e) (U v) + bias v) V t" by (rule agreement_ball[OF tV host])
 qed
+
+section \<open>Hull certificates: strict affine conditions are preserved by convex combination\<close>
+
+text \<open>The clean-up conditions (half-space slack > 0, affine in u through n = u - x) and the agreement conditions
+  (<u, U t - U v> > 0) are strict affine inequalities in the residual. If every residual of a finite family satisfies
+  a family of such inequalities, so does every convex combination of them. So a class whose every residual is
+  certified has its whole convex hull certified -- the ceiling for any sound set-level bound over that class.\<close>
+
+lemma convex_strict_affine:
+  fixes u :: "'i \<Rightarrow> 'a::real_inner"
+  assumes fin: "finite I" and nn: "\<forall>i\<in>I. 0 \<le> l i" and s1: "sum l I = 1"
+      and pos: "\<forall>i\<in>I. inner (u i) w + b > 0"
+  shows "inner (\<Sum>i\<in>I. l i *\<^sub>R u i) w + b > 0"
+proof -
+  have eq: "inner (\<Sum>i\<in>I. l i *\<^sub>R u i) w + b = (\<Sum>i\<in>I. l i * (inner (u i) w + b))"
+  proof -
+    have "inner (\<Sum>i\<in>I. l i *\<^sub>R u i) w = (\<Sum>i\<in>I. l i * inner (u i) w)" by (simp add: inner_sum_left)
+    moreover have "b = (\<Sum>i\<in>I. l i * b)" using s1 by (simp add: sum_distrib_right[symmetric])
+    ultimately show ?thesis by (simp add: distrib_left sum.distrib)
+  qed
+  obtain j where j: "j \<in> I" "l j > 0"
+  proof -
+    have "\<exists>j\<in>I. l j > 0"
+    proof (rule ccontr)
+      assume "\<not> (\<exists>j\<in>I. l j > 0)"
+      hence "\<forall>j\<in>I. l j = 0" using nn by force
+      hence "sum l I = 0" by simp
+      thus False using s1 by simp
+    qed
+    thus ?thesis using that by blast
+  qed
+  have "0 < (\<Sum>i\<in>I. l i * (inner (u i) w + b))"
+  proof (rule sum_pos2[OF fin j(1)])
+    show "0 < l j * (inner (u j) w + b)" using j pos by simp
+    show "\<And>i. i \<in> I \<Longrightarrow> 0 \<le> l i * (inner (u i) w + b)" using nn pos by (simp add: less_imp_le)
+  qed
+  thus ?thesis using eq by simp
+qed
+
+theorem hull_certified_conditions:
+  fixes u :: "'i \<Rightarrow> 'a::real_inner" and w :: "'k \<Rightarrow> 'a"
+  assumes fin: "finite I" and nn: "\<forall>i\<in>I. 0 \<le> l i" and s1: "sum l I = 1"
+      and all: "\<forall>i\<in>I. \<forall>k\<in>K. inner (u i) (w k) + b k > 0"
+  shows "\<forall>k\<in>K. inner (\<Sum>i\<in>I. l i *\<^sub>R u i) (w k) + b k > 0"
+  using convex_strict_affine[OF fin nn s1] all by blast
 
 end
