@@ -9,7 +9,7 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 46 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 49 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
@@ -846,3 +846,57 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ (∀r. ∀v∈V. ∀w∈V. inner (P r) ((U::'v ⇒ 'a) v - U w) = inner r (U v - U w)) ⟷ (∀v∈V. ∀w∈V. P (U v - U w) = U v - U w) | discharged by the kernel-checked substrate lemma | — | (rule projection_preserves_margins_iff) | method |
+
+# theorem RoleCleanupOffset
+> Local neighbourhood, per role: with a fixed observed offset E0 and a perturbation E (⟨unbind E w, d⟩ = ⟨e, q⟩), the half-space slack bound on ‖e‖ keeps the nearest filler at σ(s). Cites `role_cleanup_offset`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ s ∈ D ⟹ inner (r s) w = 1 ⟹ σ s ∈ (F::'b set) ⟹ ah ∈ F ⟹ ∀a∈F. inner (unbind E w) ((f::'b ⇒ real^'n) a - f (σ s)) = inner (e::'d::real_inner) (q a) ⟹ ∀a∈F. a ≠ σ s ⟶ norm e * norm (q a) < (norm (f a - f (σ s)))⇧2 / 2 - inner ((∑t∈D - {s}. inner (r t) w *⇩R f (σ t)) + unbind E0 w) (f a - f (σ s)) ⟹ ∀a'∈F. dist (unbind (structure_tpr f r σ D + (E0 + E)) w) (f ah) ≤ dist (unbind (structure_tpr f r σ D + (E0 + E)) w) (f a') ⟹ ah = σ s |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ s ∈ D ⟹ inner (r s) w = 1 ⟹ σ s ∈ (F::'b set) ⟹ ah ∈ F ⟹ ∀a∈F. inner (unbind E w) ((f::'b ⇒ real^'n) a - f (σ s)) = inner (e::'d::real_inner) (q a) ⟹ ∀a∈F. a ≠ σ s ⟶ norm e * norm (q a) < (norm (f a - f (σ s)))⇧2 / 2 - inner ((∑t∈D - {s}. inner (r t) w *⇩R f (σ t)) + unbind E0 w) (f a - f (σ s)) ⟹ ∀a'∈F. dist (unbind (structure_tpr f r σ D + (E0 + E)) w) (f ah) ≤ dist (unbind (structure_tpr f r σ D + (E0 + E)) w) (f a') ⟹ ah = σ s | discharged by the kernel-checked substrate lemma | — | (rule role_cleanup_offset) | method |
+
+# theorem CleanupLocalCertifiedExact
+> Certified neighbourhood around an observed residual u0, part 1: clean-up of u0 + e returns x(σ) exactly. Cites `cleanup_local_certified`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm e * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner ((∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) + unbind (P (u0 - x)) (w s)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u0 + e - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u0 + e - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm e * norm ((U::'v ⇒ 'd) t - U v) < (inner u0 (U t) + bias t) - (inner u0 (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm e * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner ((∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) + unbind (P (u0 - x)) (w s)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u0 + e - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u0 + e - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm e * norm ((U::'v ⇒ 'd) t - U v) < (inner u0 (U t) + bias t) - (inner u0 (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x | discharged by the kernel-checked substrate lemma | — | (rule cleanup_local_certified(1)) | method |
+
+# theorem CleanupLocalCertifiedDecision
+> Certified neighbourhood around an observed residual u0, part 2: the host decides the code point's t at u0 + e. Cites `cleanup_local_certified`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm e * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner ((∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) + unbind (P (u0 - x)) (w s)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u0 + e - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u0 + e - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm e * norm ((U::'v ⇒ 'd) t - U v) < (inner u0 (U t) + bias t) - (inner u0 (U v) + bias v) ⟹ decodes_to (λv. inner (u0 + e) (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm e * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner ((∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) + unbind (P (u0 - x)) (w s)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u0 + e - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u0 + e - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm e * norm ((U::'v ⇒ 'd) t - U v) < (inner u0 (U t) + bias t) - (inner u0 (U v) + bias v) ⟹ decodes_to (λv. inner (u0 + e) (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule cleanup_local_certified(2)) | method |

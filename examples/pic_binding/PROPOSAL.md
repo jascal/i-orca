@@ -30,7 +30,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cleanup.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 46 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 49 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -54,6 +54,7 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cle
 | T5(c) biased, via the lift `(U_v, b_v/s)`: `m < ‖(w, s)‖·hdist_lifted(t)` for every `s > 0` (upper bound) | **`proved`** | `certificate_hull_ceiling_biased` |
 | T6 (a) an orthogonal projection preserves every margin of every residual **iff** it fixes every readout difference | **`proved`** | `projection_preserves_differences`, `projection_preserves_margins`, `projection_preserves_decision`, `projection_margin_changes`, `projection_preserves_margins_iff` (in `PIC_Cleanup.thy`) |
 | T6 (b) directional clean-up radius `ρ_dir` (exact per half-space, ≥ `ρ`) | **`proved`** | `nearest_iff_halfspace`, `directional_snap`, `directional_radius_tight`, `directional_q_bound`, `worst_case_implies_directional`, `role_readout_decomp`, `role_cleanup_directional`, `cleanup_certified_directional` (in `PIC_Cleanup.thy`) |
+| T6 (b) certified neighbourhood around an observed residual `u₀`: `‖e‖` below `u₀`'s clean-up and host slacks | **`proved`** | `role_cleanup_offset`, `cleanup_local_certified` (in `PIC_Cleanup.thy`) |
 | T6 (b) clean-up constants: exact recovery within `ρ(σ)`, host agreement within `β(σ)` | **`proved`** | `nearest_point_cleanup`, `nearest_point_selects`, `nearest_point_radius_tight`, `unbind_norm_le`, `role_cleanup_close`, `role_cleanup`, `cleanup_exact`, `left_inverse_noise`, `agreement_ball`, `cleanup_certified` (in `PIC_Cleanup.thy`) |
 
 The tensor product is a concrete construction, `tprod f r = (χ i. f$i *⇩R r)` in `real^'m^'n`. The identity
