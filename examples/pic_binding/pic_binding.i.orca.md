@@ -9,13 +9,13 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 39 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 46 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
   Scope: T1 (absolute + SIGNED), T1', T2 (diagonal-inclusive convention), T3 (one factor of 2), T5(a) (uniform,
   pairwise-exact, hybrid), T5(b) (domain, given an error bound on the whole domain), T5(c) (hull ceiling; bias-free, and biased via a lift).
-  T6(b) clean-up constants (PIC_Cleanup.thy). OPEN: T2 claim 4 (frame-operator tightness), T4, T6(a), bounding the fit error off the evaluated contexts, and the
+  T6(b) clean-up constants (PIC_Cleanup.thy). T6(a) iff (PIC_Cleanup.thy). OPEN: T2 claim 4 (frame-operator tightness), T4, bounding the fit error off the evaluated contexts, and the
   pre-norm Lipschitz step. No theorem here says any model is TPR-shaped.
 -->
 
@@ -720,3 +720,129 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ ∀T. P ((W::real^'m^'n ⇒ 'd) T) = T ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) ((f::'b ⇒ real^'n) a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule cleanup_certified_directional(2)) | method |
+
+# theorem ProjectionPreservesDifferences
+> T6(a): a self-adjoint P that fixes d leaves ⟨r, d⟩ unchanged: ⟨P r, d⟩ = ⟨r, d⟩. Cites `projection_preserves_differences`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀x y. inner ((P::'a::real_inner ⇒ 'a) x) y = inner x (P y) ⟹ P d = d ⟹ inner (P r) d = inner r d |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀x y. inner ((P::'a::real_inner ⇒ 'a) x) y = inner x (P y) ⟹ P d = d ⟹ inner (P r) d = inner r d | discharged by the kernel-checked substrate lemma | — | (rule projection_preserves_differences) | method |
+
+# theorem ProjectionPreservesMargins
+> T6(a): if P fixes U_t − U_v, the margin of t over v is the same for P r as for r. Cites `projection_preserves_margins`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀x y. inner ((P::'a::real_inner ⇒ 'a) x) y = inner x (P y) ⟹ P ((U::'v ⇒ 'a) t - U v) = U t - U v ⟹ (inner (P r) (U t) + bias t) - (inner (P r) (U v) + bias v) = (inner r (U t) + bias t) - (inner r (U v) + bias v) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀x y. inner ((P::'a::real_inner ⇒ 'a) x) y = inner x (P y) ⟹ P ((U::'v ⇒ 'a) t - U v) = U t - U v ⟹ (inner (P r) (U t) + bias t) - (inner (P r) (U v) + bias v) = (inner r (U t) + bias t) - (inner r (U v) + bias v) | discharged by the kernel-checked substrate lemma | — | (rule projection_preserves_margins) | method |
+
+# theorem ProjectionPreservesDecision
+> T6(a): if P fixes every U_t − U_v, P r and r decode to t alike. Cites `projection_preserves_decision`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀x y. inner ((P::'a::real_inner ⇒ 'a) x) y = inner x (P y) ⟹ ∀v∈V. P ((U::'v ⇒ 'a) t - U v) = U t - U v ⟹ decodes_to (λv. inner (P r) (U v) + bias v) V t ⟷ decodes_to (λv. inner r (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀x y. inner ((P::'a::real_inner ⇒ 'a) x) y = inner x (P y) ⟹ ∀v∈V. P ((U::'v ⇒ 'a) t - U v) = U t - U v ⟹ decodes_to (λv. inner (P r) (U v) + bias v) V t ⟷ decodes_to (λv. inner r (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule projection_preserves_decision) | method |
+
+# theorem ProjectionMarginChanges1
+> T6(a), converse: if an orthogonal projection moves a difference d, the residual d − P d changes the margin along d by ‖d − P d‖² > 0 (the projected residual scores 0 along d). Cites `projection_margin_changes`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ P d ≠ d ⟹ inner (P (d - P d)) d = 0 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ P d ≠ d ⟹ inner (P (d - P d)) d = 0 | discharged by the kernel-checked substrate lemma | — | (rule projection_margin_changes(1)) | method |
+
+# theorem ProjectionMarginChanges2
+> T6(a), converse: if an orthogonal projection moves a difference d, the residual d − P d changes the margin along d by ‖d − P d‖² > 0 (the original scores ‖d − P d‖²). Cites `projection_margin_changes`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ P d ≠ d ⟹ inner (d - P d) d = (norm (d - P d))⇧2 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ P d ≠ d ⟹ inner (d - P d) d = (norm (d - P d))⇧2 | discharged by the kernel-checked substrate lemma | — | (rule projection_margin_changes(2)) | method |
+
+# theorem ProjectionMarginChanges3
+> T6(a), converse: if an orthogonal projection moves a difference d, the residual d − P d changes the margin along d by ‖d − P d‖² > 0 (and that change is positive). Cites `projection_margin_changes`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ P d ≠ d ⟹ (norm (d - P d))⇧2 > 0 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ P d ≠ d ⟹ (norm (d - P d))⇧2 > 0 | discharged by the kernel-checked substrate lemma | — | (rule projection_margin_changes(3)) | method |
+
+# theorem ProjectionPreservesMarginsIff
+> T6(a): an orthogonal projection preserves every margin of every residual IFF it fixes every readout difference. Cites `projection_preserves_margins_iff`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ (∀r. ∀v∈V. ∀w∈V. inner (P r) ((U::'v ⇒ 'a) v - U w) = inner r (U v - U w)) ⟷ (∀v∈V. ∀w∈V. P (U v - U w) = U v - U w) |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | linear (P::'a::real_inner ⇒ 'a) ⟹ ∀x. P (P x) = P x ⟹ ∀x y. inner (P x) y = inner x (P y) ⟹ (∀r. ∀v∈V. ∀w∈V. inner (P r) ((U::'v ⇒ 'a) v - U w) = inner r (U v - U w)) ⟷ (∀v∈V. ∀w∈V. P (U v - U w) = U v - U w) | discharged by the kernel-checked substrate lemma | — | (rule projection_preserves_margins_iff) | method |
