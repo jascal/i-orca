@@ -27,6 +27,10 @@
     convex_strict_affine / hull_certified_conditions : strict affine conditions (the clean-up slacks and the
                                     agreement margins) that hold at every residual of a finite family hold at every
                                     convex combination -- the hull ceiling for set-level bounds;
+    compression_offset_bound / compressed_cleanup_certified / compressed_eps0_left_inverse : T4(c) -- clean-up
+                                    through an approximate decoder P (P W != I) with |(P W - I) T| <= eps |T|:
+                                    the degraded radius rho_eps >= rho_dir - eps |T| |w_s| |d| / |q|; eps = 0 under a
+                                    left inverse recovers the directional theorem;
     cleanup_certified             : the composition -- clean-up returns x(sigma) exactly AND the host decides
                                     the code point's decision t.
 
@@ -570,5 +574,100 @@ theorem hull_certified_conditions:
       and all: "\<forall>i\<in>I. \<forall>k\<in>K. inner (u i) (w k) + b k > 0"
   shows "\<forall>k\<in>K. inner (\<Sum>i\<in>I. l i *\<^sub>R u i) (w k) + b k > 0"
   using convex_strict_affine[OF fin nn s1] all by blast
+
+section \<open>T4(c): compressed binding -- clean-up through an approximate decoder\<close>
+
+text \<open>When W maps the tensor space into a smaller residual (d_F n_role > d), no left inverse exists. Take any
+  linear decoder P (e.g. ridge W^+). Then P (u - b0) = T(sigma) + E(sigma) + P n with the compression error
+  E(sigma) = P (W T(sigma)) - T(sigma), a FIXED offset per sigma. If |E(sigma)| <= eps |T(sigma)|, each role's
+  half-space slack degrades by at most eps |T(sigma)| |w_s| |d_a| (Cauchy-Schwarz + unbind_norm_le), giving the
+  degraded radius rho_eps = min (|d|^2/2 - <c,d> - eps |T| |w_s| |d|) / |q| >= rho_dir - eps |T| |w_s| |d| / |q|.
+  With eps = 0 (a left inverse) the condition is exactly cleanup_certified_directional's.\<close>
+
+lemma compression_offset_bound:
+  fixes E :: "real^'m^'n"
+  assumes err: "norm E \<le> \<epsilon> * norm T"
+  shows "inner (unbind E w) d \<le> \<epsilon> * norm T * norm w * norm d"
+proof -
+  have "inner (unbind E w) d \<le> norm (unbind E w) * norm d" by (rule norm_cauchy_schwarz)
+  also have "\<dots> \<le> norm E * norm w * norm d" by (rule mult_right_mono[OF unbind_norm_le norm_ge_zero])
+  also have "\<dots> \<le> \<epsilon> * norm T * norm w * norm d"
+    by (rule mult_right_mono[OF mult_right_mono[OF err norm_ge_zero] norm_ge_zero])
+  finally show ?thesis .
+qed
+
+theorem compressed_cleanup_certified:
+  fixes f :: "'b \<Rightarrow> real^'n" and U :: "'v \<Rightarrow> 'd::real_inner"
+    and W :: "real^'m^'n \<Rightarrow> 'd" and P :: "'d \<Rightarrow> real^'m^'n" and q :: "'s \<Rightarrow> 'b \<Rightarrow> 'd"
+  assumes finD: "finite D"
+      and lin: "linear P"
+      and err: "norm (P (W (structure_tpr f r \<sigma> D)) - structure_tpr f r \<sigma> D)
+                \<le> \<epsilon> * norm (structure_tpr f r \<sigma> D)"
+      and one: "\<forall>s\<in>D. inner (r s) (w s) = 1"
+      and inF: "\<forall>s\<in>D. \<sigma> s \<in> F s"
+      and rep: "\<forall>s\<in>D. \<forall>a\<in>F s. \<forall>y. inner (unbind (P y) (w s)) (f a - f (\<sigma> s)) = inner y (q s a)"
+      and rad: "\<forall>s\<in>D. \<forall>a\<in>F s. a \<noteq> \<sigma> s \<longrightarrow> norm (u - x) * norm (q s a)
+                  < (norm (f a - f (\<sigma> s)))\<^sup>2 / 2
+                    - inner (\<Sum>t\<in>D - {s}. inner (r t) (w s) *\<^sub>R f (\<sigma> t)) (f a - f (\<sigma> s))
+                    - \<epsilon> * norm (structure_tpr f r \<sigma> D) * norm (w s) * norm (f a - f (\<sigma> s))"
+      and xdef: "x = W (structure_tpr f r \<sigma> D) + b0"
+      and ah: "\<forall>s\<in>D. \<sigma>h s \<in> F s"
+      and near: "\<forall>s\<in>D. \<forall>a'\<in>F s. dist (unbind (P (u - b0)) (w s)) (f (\<sigma>h s))
+                                   \<le> dist (unbind (P (u - b0)) (w s)) (f a')"
+      and tV: "t \<in> V"
+      and beta: "\<forall>v\<in>V. v \<noteq> t \<longrightarrow>
+                   norm (u - x) * norm (U t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v)"
+  shows "W (structure_tpr f r \<sigma>h D) + b0 = x"
+    and "decodes_to (\<lambda>v. inner u (U v) + bias v) V t"
+proof -
+  let ?T = "structure_tpr f r \<sigma> D"
+  let ?E0 = "P (W ?T) - ?T"
+  have Pu: "P (u - b0) = ?T + (?E0 + P (u - x))"
+  proof -
+    have "P (u - b0) = P (W ?T + (u - x))" by (simp add: xdef algebra_simps)
+    also have "\<dots> = P (W ?T) + P (u - x)" by (simp add: linear_add[OF lin])
+    finally show ?thesis by (simp add: algebra_simps)
+  qed
+  have roles: "\<forall>s\<in>D. \<sigma>h s = \<sigma> s"
+  proof
+    fix s assume s: "s \<in> D"
+    have rep_e: "\<forall>a\<in>F s. inner (unbind (P (u - x)) (w s)) (f a - f (\<sigma> s)) = inner (u - x) (q s a)"
+      using rep s by blast
+    have rad_e: "\<forall>a\<in>F s. a \<noteq> \<sigma> s \<longrightarrow> norm (u - x) * norm (q s a)
+                  < (norm (f a - f (\<sigma> s)))\<^sup>2 / 2
+                    - inner ((\<Sum>t\<in>D - {s}. inner (r t) (w s) *\<^sub>R f (\<sigma> t)) + unbind ?E0 (w s)) (f a - f (\<sigma> s))"
+    proof (intro ballI impI)
+      fix a assume a: "a \<in> F s" and ne: "a \<noteq> \<sigma> s"
+      have b: "inner (unbind ?E0 (w s)) (f a - f (\<sigma> s))
+               \<le> \<epsilon> * norm ?T * norm (w s) * norm (f a - f (\<sigma> s))"
+        by (rule compression_offset_bound[OF err])
+      show "norm (u - x) * norm (q s a)
+            < (norm (f a - f (\<sigma> s)))\<^sup>2 / 2
+              - inner ((\<Sum>t\<in>D - {s}. inner (r t) (w s) *\<^sub>R f (\<sigma> t)) + unbind ?E0 (w s)) (f a - f (\<sigma> s))"
+      proof -
+        have r0: "norm (u - x) * norm (q s a)
+                  < (norm (f a - f (\<sigma> s)))\<^sup>2 / 2
+                    - inner (\<Sum>t\<in>D - {s}. inner (r t) (w s) *\<^sub>R f (\<sigma> t)) (f a - f (\<sigma> s))
+                    - \<epsilon> * norm ?T * norm (w s) * norm (f a - f (\<sigma> s))"
+          using rad s a ne by blast
+        show ?thesis using r0 b by (simp add: inner_add_left)
+      qed
+    qed
+    show "\<sigma>h s = \<sigma> s"
+    proof (rule role_cleanup_offset[where D = D and s = s and r = r and w = "w s" and f = f and \<sigma> = \<sigma>
+                                      and E = "P (u - x)" and E0 = ?E0 and F = "F s" and ah = "\<sigma>h s"
+                                      and e = "u - x" and q = "q s"])
+    qed (use finD s one inF ah rep_e rad_e near Pu in auto)
+  qed
+  have "structure_tpr f r \<sigma>h D = ?T" by (rule cleanup_exact[OF roles])
+  thus "W (structure_tpr f r \<sigma>h D) + b0 = x" using xdef by simp
+  have "decodes_to (\<lambda>v. inner (x + (u - x)) (U v) + bias v) V t" by (rule agreement_ball[OF tV beta])
+  thus "decodes_to (\<lambda>v. inner u (U v) + bias v) V t" by simp
+qed
+
+corollary compressed_eps0_left_inverse:
+  assumes inv: "\<forall>T. P (W T) = T"
+  shows "norm (P (W T0) - T0) \<le> 0 * norm T0"
+  using inv by simp
 
 end

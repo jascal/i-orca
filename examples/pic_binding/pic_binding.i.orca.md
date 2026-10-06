@@ -9,13 +9,13 @@
     - substrate:  isabelle build -d examples/pic_core PIC_Core
     - surface:    isabelle build -b -d examples/pic_core PIC_Core   (store the heap once)
                   i-orca check examples/pic_binding/pic_binding.i.orca.md -d examples/pic_core --session PIC_Core
-      All 51 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
+      All 55 theorems kernel-checked, formal_fraction_real = 1.000 each (2026-10-04).
       Without --session, i-orca infers parent HOL and reloads PIC_Core + HOL-Analysis from source per theorem
       (~8 min and heavy memory each) -- same verdict, much slower.
 
   Scope: T1 (absolute + SIGNED), T1', T2 (diagonal-inclusive convention), T3 (one factor of 2), T5(a) (uniform,
   pairwise-exact, hybrid), T5(b) (domain, given an error bound on the whole domain), T5(c) (hull ceiling; bias-free, and biased via a lift).
-  T6(b) clean-up constants (PIC_Cleanup.thy). T6(a) iff (PIC_Cleanup.thy). OPEN: T2 claim 4 (frame-operator tightness), T4, bounding the fit error off the evaluated contexts, and the
+  T6(b) clean-up constants (PIC_Cleanup.thy). T6(a) iff (PIC_Cleanup.thy). T4(c) compressed clean-up (PIC_Cleanup.thy). OPEN: T2 claim 4 (frame-operator tightness), T4 (a)/(b) encodings, bounding the fit error off the evaluated contexts, and the
   pre-norm Lipschitz step. No theorem here says any model is TPR-shaped.
 -->
 
@@ -936,3 +936,75 @@
 | Id     | Claim | By | Using | Method | Status |
 |--------|-------|----|-------|--------|--------|
 | s_show | finite I ⟹ ∀i∈I. 0 ≤ l i ⟹ sum l I = 1 ⟹ ∀i∈I. ∀k∈K. inner ((u::'i ⇒ 'a::real_inner) i) ((w::'k ⇒ 'a) k) + b k > 0 ⟹ ∀k∈K. inner (∑i∈I. l i *⇩R u i) (w k) + b k > 0 | discharged by the kernel-checked substrate lemma | — | (rule hull_certified_conditions) | method |
+
+# theorem CompressionOffsetBound
+> T4(c): a compression error E with ‖E‖ ≤ ε‖T‖ moves a role's half-space score by at most ε‖T‖‖w‖‖d‖. Cites `compression_offset_bound`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| norm (E::real^'m^'n) ≤ ε * norm T ⟹ inner (unbind E w) d ≤ ε * norm T * norm w * norm d |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | norm (E::real^'m^'n) ≤ ε * norm T ⟹ inner (unbind E w) d ≤ ε * norm T * norm w * norm d | discharged by the kernel-checked substrate lemma | — | (rule compression_offset_bound) | method |
+
+# theorem CompressedCleanupCertifiedExact
+> T4(c), compressed clean-up through an approximate decoder P (P·W ≠ I) with ‖(P·W − I)T(σ)‖ ≤ ε‖T(σ)‖, part 1: clean-up returns x(σ) exactly within the degraded radius ρ_ε. Cites `compressed_cleanup_certified`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ norm (P ((W::real^'m^'n ⇒ 'd) (structure_tpr (f::'b ⇒ real^'n) r σ D)) - structure_tpr f r σ D) ≤ ε * norm (structure_tpr f r σ D) ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) (f a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) - ε * norm (structure_tpr f r σ D) * norm (w s) * norm (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ norm (P ((W::real^'m^'n ⇒ 'd) (structure_tpr (f::'b ⇒ real^'n) r σ D)) - structure_tpr f r σ D) ≤ ε * norm (structure_tpr f r σ D) ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) (f a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) - ε * norm (structure_tpr f r σ D) * norm (w s) * norm (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ W (structure_tpr f r σh D) + b0 = x | discharged by the kernel-checked substrate lemma | — | (rule compressed_cleanup_certified(1)) | method |
+
+# theorem CompressedCleanupCertifiedDecision
+> T4(c), compressed clean-up through an approximate decoder P (P·W ≠ I) with ‖(P·W − I)T(σ)‖ ≤ ε‖T(σ)‖, part 2: the host decides the code point's t within β. Cites `compressed_cleanup_certified`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ norm (P ((W::real^'m^'n ⇒ 'd) (structure_tpr (f::'b ⇒ real^'n) r σ D)) - structure_tpr f r σ D) ≤ ε * norm (structure_tpr f r σ D) ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) (f a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) - ε * norm (structure_tpr f r σ D) * norm (w s) * norm (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | finite D ⟹ linear (P::'d::real_inner ⇒ real^'m^'n) ⟹ norm (P ((W::real^'m^'n ⇒ 'd) (structure_tpr (f::'b ⇒ real^'n) r σ D)) - structure_tpr f r σ D) ≤ ε * norm (structure_tpr f r σ D) ⟹ ∀s∈D. inner (r s) (w s) = 1 ⟹ ∀s∈D. σ s ∈ F s ⟹ ∀s∈D. ∀a∈F s. ∀y. inner (unbind (P y) (w s)) (f a - f (σ s)) = inner y (q s a) ⟹ ∀s∈D. ∀a∈F s. a ≠ σ s ⟶ norm (u - x) * norm (q s a) < (norm (f a - f (σ s)))⇧2 / 2 - inner (∑t∈D - {s}. inner (r t) (w s) *⇩R f (σ t)) (f a - f (σ s)) - ε * norm (structure_tpr f r σ D) * norm (w s) * norm (f a - f (σ s)) ⟹ x = W (structure_tpr f r σ D) + b0 ⟹ ∀s∈D. σh s ∈ F s ⟹ ∀s∈D. ∀a'∈F s. dist (unbind (P (u - b0)) (w s)) (f (σh s)) ≤ dist (unbind (P (u - b0)) (w s)) (f a') ⟹ t ∈ V ⟹ ∀v∈V. v ≠ t ⟶ norm (u - x) * norm ((U::'v ⇒ 'd) t - U v) < (inner x (U t) + bias t) - (inner x (U v) + bias v) ⟹ decodes_to (λv. inner u (U v) + bias v) V t | discharged by the kernel-checked substrate lemma | — | (rule compressed_cleanup_certified(2)) | method |
+
+# theorem CompressedEps0LeftInverse
+> T4(c): with a left inverse (P·W = I) the compression error is 0, so ε = 0 recovers cleanup_certified_directional. Cites `compressed_eps0_left_inverse`.
+
+## imports
+| Theory      |
+|-------------|
+| PIC_Cleanup |
+
+## goal
+| Statement |
+|-----------|
+| ∀T. (P::'d ⇒ 'e::real_normed_vector) ((W::'e ⇒ 'd) T) = T ⟹ norm (P (W T0) - T0) ≤ 0 * norm T0 |
+
+## proof
+| Id     | Claim | By | Using | Method | Status |
+|--------|-------|----|-------|--------|--------|
+| s_show | ∀T. (P::'d ⇒ 'e::real_normed_vector) ((W::'e ⇒ 'd) T) = T ⟹ norm (P (W T0) - T0) ≤ 0 * norm T0 | discharged by the kernel-checked substrate lemma | — | (rule compressed_eps0_left_inverse) | method |

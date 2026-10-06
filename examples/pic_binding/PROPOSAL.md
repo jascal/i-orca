@@ -30,7 +30,7 @@ approximated by **linearly-transformed tensor product representations** (TPRs):
 
 The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cleanup.thy` (session `PIC_Core`, `quick_and_dirty = false`,
 0 sorry). The i-orca surface is `examples/pic_binding/pic_binding.i.orca.md`, checked with
-`i-orca check … -d examples/pic_core --session PIC_Core`. All 51 surface theorems are kernel-checked
+`i-orca check … -d examples/pic_core --session PIC_Core`. All 55 surface theorems are kernel-checked
 (`formal_fraction_real = 1.000` each).
 
 | item | status | lemma(s) in `PIC_Binding.thy` |
@@ -42,7 +42,8 @@ The kernel-checked substrate is `examples/pic_core/PIC_Binding.thy` and `PIC_Cle
 | T2 claims 1–3 (diagonal-inclusive FP, Welch value, ratio) | **`proved`** | `tensor_frame_potential`, `tensor_welch_value`, `tensor_fp_welch_ratio` |
 | T2 claim 4 (tensor of tight frames is tight) | `open` | — |
 | T3 matched-filter unbinding, one factor of 2 | **`proved`** | `unbind_certified` |
-| T4 (a)–(c) | `open` | — |
+| T4 (a)–(b) | `open` | — |
+| T4 (c) compressed clean-up through an approximate decoder: `‖(P·W − I)T(σ)‖ ≤ ε‖T(σ)‖` degrades each half-space slack by `≤ ε‖T‖‖w_s‖‖d‖`, so `ρ_ε ≥ ρ_dir − ε‖T‖‖w_s‖‖d‖/‖q‖`; `ε = 0` under a left inverse | **`proved`** | `compression_offset_bound`, `compressed_cleanup_certified`, `compressed_eps0_left_inverse` (in `PIC_Cleanup.thy`) |
 | T5(a) last-layer substitution | **`proved`** | `substitution_certified`, `substitution_certified_max`, `substitution_certified_norm` |
 | T5(a), pairwise, EXACT (iff): `L(t) − L(v) > ⟨r − r̂, U_t − U_v⟩` ∀ rivals | **`proved`** | `substitution_pairwise_iff`, `substitution_certified_pairwise` |
 | uniform T5(a) ⟹ pairwise (pairwise is at least as strong) | **`proved`** | `uniform_implies_pairwise` |
@@ -188,6 +189,17 @@ non-asymptotically, in PIC's own certificate. It is exactly a frame-side conditi
 **Why it matters.** This is the frame-side reason TPR structure and superposition are not rivals. The paper's 2–3K
 role vocabularies in 2880-dimensional GPT-OSS force (a) and (b).
 **Tractability:** (a) and (b) are corollaries of existing theorems. (c) needs the constant worked out.
+
+**Status of (c) (2026-10-05): kernel-checked, in decoder form** (`pic_core/PIC_Cleanup.thy`). The near-isometry
+statement above is replaced by what clean-up actually needs: a linear decoder `P` (for example ridge `W⁺`) with
+compression error `E(σ) = (P·W − I)T(σ)`, `‖E(σ)‖ ≤ ε‖T(σ)‖`.
+- `E(σ)` enters each role readout as a fixed offset, so each half-space slack loses at most `ε‖T(σ)‖‖w_s‖‖d_a‖`
+  (`compression_offset_bound`).
+- **Degraded radius:** `ρ_ε(σ) = min_{s,a} (‖d_a‖²/2 − ⟨c_s, d_a⟩ − ε‖T(σ)‖‖w_s‖‖d_a‖)/‖M_sᵀ d_a‖`, which is at least
+  `ρ_dir − ε‖T‖‖w_s‖‖d_a‖/‖q‖`. Within it, clean-up is exact and the host agrees (`compressed_cleanup_certified`).
+- **`ε = 0` under a left inverse** (`compressed_eps0_left_inverse`) recovers `cleanup_certified_directional`.
+- Per context, the exact offset `E(σ)` is computable, so the exact per-context check (`role_cleanup_offset`) needs no
+  `ε` at all.
 
 ## T5 — Last-layer substitution is certified by the margin theorem
 
