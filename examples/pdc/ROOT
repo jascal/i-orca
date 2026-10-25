@@ -1,0 +1,5 @@
+session "PDC" = "PIC_Core" +
+  options [quick_and_dirty = false]
+  theories
+    PDC_Derive
+    PDC_Admission
