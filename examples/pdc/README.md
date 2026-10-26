@@ -50,3 +50,9 @@ isabelle build -o timeout=40 -d examples/pic_core -D examples/pdc
 can be reduced to its maximum when checking strict decoding of an inside
 target. It is the decision reduction used by R7; an outside logsumexp is
 used only in the empirical loss and is not substituted for that maximum.
+
+`pairwise_gap_guard_iff` checks that the absolute pairwise-drift sufficient
+condition `abs(host_gap - body_gap) < body_gap` is equivalent to
+`0 < host_gap` and `host_gap < 2 * body_gap`. Mere positive agreement of
+the two gaps is weaker. The singleton diagnostic uses this exact scope;
+it is not a theorem that any empirical source has causal sufficiency.

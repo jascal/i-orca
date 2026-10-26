@@ -93,4 +93,13 @@ theorem decode_fixed_outside_max:
     decodes_to L C t \<and> Max (L ` Outs) < L t"
   using assms by (auto simp: decodes_to_def Max_less_iff)
 
+
+text \<open>The absolute pairwise-drift sufficient guard requires more than
+  agreement of the two positive gaps. It also bounds their relative scale.\<close>
+lemma pairwise_gap_guard_iff:
+  fixes host_gap body_gap :: real
+  shows "abs (host_gap - body_gap) < body_gap \<longleftrightarrow>
+    0 < host_gap \<and> host_gap < 2 * body_gap"
+  by (simp only: abs_less_iff; linarith)
+
 end
