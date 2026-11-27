@@ -1,0 +1,30 @@
+session "Student_Formal" = "HOL" +
+  options [timeout = 120]
+  theories
+    Quantiser_Levels
+    Sparse_TopK
+    Node_Mask_Clamp
+    Swap_Probe_Identifiability
+    Capacity_Counting
+
+session "Swap_Bounds" in "swap_bounds" = "HOL" +
+  options [timeout = 300]
+  theories
+    Swap_Score_Bounds
+    Rounding_Margin
+    Feature_Node_Swaps
+
+session "Agreement_Chain" in "agreement_chain" = "HOL" +
+  options [timeout = 120]
+  theories
+    Agreement_Chain
+
+session "Certificate_Decision" in "certificate_decision" = "HOL" +
+  options [timeout = 300]
+  theories
+    Certificate_Decision_Soundness
+
+session "Check_Certificate_Decision" in "certificate_decision/check_oracles" = "Certificate_Decision" +
+  options [quick_and_dirty = false]
+  theories
+    Check
