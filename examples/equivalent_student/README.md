@@ -14,7 +14,7 @@ and nothing says that a trained student is faithful. That is an empirical questi
 
 | Session | Dir | Says |
 |---|---|---|
-| `Student_Formal` | `.` | Quantiser levels: a code at least δ from every threshold keeps its level, and a zero margin penalty means perturbations below w·sp cannot change a level (`Quantiser_Levels`). A TopK code has at most k nonzeros (`Sparse_TopK`). Clamp/mask facts: a clamped node's computation does not reach the output, swapping a clamped node is a no-op, a counting bound on clamp cost, and two duplicate nodes that are each inert alone but not together (`Node_Mask_Clamp`). What swap tests can identify: matching every single-node swap does not imply matching a two-node swap, and on a redundant pair the ablation screen's mask is not inert (`Swap_Probe_Identifiability`). Capacity counting: exact single-node swap equivalence forces at least as many distinct student values as host swap behaviours, plus code-count bounds for a sparse discrete site (`Capacity_Counting`). |
+| `Student_Formal` | `.` | Quantiser levels: a code at least δ from every threshold keeps its level, and a zero margin penalty means perturbations below w·sp cannot change a level (`Quantiser_Levels`). A TopK code has at most k nonzeros (`Sparse_TopK`). Clamp/mask facts: a clamped node's computation does not reach the output, swapping a clamped node is a no-op, a counting bound on clamp cost, and two duplicate nodes that are each inert alone but not together (`Node_Mask_Clamp`). What swap tests can identify: matching every single-node swap does not imply matching a two-node swap, and on a redundant pair the ablation screen's mask is not inert (`Swap_Probe_Identifiability`). Capacity counting: exact single-node swap equivalence forces at least as many distinct student values as host swap behaviours, plus code-count bounds for a sparse discrete site, and two corollaries showing the condition does not bind at the study's operating points: D 64, k 8, L 10 (toy hosts, at least 10^15 codes) and D 1024, k 32, L 40 (pythia-14m, at least 10^99) (`Capacity_Counting`). |
 | `Swap_Bounds` | `swap_bounds/` | Swap-score triangle bounds, the no-op floor, Lipschitz top-answer preservation and rounding-margin bounds that connect continuous and discrete students. |
 | `Agreement_Chain` | `agreement_chain/` | If the host's top answer is i, the continuous student ranks i first by a margin m ("link 1", a premise), and rounding moves no two logits apart by more than B < m, then the rounded student's top answer is i. Link 1 is a property of trained weights; it is a premise here, not proved. |
 | `Certificate_Decision` | `certificate_decision/` | Soundness of the decision logic of the interval/ball output certificate: given enclosures that contain the true logits, "certified agree", "certified disagree" and "undecided" are reported correctly. |
@@ -22,6 +22,21 @@ and nothing says that a trained student is faithful. That is an empirical questi
 
 `student_formal.i.orca.md` is the readable i-orca surface for `Student_Formal` (18 theorem blocks;
 `i-orca check` gave formal_fraction_real 1.000 on each when it was written).
+
+## Related corpora
+
+These sessions import only HOL; nothing here depends on another corpus, but several sit close to one:
+- [`../provable_opt/`](../provable_opt): PO-T3's margin-certified decode invariance is the same "margin beats
+  perturbation, so the top answer is kept" argument as `Rounding_Margin` and `Agreement_Chain`, applied there to
+  a Datalog transform.
+- [`../pic_core/`](../pic_core) (`PIC_Cleanup.thy`, T6(a)): a linear projection preserves every decision margin
+  iff it fixes every readout difference. That is the exact counterpart of the spread bound used here, which only
+  bounds the differences.
+- [`../recoverability/`](../recoverability) and [`../superposition/`](../superposition): capacity questions for
+  SAE-style dictionaries. `Capacity_Counting` is a counting bound on code space, not a geometric one.
+
+`Certificate_Decision_Soundness.thy` restates some quantiser-level lemmas from `Quantiser_Levels.thy` so that the
+session stands alone. A shared level theory would remove the copy if the two sessions start to evolve together.
 
 ## Status
 

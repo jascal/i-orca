@@ -1,5 +1,9 @@
 # Soundness of the certificate's decision logic (Isabelle, kernel-checked)
 
+> **In i-orca:** copied from the (unpublished) equivalent-student study repo. Relative links to files outside this
+> folder (`../../GLOSSARY.md`, `../certificate/...`) point into that repo and do not resolve here. See
+> [`../README.md`](../README.md) for the corpus overview.
+
 Filed 2026-11-24 at the user's request. The problem statement was sent to Fable (advisor agent), which returned a first theory
 text; this session compiled it and repaired the proofs (tactics and two helper lemmas only, no statement changed). Labels
 (proved / empirical / open) as in ../../GLOSSARY.md. Context: ../certificate/RESULTS.md and ../certificate/certify_student.py.

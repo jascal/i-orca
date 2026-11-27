@@ -1,5 +1,9 @@
 # Swap-score and rounding bounds (Isabelle, kernel-checked)
 
+> **In i-orca:** copied from the (unpublished) equivalent-student study repo. Relative links to files outside this
+> folder (`../../GLOSSARY.md`, `../certificate/...`) point into that repo and do not resolve here. See
+> [`../README.md`](../README.md) for the corpus overview.
+
 Written 2026-11-22 by the SCALE session at the user's request. It is separate from the parent folder's `Student_Formal`
 session (code-22's), so neither build touches the other. Labels are explained in [../../GLOSSARY.md](../../GLOSSARY.md).
 

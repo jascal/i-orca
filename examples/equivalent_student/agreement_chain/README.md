@@ -1,4 +1,8 @@
 # Agreement chain (Isabelle, kernel-checked)
+
+> **In i-orca:** copied from the (unpublished) equivalent-student study repo. Relative links to files outside this
+> folder (`../../GLOSSARY.md`, `../certificate/...`) point into that repo and do not resolve here. See
+> [`../README.md`](../README.md) for the corpus overview.
 Written 2026-11-23 by observer session code-22 at the user's request ("work on proving the additional step"). Own session so it
 does not touch Student_Formal or code-da's Swap_Bounds. Labels (proved / empirical / open) as in ../../GLOSSARY.md. Measurement:
 ../certificate/R1_HYPOTHESIS_CHECK.md.

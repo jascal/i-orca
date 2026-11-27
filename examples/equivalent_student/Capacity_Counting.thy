@@ -150,4 +150,29 @@ corollary capacity_not_binding_64_8_10:
   shows "m \<le> card (sparse_codes 64 8 10)"
   using assms codes_64_8_10_large by simp
 
+text \<open>Second operating point: the pythia-14m students (dictionary D = 1024, k = 32 active latents,
+L = 40 levels). The code count exceeds 10^99, far above any finite evaluation set used.\<close>
+
+lemma choose_1024_32_ge: "(32::nat) ^ 32 \<le> 1024 choose 32"
+proof -
+  have "(of_nat (1024::nat) / of_nat (32::nat) :: real) ^ 32 \<le> of_nat (1024 choose 32)"
+    by (rule binomial_ge_n_over_k_pow_k) simp
+  then have "(32::real) ^ 32 \<le> of_nat (1024 choose 32)" by simp
+  then have "of_nat ((32::nat) ^ 32) \<le> (of_nat (1024 choose 32) :: real)" by simp
+  then show ?thesis by (simp only: of_nat_le_iff)
+qed
+
+lemma codes_1024_32_40_large: "10 ^ 99 \<le> card (sparse_codes 1024 32 40)"
+proof -
+  have "(10::nat) ^ 99 \<le> 32 ^ 32 * 40 ^ 32" by simp
+  also have "... \<le> (1024 choose 32) * 40 ^ 32" using choose_1024_32_ge by (intro mult_right_mono) simp_all
+  also have "... \<le> card (sparse_codes 1024 32 40)" by (rule card_sparse_codes_ge)
+  finally show ?thesis .
+qed
+
+corollary capacity_not_binding_1024_32_40:
+  assumes "m \<le> 10 ^ 99"
+  shows "m \<le> card (sparse_codes 1024 32 40)"
+  using assms codes_1024_32_40_large by simp
+
 end
