@@ -8,3 +8,8 @@ session "PIC_Core" = "HOL-Analysis" +
     PIC_Margin_Hull
     PIC_Binding
     PIC_Cleanup
+
+session "PIC_Robust" in "robust" = "PIC_Core" +
+  options [quick_and_dirty = false]
+  theories
+    PIC_Robust
